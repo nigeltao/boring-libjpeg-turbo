@@ -107,33 +107,6 @@ output_pass_setup(j_decompress_ptr cinfo)
     cinfo->output_scanline = 0;
     cinfo->global_state = DSTATE_PRESCAN;
   }
-  /* Loop over any required dummy passes */
-  while (cinfo->master->is_dummy_pass) {
-#ifdef QUANT_2PASS_SUPPORTED
-    /* Crank through the dummy pass */
-    while (cinfo->output_scanline < cinfo->output_height) {
-      JDIMENSION last_scanline;
-      /* Call progress monitor hook if present */
-      if (cinfo->progress != NULL) {
-        cinfo->progress->pass_counter = (long)cinfo->output_scanline;
-        cinfo->progress->pass_limit = (long)cinfo->output_height;
-        (*cinfo->progress->progress_monitor) ((j_common_ptr)cinfo);
-      }
-      /* Process some data */
-      last_scanline = cinfo->output_scanline;
-      (*cinfo->main->process_data) (cinfo, (JSAMPARRAY)NULL,
-                                    &cinfo->output_scanline, (JDIMENSION)0);
-      if (cinfo->output_scanline == last_scanline)
-        return FALSE;           /* No progress made, must suspend */
-    }
-    /* Finish up dummy pass, and set up for another one */
-    (*cinfo->master->finish_output_pass) (cinfo);
-    (*cinfo->master->prepare_for_output_pass) (cinfo);
-    cinfo->output_scanline = 0;
-#else
-    ERREXIT(cinfo, JERR_NOT_COMPILED);
-#endif /* QUANT_2PASS_SUPPORTED */
-  }
   /* Ready for application to drive output pass through
    * jpeg_read_scanlines or jpeg_read_raw_data.
    */
@@ -309,14 +282,6 @@ noop_convert(j_decompress_ptr cinfo, JSAMPIMAGE input_buf,
 }
 
 
-/* Dummy quantize function used by jpeg_skip_scanlines() */
-LOCAL(void)
-noop_quantize(j_decompress_ptr cinfo, JSAMPARRAY input_buf,
-              JSAMPARRAY output_buf, int num_rows)
-{
-}
-
-
 /*
  * In some cases, it is best to call jpeg_read_scanlines() and discard the
  * output, rather than skipping the scanlines, because this allows us to
@@ -338,8 +303,6 @@ read_and_discard_scanlines(j_decompress_ptr cinfo, JDIMENSION num_lines)
   void (*color_convert) (j_decompress_ptr cinfo, JSAMPIMAGE input_buf,
                          JDIMENSION input_row, JSAMPARRAY output_buf,
                          int num_rows) = NULL;
-  void (*color_quantize) (j_decompress_ptr cinfo, JSAMPARRAY input_buf,
-                          JSAMPARRAY output_buf, int num_rows) = NULL;
 
   if (cinfo->cconvert && cinfo->cconvert->color_convert) {
     color_convert = cinfo->cconvert->color_convert;
@@ -348,11 +311,6 @@ read_and_discard_scanlines(j_decompress_ptr cinfo, JDIMENSION num_lines)
      * pointer.  The pointer isn't actually used.
      */
     scanlines = &dummy_row;
-  }
-
-  if (cinfo->cquantize && cinfo->cquantize->color_quantize) {
-    color_quantize = cinfo->cquantize->color_quantize;
-    cinfo->cquantize->color_quantize = noop_quantize;
   }
 
 #ifdef UPSAMPLE_MERGING_SUPPORTED
@@ -367,9 +325,6 @@ read_and_discard_scanlines(j_decompress_ptr cinfo, JDIMENSION num_lines)
 
   if (color_convert)
     cinfo->cconvert->color_convert = color_convert;
-
-  if (color_quantize)
-    cinfo->cquantize->color_quantize = color_quantize;
 }
 
 
@@ -424,10 +379,6 @@ jpeg_skip_scanlines(j_decompress_ptr cinfo, JDIMENSION num_lines)
   int y;
   JDIMENSION lines_per_iMCU_row, lines_left_in_iMCU_row, lines_after_iMCU_row;
   JDIMENSION lines_to_skip, lines_to_read;
-
-  /* Two-pass color quantization is not supported. */
-  if (cinfo->quantize_colors && cinfo->two_pass_quantize)
-    ERREXIT(cinfo, JERR_NOTIMPL);
 
   if (cinfo->global_state != DSTATE_SCANNING)
     ERREXIT1(cinfo, JERR_BAD_STATE, cinfo->global_state);

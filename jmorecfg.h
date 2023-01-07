@@ -262,8 +262,8 @@ typedef int boolean;
 /* notboring: #define IDCT_SCALING_SUPPORTED */
 #undef  UPSAMPLE_SCALING_SUPPORTED  /* Output rescaling at upsample stage? */
 #define UPSAMPLE_MERGING_SUPPORTED  /* Fast path for sloppy upsampling? */
-#define QUANT_1PASS_SUPPORTED       /* 1-pass color quantization? */
-#define QUANT_2PASS_SUPPORTED       /* 2-pass color quantization? */
+/* notboring: #define QUANT_1PASS_SUPPORTED */
+/* notboring: #define QUANT_2PASS_SUPPORTED */
 
 /* more capability options later, no doubt */
 

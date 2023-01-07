@@ -163,7 +163,7 @@ struct jpeg_decomp_master {
   void (*finish_output_pass) (j_decompress_ptr cinfo);
 
   /* State variables made visible to other modules */
-  boolean is_dummy_pass;        /* True during 1st pass for 2-pass quant */
+  boolean notboring_is_dummy_pass;
 
   /* Partial decompression variables */
   JDIMENSION first_iMCU_col;
@@ -278,13 +278,7 @@ struct jpeg_color_deconverter {
 };
 
 /* Color quantization or color precision reduction */
-struct jpeg_color_quantizer {
-  void (*start_pass) (j_decompress_ptr cinfo, boolean is_pre_scan);
-  void (*color_quantize) (j_decompress_ptr cinfo, JSAMPARRAY input_buf,
-                          JSAMPARRAY output_buf, int num_rows);
-  void (*finish_pass) (j_decompress_ptr cinfo);
-  void (*new_color_map) (j_decompress_ptr cinfo);
-};
+struct jpeg_color_quantizer { long notboring_dummy; };
 
 
 /* Miscellaneous useful macros */
@@ -348,8 +342,6 @@ EXTERN(void) jinit_phuff_decoder(j_decompress_ptr cinfo);
 EXTERN(void) jinit_inverse_dct(j_decompress_ptr cinfo);
 EXTERN(void) jinit_upsampler(j_decompress_ptr cinfo);
 EXTERN(void) jinit_color_deconverter(j_decompress_ptr cinfo);
-EXTERN(void) jinit_1pass_quantizer(j_decompress_ptr cinfo);
-EXTERN(void) jinit_2pass_quantizer(j_decompress_ptr cinfo);
 EXTERN(void) jinit_merged_upsampler(j_decompress_ptr cinfo);
 /* Memory manager initialization */
 EXTERN(void) jinit_memory_mgr(j_common_ptr cinfo);

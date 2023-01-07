@@ -18,11 +18,8 @@ typedef struct {
 
   boolean using_merged_upsample; /* TRUE if using merged upsample/cconvert */
 
-  /* Saved references to initialized quantizer modules,
-   * in case we need to switch modes.
-   */
-  struct jpeg_color_quantizer *quantizer_1pass;
-  struct jpeg_color_quantizer *quantizer_2pass;
+  void *notboring_quantizer_1pass;
+  void *notboring_quantizer_2pass;
 } my_decomp_master;
 
 typedef my_decomp_master *my_master_ptr;

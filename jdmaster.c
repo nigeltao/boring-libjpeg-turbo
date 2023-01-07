@@ -147,8 +147,7 @@ jpeg_calc_output_dimensions(j_decompress_ptr cinfo)
     cinfo->out_color_components = cinfo->num_components;
     break;
   }
-  cinfo->output_components = (cinfo->quantize_colors ? 1 :
-                              cinfo->out_color_components);
+  cinfo->output_components = cinfo->out_color_components;
 
   /* See if upsampler will want to emit more than one row at a time */
   if (use_merged_upsample(cinfo))
@@ -261,55 +260,6 @@ master_selection(j_decompress_ptr cinfo)
   master->pass_number = 0;
   master->using_merged_upsample = use_merged_upsample(cinfo);
 
-  /* Color quantizer selection */
-  master->quantizer_1pass = NULL;
-  master->quantizer_2pass = NULL;
-  /* No mode changes if not using buffered-image mode. */
-  if (!cinfo->quantize_colors || !cinfo->buffered_image) {
-    cinfo->enable_1pass_quant = FALSE;
-    cinfo->enable_external_quant = FALSE;
-    cinfo->enable_2pass_quant = FALSE;
-  }
-  if (cinfo->quantize_colors) {
-    if (cinfo->raw_data_out)
-      ERREXIT(cinfo, JERR_NOTIMPL);
-    /* 2-pass quantizer only works in 3-component color space. */
-    if (cinfo->out_color_components != 3) {
-      cinfo->enable_1pass_quant = TRUE;
-      cinfo->enable_external_quant = FALSE;
-      cinfo->enable_2pass_quant = FALSE;
-      cinfo->colormap = NULL;
-    } else if (cinfo->colormap != NULL) {
-      cinfo->enable_external_quant = TRUE;
-    } else if (cinfo->two_pass_quantize) {
-      cinfo->enable_2pass_quant = TRUE;
-    } else {
-      cinfo->enable_1pass_quant = TRUE;
-    }
-
-    if (cinfo->enable_1pass_quant) {
-#ifdef QUANT_1PASS_SUPPORTED
-      jinit_1pass_quantizer(cinfo);
-      master->quantizer_1pass = cinfo->cquantize;
-#else
-      ERREXIT(cinfo, JERR_NOT_COMPILED);
-#endif
-    }
-
-    /* We use the 2-pass code to map to external colormaps. */
-    if (cinfo->enable_2pass_quant || cinfo->enable_external_quant) {
-#ifdef QUANT_2PASS_SUPPORTED
-      jinit_2pass_quantizer(cinfo);
-      master->quantizer_2pass = cinfo->cquantize;
-#else
-      ERREXIT(cinfo, JERR_NOT_COMPILED);
-#endif
-    }
-    /* If both quantizers are initialized, the 2-pass one is left active;
-     * this is necessary for starting with quantization to an external map.
-     */
-  }
-
   /* Post-processing: in particular, color conversion first */
   if (!cinfo->raw_data_out) {
     if (master->using_merged_upsample) {
@@ -322,7 +272,7 @@ master_selection(j_decompress_ptr cinfo)
       jinit_color_deconverter(cinfo);
       jinit_upsampler(cinfo);
     }
-    jinit_d_post_controller(cinfo, cinfo->enable_2pass_quant);
+    jinit_d_post_controller(cinfo, FALSE);
   }
   /* Inverse DCT */
   jinit_inverse_dct(cinfo);
@@ -377,7 +327,7 @@ master_selection(j_decompress_ptr cinfo)
     cinfo->progress->pass_counter = 0L;
     cinfo->progress->pass_limit = (long)cinfo->total_iMCU_rows * nscans;
     cinfo->progress->completed_passes = 0;
-    cinfo->progress->total_passes = (cinfo->enable_2pass_quant ? 3 : 2);
+    cinfo->progress->total_passes = 2;
     /* Count the input pass as done */
     master->pass_number++;
   }
@@ -399,38 +349,14 @@ prepare_for_output_pass(j_decompress_ptr cinfo)
 {
   my_master_ptr master = (my_master_ptr)cinfo->master;
 
-  if (master->pub.is_dummy_pass) {
-#ifdef QUANT_2PASS_SUPPORTED
-    /* Final pass of 2-pass quantization */
-    master->pub.is_dummy_pass = FALSE;
-    (*cinfo->cquantize->start_pass) (cinfo, FALSE);
-    (*cinfo->post->start_pass) (cinfo, JBUF_CRANK_DEST);
-    (*cinfo->main->start_pass) (cinfo, JBUF_CRANK_DEST);
-#else
-    ERREXIT(cinfo, JERR_NOT_COMPILED);
-#endif /* QUANT_2PASS_SUPPORTED */
-  } else {
-    if (cinfo->quantize_colors && cinfo->colormap == NULL) {
-      /* Select new quantization method */
-      if (cinfo->two_pass_quantize && cinfo->enable_2pass_quant) {
-        cinfo->cquantize = master->quantizer_2pass;
-        master->pub.is_dummy_pass = TRUE;
-      } else if (cinfo->enable_1pass_quant) {
-        cinfo->cquantize = master->quantizer_1pass;
-      } else {
-        ERREXIT(cinfo, JERR_MODE_CHANGE);
-      }
-    }
+  if (NOTBORING_ALWAYS_TRUE) {
     (*cinfo->idct->start_pass) (cinfo);
     (*cinfo->coef->start_output_pass) (cinfo);
     if (!cinfo->raw_data_out) {
       if (!master->using_merged_upsample)
         (*cinfo->cconvert->start_pass) (cinfo);
       (*cinfo->upsample->start_pass) (cinfo);
-      if (cinfo->quantize_colors)
-        (*cinfo->cquantize->start_pass) (cinfo, master->pub.is_dummy_pass);
-      (*cinfo->post->start_pass) (cinfo,
-            (master->pub.is_dummy_pass ? JBUF_SAVE_AND_PASS : JBUF_PASS_THRU));
+      (*cinfo->post->start_pass) (cinfo, JBUF_PASS_THRU);
       (*cinfo->main->start_pass) (cinfo, JBUF_PASS_THRU);
     }
   }
@@ -438,13 +364,12 @@ prepare_for_output_pass(j_decompress_ptr cinfo)
   /* Set up progress monitor's pass info if present */
   if (cinfo->progress != NULL) {
     cinfo->progress->completed_passes = master->pass_number;
-    cinfo->progress->total_passes = master->pass_number +
-                                    (master->pub.is_dummy_pass ? 2 : 1);
+    cinfo->progress->total_passes = master->pass_number + 1;
     /* In buffered-image mode, we assume one more output pass if EOI not
      * yet reached, but no more passes if EOI has been reached.
      */
     if (cinfo->buffered_image && !cinfo->inputctl->eoi_reached) {
-      cinfo->progress->total_passes += (cinfo->enable_2pass_quant ? 2 : 1);
+      cinfo->progress->total_passes += 1;
     }
   }
 }
@@ -459,39 +384,8 @@ finish_output_pass(j_decompress_ptr cinfo)
 {
   my_master_ptr master = (my_master_ptr)cinfo->master;
 
-  if (cinfo->quantize_colors)
-    (*cinfo->cquantize->finish_pass) (cinfo);
   master->pass_number++;
 }
-
-
-#ifdef D_MULTISCAN_FILES_SUPPORTED
-
-/*
- * Switch to a new external colormap between output passes.
- */
-
-GLOBAL(void)
-jpeg_new_colormap(j_decompress_ptr cinfo)
-{
-  my_master_ptr master = (my_master_ptr)cinfo->master;
-
-  /* Prevent application from calling me at wrong times */
-  if (cinfo->global_state != DSTATE_BUFIMAGE)
-    ERREXIT1(cinfo, JERR_BAD_STATE, cinfo->global_state);
-
-  if (cinfo->quantize_colors && cinfo->enable_external_quant &&
-      cinfo->colormap != NULL) {
-    /* Select 2-pass quantizer for external colormap use */
-    cinfo->cquantize = master->quantizer_2pass;
-    /* Notify quantizer of colormap change */
-    (*cinfo->cquantize->new_color_map) (cinfo);
-    master->pub.is_dummy_pass = FALSE; /* just in case */
-  } else
-    ERREXIT(cinfo, JERR_MODE_CHANGE);
-}
-
-#endif /* D_MULTISCAN_FILES_SUPPORTED */
 
 
 /*
@@ -507,7 +401,6 @@ jinit_master_decompress(j_decompress_ptr cinfo)
   master->pub.prepare_for_output_pass = prepare_for_output_pass;
   master->pub.finish_output_pass = finish_output_pass;
 
-  master->pub.is_dummy_pass = FALSE;
   master->pub.jinit_upsampler_no_alloc = FALSE;
 
   master_selection(cinfo);

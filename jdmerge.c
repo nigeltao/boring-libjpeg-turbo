@@ -555,11 +555,7 @@ jinit_merged_upsampler(j_decompress_ptr cinfo)
     else
       upsample->upmethod = h2v2_merged_upsample;
     if (cinfo->out_color_space == JCS_RGB565) {
-      if (cinfo->dither_mode != JDITHER_NONE) {
-        upsample->upmethod = h2v2_merged_upsample_565D;
-      } else {
-        upsample->upmethod = h2v2_merged_upsample_565;
-      }
+      upsample->upmethod = h2v2_merged_upsample_565;
     }
     /* Allocate a spare row buffer */
     upsample->spare_row = (JSAMPROW)
@@ -572,11 +568,7 @@ jinit_merged_upsampler(j_decompress_ptr cinfo)
     else
       upsample->upmethod = h2v1_merged_upsample;
     if (cinfo->out_color_space == JCS_RGB565) {
-      if (cinfo->dither_mode != JDITHER_NONE) {
-        upsample->upmethod = h2v1_merged_upsample_565D;
-      } else {
-        upsample->upmethod = h2v1_merged_upsample_565;
-      }
+      upsample->upmethod = h2v1_merged_upsample_565;
     }
     /* No spare row needed */
     upsample->spare_row = NULL;

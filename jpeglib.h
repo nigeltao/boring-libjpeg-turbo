@@ -501,15 +501,13 @@ struct jpeg_decompress_struct {
   boolean do_fancy_upsampling;  /* TRUE=apply fancy upsampling */
   boolean do_block_smoothing;   /* TRUE=apply interblock smoothing */
 
-  boolean quantize_colors;      /* TRUE=colormapped output wanted */
-  /* the following are ignored if not quantize_colors: */
-  J_DITHER_MODE dither_mode;    /* type of color dithering to use */
-  boolean two_pass_quantize;    /* TRUE=use two-pass color quantization */
-  int desired_number_of_colors; /* max # colors to use in created colormap */
-  /* these are significant only in buffered-image mode: */
-  boolean enable_1pass_quant;   /* enable future use of 1-pass quantizer */
-  boolean enable_external_quant;/* enable future use of external colormap */
-  boolean enable_2pass_quant;   /* enable future use of 2-pass quantizer */
+  boolean notboring_quantize_colors;
+  J_DITHER_MODE notboring_dither_mode;
+  boolean notboring_two_pass_quantize;
+  int notboring_desired_number_of_colors;
+  boolean notboring_enable_1pass_quant;
+  boolean notboring_enable_external_quant;
+  boolean notboring_enable_2pass_quant;
 
   /* Description of actual output image that will be returned to application.
    * These fields are computed by jpeg_start_decompress().
@@ -703,7 +701,7 @@ struct jpeg_decompress_struct {
   struct jpeg_inverse_dct *idct;
   struct jpeg_upsampler *upsample;
   struct jpeg_color_deconverter *cconvert;
-  struct jpeg_color_quantizer *cquantize;
+  void *notboring_cquantize;
 };
 
 
@@ -1013,7 +1011,6 @@ EXTERN(boolean) jpeg_has_multiple_scans(j_decompress_ptr cinfo);
 EXTERN(boolean) jpeg_start_output(j_decompress_ptr cinfo, int scan_number);
 EXTERN(boolean) jpeg_finish_output(j_decompress_ptr cinfo);
 EXTERN(boolean) jpeg_input_complete(j_decompress_ptr cinfo);
-EXTERN(void) jpeg_new_colormap(j_decompress_ptr cinfo);
 EXTERN(int) jpeg_consume_input(j_decompress_ptr cinfo);
 /* Return value is one of: */
 /* #define JPEG_SUSPENDED       0    Suspended due to lack of input data */

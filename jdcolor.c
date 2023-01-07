@@ -826,7 +826,7 @@ jinit_color_deconverter(j_decompress_ptr cinfo)
 
   case JCS_RGB565:
     cinfo->out_color_components = 3;
-    if (cinfo->dither_mode == JDITHER_NONE) {
+    if (NOTBORING_ALWAYS_TRUE) {
       if (cinfo->jpeg_color_space == JCS_YCbCr) {
         if (jsimd_can_ycc_rgb565())
           cconvert->pub.color_convert = jsimd_ycc_rgb565_convert;
@@ -838,17 +838,6 @@ jinit_color_deconverter(j_decompress_ptr cinfo)
         cconvert->pub.color_convert = gray_rgb565_convert;
       } else if (cinfo->jpeg_color_space == JCS_RGB) {
         cconvert->pub.color_convert = rgb_rgb565_convert;
-      } else
-        ERREXIT(cinfo, JERR_CONVERSION_NOTIMPL);
-    } else {
-      /* only ordered dithering is supported */
-      if (cinfo->jpeg_color_space == JCS_YCbCr) {
-        cconvert->pub.color_convert = ycc_rgb565D_convert;
-        build_ycc_rgb_table(cinfo);
-      } else if (cinfo->jpeg_color_space == JCS_GRAYSCALE) {
-        cconvert->pub.color_convert = gray_rgb565D_convert;
-      } else if (cinfo->jpeg_color_space == JCS_RGB) {
-        cconvert->pub.color_convert = rgb_rgb565D_convert;
       } else
         ERREXIT(cinfo, JERR_CONVERSION_NOTIMPL);
     }
@@ -875,8 +864,5 @@ jinit_color_deconverter(j_decompress_ptr cinfo)
     break;
   }
 
-  if (cinfo->quantize_colors)
-    cinfo->output_components = 1; /* single colormapped output component */
-  else
-    cinfo->output_components = cinfo->out_color_components;
+  cinfo->output_components = cinfo->out_color_components;
 }

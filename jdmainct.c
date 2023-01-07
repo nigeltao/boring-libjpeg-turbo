@@ -121,14 +121,6 @@ METHODDEF(void) process_data_context_main(j_decompress_ptr cinfo,
                                           JSAMPARRAY output_buf,
                                           JDIMENSION *out_row_ctr,
                                           JDIMENSION out_rows_avail);
-#ifdef QUANT_2PASS_SUPPORTED
-METHODDEF(void) process_data_crank_post(j_decompress_ptr cinfo,
-                                        JSAMPARRAY output_buf,
-                                        JDIMENSION *out_row_ctr,
-                                        JDIMENSION out_rows_avail);
-#endif
-
-
 LOCAL(void)
 alloc_funny_pointers(j_decompress_ptr cinfo)
 /* Allocate space for the funny pointer lists.
@@ -269,12 +261,6 @@ start_pass_main(j_decompress_ptr cinfo, J_BUF_MODE pass_mode)
     main_ptr->buffer_full = FALSE;      /* Mark buffer empty */
     main_ptr->rowgroup_ctr = 0;
     break;
-#ifdef QUANT_2PASS_SUPPORTED
-  case JBUF_CRANK_DEST:
-    /* For last pass of 2-pass quantization, just crank the postprocessor */
-    main_ptr->pub.process_data = process_data_crank_post;
-    break;
-#endif
   default:
     ERREXIT(cinfo, JERR_BAD_BUFFER_MODE);
     break;
@@ -393,26 +379,6 @@ process_data_context_main(j_decompress_ptr cinfo, JSAMPARRAY output_buf,
     main_ptr->context_state = CTX_POSTPONED_ROW;
   }
 }
-
-
-/*
- * Process some data.
- * Final pass of two-pass quantization: just call the postprocessor.
- * Source data will be the postprocessor controller's internal buffer.
- */
-
-#ifdef QUANT_2PASS_SUPPORTED
-
-METHODDEF(void)
-process_data_crank_post(j_decompress_ptr cinfo, JSAMPARRAY output_buf,
-                        JDIMENSION *out_row_ctr, JDIMENSION out_rows_avail)
-{
-  (*cinfo->post->post_process_data) (cinfo, (JSAMPIMAGE)NULL,
-                                     (JDIMENSION *)NULL, (JDIMENSION)0,
-                                     output_buf, out_row_ctr, out_rows_avail);
-}
-
-#endif /* QUANT_2PASS_SUPPORTED */
 
 
 /*

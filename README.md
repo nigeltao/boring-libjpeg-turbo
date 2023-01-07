@@ -71,6 +71,7 @@ what many Linux distributions ship as `/usr/bin/cjpeg`. This repository's
 ### Removed C Library Features
 
 - IDCT scaling.
+- Quantization from 24-bit (or 32-bit) to 8-bit color.
 
 
 ### Removed SIMD Code

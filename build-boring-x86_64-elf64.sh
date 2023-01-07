@@ -46,8 +46,6 @@ C_FILES=(
     jidctint.c
     jmemmgr.c
     jmemnobs.c
-    jquant1.c
-    jquant2.c
     jutils.c
 
     simd/x86_64/jsimd.c
@@ -104,4 +102,4 @@ $CC $CFLAGS -I . -D PPM_SUPPORTED ${OBJ_FILES[@]} \
 
 echo Building djpeg
 $CC $CFLAGS -I . -D PPM_SUPPORTED ${OBJ_FILES[@]} \
-    djpeg.c cdjpeg.c wrppm.c rdcolmap.c -o djpeg
+    djpeg.c cdjpeg.c wrppm.c -o djpeg

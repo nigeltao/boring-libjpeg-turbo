@@ -107,8 +107,6 @@ usage(void)
 #endif
 
   fprintf(stderr, "Switches (names may be abbreviated):\n");
-  fprintf(stderr, "  -colors N      Reduce image to no more than N colors\n");
-  fprintf(stderr, "  -fast          Fast, low-quality processing\n");
   fprintf(stderr, "  -grayscale     Force grayscale output\n");
   fprintf(stderr, "  -rgb           Force RGB output\n");
   fprintf(stderr, "  -rgb565        Force RGB565 output\n");
@@ -147,17 +145,8 @@ usage(void)
   fprintf(stderr, "  -dct float     Use floating-point DCT method [legacy feature]%s\n",
           (JDCT_DEFAULT == JDCT_FLOAT ? " (default)" : ""));
 #endif
-  fprintf(stderr, "  -dither fs     Use F-S dithering (default)\n");
-  fprintf(stderr, "  -dither none   Don't use dithering in quantization\n");
-  fprintf(stderr, "  -dither ordered  Use ordered dither (medium speed, quality)\n");
   fprintf(stderr, "  -icc FILE      Extract ICC profile to FILE\n");
-#ifdef QUANT_2PASS_SUPPORTED
-  fprintf(stderr, "  -map FILE      Map to colors used in named image file\n");
-#endif
   fprintf(stderr, "  -nosmooth      Don't use high-quality upsampling\n");
-#ifdef QUANT_1PASS_SUPPORTED
-  fprintf(stderr, "  -onepass       Use 1-pass quantization (fast, low quality)\n");
-#endif
   fprintf(stderr, "  -maxmemory N   Maximum memory to use (in kbytes)\n");
   fprintf(stderr, "  -maxscans N    Maximum number of scans to allow in input file\n");
   fprintf(stderr, "  -outfile name  Specify name for output file\n");
@@ -223,14 +212,9 @@ parse_switches(j_decompress_ptr cinfo, int argc, char **argv,
     } else if (keymatch(arg, "colors", 1) || keymatch(arg, "colours", 1) ||
                keymatch(arg, "quantize", 1) || keymatch(arg, "quantise", 1)) {
       /* Do color quantization. */
-      int val;
-
-      if (++argn >= argc)       /* advance to next argument */
-        usage();
-      if (sscanf(argv[argn], "%d", &val) != 1)
-        usage();
-      cinfo->desired_number_of_colors = val;
-      cinfo->quantize_colors = TRUE;
+      fprintf(stderr, "%s: notboring: colors/quantize is not supported\n",
+              progname);
+      exit(EXIT_FAILURE);
 
     } else if (keymatch(arg, "dct", 2)) {
       /* Select IDCT algorithm. */
@@ -247,16 +231,9 @@ parse_switches(j_decompress_ptr cinfo, int argc, char **argv,
 
     } else if (keymatch(arg, "dither", 2)) {
       /* Select dithering algorithm. */
-      if (++argn >= argc)       /* advance to next argument */
-        usage();
-      if (keymatch(argv[argn], "fs", 2)) {
-        cinfo->dither_mode = JDITHER_FS;
-      } else if (keymatch(argv[argn], "none", 2)) {
-        cinfo->dither_mode = JDITHER_NONE;
-      } else if (keymatch(argv[argn], "ordered", 2)) {
-        cinfo->dither_mode = JDITHER_ORDERED;
-      } else
-        usage();
+      fprintf(stderr, "%s: notboring: dither is not supported\n",
+              progname);
+      exit(EXIT_FAILURE);
 
     } else if (keymatch(arg, "debug", 1) || keymatch(arg, "verbose", 1)) {
       /* Enable debug printouts. */
@@ -280,12 +257,9 @@ parse_switches(j_decompress_ptr cinfo, int argc, char **argv,
 
     } else if (keymatch(arg, "fast", 1)) {
       /* Select recommended processing options for quick-and-dirty output. */
-      cinfo->two_pass_quantize = FALSE;
-      cinfo->dither_mode = JDITHER_ORDERED;
-      if (!cinfo->quantize_colors) /* don't override an earlier -colors */
-        cinfo->desired_number_of_colors = 216;
-      cinfo->dct_method = JDCT_FASTEST;
-      cinfo->do_fancy_upsampling = FALSE;
+      fprintf(stderr, "%s: notboring: fast is not supported\n",
+              progname);
+      exit(EXIT_FAILURE);
 
     } else if (keymatch(arg, "gif", 1)) {
       /* GIF output format (LZW-compressed). */
@@ -317,23 +291,9 @@ parse_switches(j_decompress_ptr cinfo, int argc, char **argv,
 
     } else if (keymatch(arg, "map", 3)) {
       /* Quantize to a color map taken from an input file. */
-      if (++argn >= argc)       /* advance to next argument */
-        usage();
-      if (for_real) {           /* too expensive to do twice! */
-#ifdef QUANT_2PASS_SUPPORTED    /* otherwise can't quantize to supplied map */
-        FILE *mapfile;
-
-        if ((mapfile = fopen(argv[argn], READ_BINARY)) == NULL) {
-          fprintf(stderr, "%s: can't open %s\n", progname, argv[argn]);
-          exit(EXIT_FAILURE);
-        }
-        read_color_map(cinfo, mapfile);
-        fclose(mapfile);
-        cinfo->quantize_colors = TRUE;
-#else
-        ERREXIT(cinfo, JERR_NOT_COMPILED);
-#endif
-      }
+      fprintf(stderr, "%s: notboring: map is not supported\n",
+              progname);
+      exit(EXIT_FAILURE);
 
     } else if (keymatch(arg, "maxmemory", 3)) {
       /* Maximum memory in Kb (or Mb with 'm'). */
@@ -360,7 +320,9 @@ parse_switches(j_decompress_ptr cinfo, int argc, char **argv,
 
     } else if (keymatch(arg, "onepass", 3)) {
       /* Use fast one-pass quantization. */
-      cinfo->two_pass_quantize = FALSE;
+      fprintf(stderr, "%s: notboring: onepass is not supported\n",
+              progname);
+      exit(EXIT_FAILURE);
 
     } else if (keymatch(arg, "os2", 3)) {
       /* BMP output format (OS/2 flavor). */

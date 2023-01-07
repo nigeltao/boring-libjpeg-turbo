@@ -204,20 +204,6 @@ default_decompress_parms(j_decompress_ptr cinfo)
   cinfo->dct_method = JDCT_DEFAULT;
   cinfo->do_fancy_upsampling = TRUE;
   cinfo->do_block_smoothing = TRUE;
-  cinfo->quantize_colors = FALSE;
-  /* We set these in case application only sets quantize_colors. */
-  cinfo->dither_mode = JDITHER_FS;
-#ifdef QUANT_2PASS_SUPPORTED
-  cinfo->two_pass_quantize = TRUE;
-#else
-  cinfo->two_pass_quantize = FALSE;
-#endif
-  cinfo->desired_number_of_colors = 256;
-  cinfo->colormap = NULL;
-  /* Initialize for no mode change in buffered-image mode. */
-  cinfo->enable_1pass_quant = FALSE;
-  cinfo->enable_external_quant = FALSE;
-  cinfo->enable_2pass_quant = FALSE;
 }
 
 
