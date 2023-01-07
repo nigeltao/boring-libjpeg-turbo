@@ -232,9 +232,6 @@ jpeg_set_defaults(j_compress_ptr cinfo)
   /* No input smoothing */
   cinfo->smoothing_factor = 0;
 
-  /* DCT algorithm preference */
-  cinfo->dct_method = JDCT_DEFAULT;
-
   /* No restart markers */
   cinfo->restart_interval = 0;
   cinfo->restart_in_rows = 0;

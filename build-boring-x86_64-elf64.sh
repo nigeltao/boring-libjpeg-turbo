@@ -37,11 +37,7 @@ C_FILES=(
     jdpostct.c
     jdsample.c
     jerror.c
-    jfdctflt.c
-    jfdctfst.c
     jfdctint.c
-    jidctflt.c
-    jidctfst.c
     jidctint.c
     jmemmgr.c
     jmemnobs.c
@@ -63,15 +59,10 @@ ASM_FILES=(
     simd/x86_64/jdcolor-sse2.asm
     simd/x86_64/jdsample-avx2.asm
     simd/x86_64/jdsample-sse2.asm
-    simd/x86_64/jfdctflt-sse.asm
-    simd/x86_64/jfdctfst-sse2.asm
     simd/x86_64/jfdctint-avx2.asm
     simd/x86_64/jfdctint-sse2.asm
-    simd/x86_64/jidctflt-sse2.asm
-    simd/x86_64/jidctfst-sse2.asm
     simd/x86_64/jidctint-avx2.asm
     simd/x86_64/jidctint-sse2.asm
-    simd/x86_64/jquantf-sse2.asm
     simd/x86_64/jquanti-avx2.asm
     simd/x86_64/jquanti-sse2.asm
     simd/x86_64/jsimdcpu.asm

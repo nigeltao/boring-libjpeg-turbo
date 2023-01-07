@@ -64,14 +64,6 @@ typedef unsigned long long UDCTELEM2;
  */
 
 typedef MULTIPLIER ISLOW_MULT_TYPE;  /* short or int, whichever is faster */
-#if BITS_IN_JSAMPLE == 8
-typedef MULTIPLIER IFAST_MULT_TYPE;  /* 16 bits is OK, use short if faster */
-#define IFAST_SCALE_BITS  2          /* fractional bits in scale factors */
-#else
-typedef JLONG IFAST_MULT_TYPE;       /* need 32 bits for scaled quantizers */
-#define IFAST_SCALE_BITS  13         /* fractional bits in scale factors */
-#endif
-typedef FAST_FLOAT FLOAT_MULT_TYPE;  /* preferred floating type */
 
 
 /*
@@ -91,16 +83,8 @@ typedef FAST_FLOAT FLOAT_MULT_TYPE;  /* preferred floating type */
 /* Extern declarations for the forward and inverse DCT routines. */
 
 EXTERN(void) jpeg_fdct_islow(DCTELEM *data);
-EXTERN(void) jpeg_fdct_ifast(DCTELEM *data);
-EXTERN(void) jpeg_fdct_float(FAST_FLOAT *data);
 
 EXTERN(void) jpeg_idct_islow(j_decompress_ptr cinfo,
-                             jpeg_component_info *compptr, JCOEFPTR coef_block,
-                             JSAMPARRAY output_buf, JDIMENSION output_col);
-EXTERN(void) jpeg_idct_ifast(j_decompress_ptr cinfo,
-                             jpeg_component_info *compptr, JCOEFPTR coef_block,
-                             JSAMPARRAY output_buf, JDIMENSION output_col);
-EXTERN(void) jpeg_idct_float(j_decompress_ptr cinfo,
                              jpeg_component_info *compptr, JCOEFPTR coef_block,
                              JSAMPARRAY output_buf, JDIMENSION output_col);
 

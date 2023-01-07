@@ -345,13 +345,6 @@ EXTERN(void) jsimd_convsamp_avx2
 EXTERN(void) jsimd_convsamp_neon
   (JSAMPARRAY sample_data, JDIMENSION start_col, DCTELEM *workspace);
 
-/* Floating Point Sample Conversion */
-EXTERN(void) jsimd_convsamp_float_sse
-  (JSAMPARRAY sample_data, JDIMENSION start_col, FAST_FLOAT *workspace);
-
-EXTERN(void) jsimd_convsamp_float_sse2
-  (JSAMPARRAY sample_data, JDIMENSION start_col, FAST_FLOAT *workspace);
-
 /* Accurate Integer Forward DCT */
 extern const int jconst_fdct_islow_sse2[];
 EXTERN(void) jsimd_fdct_islow_sse2(DCTELEM *data);
@@ -360,16 +353,6 @@ extern const int jconst_fdct_islow_avx2[];
 EXTERN(void) jsimd_fdct_islow_avx2(DCTELEM *data);
 
 EXTERN(void) jsimd_fdct_islow_neon(DCTELEM *data);
-
-/* Fast Integer Forward DCT */
-extern const int jconst_fdct_ifast_sse2[];
-EXTERN(void) jsimd_fdct_ifast_sse2(DCTELEM *data);
-
-EXTERN(void) jsimd_fdct_ifast_neon(DCTELEM *data);
-
-/* Floating Point Forward DCT */
-extern const int jconst_fdct_float_sse[];
-EXTERN(void) jsimd_fdct_float_sse(FAST_FLOAT *data);
 
 /* Quantization */
 EXTERN(void) jsimd_quantize_sse2
@@ -380,13 +363,6 @@ EXTERN(void) jsimd_quantize_avx2
 
 EXTERN(void) jsimd_quantize_neon
   (JCOEFPTR coef_block, DCTELEM *divisors, DCTELEM *workspace);
-
-/* Floating Point Quantization */
-EXTERN(void) jsimd_quantize_float_sse
-  (JCOEFPTR coef_block, FAST_FLOAT *divisors, FAST_FLOAT *workspace);
-
-EXTERN(void) jsimd_quantize_float_sse2
-  (JCOEFPTR coef_block, FAST_FLOAT *divisors, FAST_FLOAT *workspace);
 
 /* Accurate Integer Inverse DCT */
 extern const int jconst_idct_islow_sse2[];
@@ -400,27 +376,6 @@ EXTERN(void) jsimd_idct_islow_avx2
    JDIMENSION output_col);
 
 EXTERN(void) jsimd_idct_islow_neon
-  (void *dct_table, JCOEFPTR coef_block, JSAMPARRAY output_buf,
-   JDIMENSION output_col);
-
-/* Fast Integer Inverse DCT */
-extern const int jconst_idct_ifast_sse2[];
-EXTERN(void) jsimd_idct_ifast_sse2
-  (void *dct_table, JCOEFPTR coef_block, JSAMPARRAY output_buf,
-   JDIMENSION output_col);
-
-EXTERN(void) jsimd_idct_ifast_neon
-  (void *dct_table, JCOEFPTR coef_block, JSAMPARRAY output_buf,
-   JDIMENSION output_col);
-
-/* Floating Point Inverse DCT */
-extern const int jconst_idct_float_sse[];
-EXTERN(void) jsimd_idct_float_sse
-  (void *dct_table, JCOEFPTR coef_block, JSAMPARRAY output_buf,
-   JDIMENSION output_col);
-
-extern const int jconst_idct_float_sse2[];
-EXTERN(void) jsimd_idct_float_sse2
   (void *dct_table, JCOEFPTR coef_block, JSAMPARRAY output_buf,
    JDIMENSION output_col);
 

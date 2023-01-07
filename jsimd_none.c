@@ -149,21 +149,9 @@ jsimd_can_convsamp(void)
   return 0;
 }
 
-GLOBAL(int)
-jsimd_can_convsamp_float(void)
-{
-  return 0;
-}
-
 GLOBAL(void)
 jsimd_convsamp(JSAMPARRAY sample_data, JDIMENSION start_col,
                DCTELEM *workspace)
-{
-}
-
-GLOBAL(void)
-jsimd_convsamp_float(JSAMPARRAY sample_data, JDIMENSION start_col,
-                     FAST_FLOAT *workspace)
 {
 }
 
@@ -173,30 +161,8 @@ jsimd_can_fdct_islow(void)
   return 0;
 }
 
-GLOBAL(int)
-jsimd_can_fdct_ifast(void)
-{
-  return 0;
-}
-
-GLOBAL(int)
-jsimd_can_fdct_float(void)
-{
-  return 0;
-}
-
 GLOBAL(void)
 jsimd_fdct_islow(DCTELEM *data)
-{
-}
-
-GLOBAL(void)
-jsimd_fdct_ifast(DCTELEM *data)
-{
-}
-
-GLOBAL(void)
-jsimd_fdct_float(FAST_FLOAT *data)
 {
 }
 
@@ -206,20 +172,8 @@ jsimd_can_quantize(void)
   return 0;
 }
 
-GLOBAL(int)
-jsimd_can_quantize_float(void)
-{
-  return 0;
-}
-
 GLOBAL(void)
 jsimd_quantize(JCOEFPTR coef_block, DCTELEM *divisors, DCTELEM *workspace)
-{
-}
-
-GLOBAL(void)
-jsimd_quantize_float(JCOEFPTR coef_block, FAST_FLOAT *divisors,
-                     FAST_FLOAT *workspace)
 {
 }
 
@@ -229,34 +183,8 @@ jsimd_can_idct_islow(void)
   return 0;
 }
 
-GLOBAL(int)
-jsimd_can_idct_ifast(void)
-{
-  return 0;
-}
-
-GLOBAL(int)
-jsimd_can_idct_float(void)
-{
-  return 0;
-}
-
 GLOBAL(void)
 jsimd_idct_islow(j_decompress_ptr cinfo, jpeg_component_info *compptr,
-                 JCOEFPTR coef_block, JSAMPARRAY output_buf,
-                 JDIMENSION output_col)
-{
-}
-
-GLOBAL(void)
-jsimd_idct_ifast(j_decompress_ptr cinfo, jpeg_component_info *compptr,
-                 JCOEFPTR coef_block, JSAMPARRAY output_buf,
-                 JDIMENSION output_col)
-{
-}
-
-GLOBAL(void)
-jsimd_idct_float(j_decompress_ptr cinfo, jpeg_component_info *compptr,
                  JCOEFPTR coef_block, JSAMPARRAY output_buf,
                  JDIMENSION output_col)
 {

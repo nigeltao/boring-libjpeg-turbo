@@ -201,7 +201,6 @@ default_decompress_parms(j_decompress_ptr cinfo)
   cinfo->output_gamma = 1.0;
   cinfo->buffered_image = FALSE;
   cinfo->raw_data_out = FALSE;
-  cinfo->dct_method = JDCT_DEFAULT;
   cinfo->do_fancy_upsampling = TRUE;
   cinfo->do_block_smoothing = TRUE;
 }

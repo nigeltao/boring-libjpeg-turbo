@@ -66,12 +66,6 @@ typedef my_idct_controller *my_idct_ptr;
 
 typedef union {
   ISLOW_MULT_TYPE islow_array[DCTSIZE2];
-#ifdef DCT_IFAST_SUPPORTED
-  IFAST_MULT_TYPE ifast_array[DCTSIZE2];
-#endif
-#ifdef DCT_FLOAT_SUPPORTED
-  FLOAT_MULT_TYPE float_array[DCTSIZE2];
-#endif
 } multiplier_table;
 
 
@@ -87,7 +81,6 @@ start_pass(j_decompress_ptr cinfo)
   my_idct_ptr idct = (my_idct_ptr)cinfo->idct;
   int ci, i;
   jpeg_component_info *compptr;
-  int method = 0;
   inverse_DCT_method_ptr method_ptr = NULL;
   JQUANT_TBL *qtbl;
 
@@ -95,38 +88,10 @@ start_pass(j_decompress_ptr cinfo)
        ci++, compptr++) {
     /* Select the proper IDCT routine for this component's scaling */
     if (NOTBORING_ALWAYS_TRUE) {
-      switch (cinfo->dct_method) {
-#ifdef DCT_ISLOW_SUPPORTED
-      case JDCT_ISLOW:
         if (jsimd_can_idct_islow())
           method_ptr = jsimd_idct_islow;
         else
           method_ptr = jpeg_idct_islow;
-        method = JDCT_ISLOW;
-        break;
-#endif
-#ifdef DCT_IFAST_SUPPORTED
-      case JDCT_IFAST:
-        if (jsimd_can_idct_ifast())
-          method_ptr = jsimd_idct_ifast;
-        else
-          method_ptr = jpeg_idct_ifast;
-        method = JDCT_IFAST;
-        break;
-#endif
-#ifdef DCT_FLOAT_SUPPORTED
-      case JDCT_FLOAT:
-        if (jsimd_can_idct_float())
-          method_ptr = jsimd_idct_float;
-        else
-          method_ptr = jpeg_idct_float;
-        method = JDCT_FLOAT;
-        break;
-#endif
-      default:
-        ERREXIT(cinfo, JERR_NOT_COMPILED);
-        break;
-      }
     }
     idct->pub.inverse_DCT[ci] = method_ptr;
     /* Create multiplier table from quant table.
@@ -136,15 +101,13 @@ start_pass(j_decompress_ptr cinfo)
      * multiplier table all-zero; we'll be reading zeroes from the
      * coefficient controller's buffer anyway.
      */
-    if (!compptr->component_needed || idct->cur_method[ci] == method)
+    if (!compptr->component_needed || idct->cur_method[ci] == JDCT_ISLOW)
       continue;
     qtbl = compptr->quant_table;
     if (qtbl == NULL)           /* happens if no data yet for component */
       continue;
-    idct->cur_method[ci] = method;
-    switch (method) {
-    case JDCT_ISLOW:
-      {
+    idct->cur_method[ci] = JDCT_ISLOW;
+    if (NOTBORING_ALWAYS_TRUE) {
         /* For LL&M IDCT method, multipliers are equal to raw quantization
          * coefficients, but are stored as ints to ensure access efficiency.
          */
@@ -152,72 +115,6 @@ start_pass(j_decompress_ptr cinfo)
         for (i = 0; i < DCTSIZE2; i++) {
           ismtbl[i] = (ISLOW_MULT_TYPE)qtbl->quantval[i];
         }
-      }
-      break;
-#ifdef DCT_IFAST_SUPPORTED
-    case JDCT_IFAST:
-      {
-        /* For AA&N IDCT method, multipliers are equal to quantization
-         * coefficients scaled by scalefactor[row]*scalefactor[col], where
-         *   scalefactor[0] = 1
-         *   scalefactor[k] = cos(k*PI/16) * sqrt(2)    for k=1..7
-         * For integer operation, the multiplier table is to be scaled by
-         * IFAST_SCALE_BITS.
-         */
-        IFAST_MULT_TYPE *ifmtbl = (IFAST_MULT_TYPE *)compptr->dct_table;
-#define CONST_BITS  14
-        static const INT16 aanscales[DCTSIZE2] = {
-          /* precomputed values scaled up by 14 bits */
-          16384, 22725, 21407, 19266, 16384, 12873,  8867,  4520,
-          22725, 31521, 29692, 26722, 22725, 17855, 12299,  6270,
-          21407, 29692, 27969, 25172, 21407, 16819, 11585,  5906,
-          19266, 26722, 25172, 22654, 19266, 15137, 10426,  5315,
-          16384, 22725, 21407, 19266, 16384, 12873,  8867,  4520,
-          12873, 17855, 16819, 15137, 12873, 10114,  6967,  3552,
-           8867, 12299, 11585, 10426,  8867,  6967,  4799,  2446,
-           4520,  6270,  5906,  5315,  4520,  3552,  2446,  1247
-        };
-        SHIFT_TEMPS
-
-        for (i = 0; i < DCTSIZE2; i++) {
-          ifmtbl[i] = (IFAST_MULT_TYPE)
-            DESCALE(MULTIPLY16V16((JLONG)qtbl->quantval[i],
-                                  (JLONG)aanscales[i]),
-                    CONST_BITS - IFAST_SCALE_BITS);
-        }
-      }
-      break;
-#endif
-#ifdef DCT_FLOAT_SUPPORTED
-    case JDCT_FLOAT:
-      {
-        /* For float AA&N IDCT method, multipliers are equal to quantization
-         * coefficients scaled by scalefactor[row]*scalefactor[col], where
-         *   scalefactor[0] = 1
-         *   scalefactor[k] = cos(k*PI/16) * sqrt(2)    for k=1..7
-         */
-        FLOAT_MULT_TYPE *fmtbl = (FLOAT_MULT_TYPE *)compptr->dct_table;
-        int row, col;
-        static const double aanscalefactor[DCTSIZE] = {
-          1.0, 1.387039845, 1.306562965, 1.175875602,
-          1.0, 0.785694958, 0.541196100, 0.275899379
-        };
-
-        i = 0;
-        for (row = 0; row < DCTSIZE; row++) {
-          for (col = 0; col < DCTSIZE; col++) {
-            fmtbl[i] = (FLOAT_MULT_TYPE)
-              ((double)qtbl->quantval[i] *
-               aanscalefactor[row] * aanscalefactor[col]);
-            i++;
-          }
-        }
-      }
-      break;
-#endif
-    default:
-      ERREXIT(cinfo, JERR_NOT_COMPILED);
-      break;
     }
   }
 }

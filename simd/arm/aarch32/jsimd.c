@@ -513,23 +513,11 @@ jsimd_can_convsamp(void)
   return 0;
 }
 
-GLOBAL(int)
-jsimd_can_convsamp_float(void)
-{
-  return 0;
-}
-
 GLOBAL(void)
 jsimd_convsamp(JSAMPARRAY sample_data, JDIMENSION start_col,
                DCTELEM *workspace)
 {
   jsimd_convsamp_neon(sample_data, start_col, workspace);
-}
-
-GLOBAL(void)
-jsimd_convsamp_float(JSAMPARRAY sample_data, JDIMENSION start_col,
-                     FAST_FLOAT *workspace)
-{
 }
 
 GLOBAL(int)
@@ -549,44 +537,10 @@ jsimd_can_fdct_islow(void)
   return 0;
 }
 
-GLOBAL(int)
-jsimd_can_fdct_ifast(void)
-{
-  init_simd();
-
-  /* The code is optimised for these values only */
-  if (DCTSIZE != 8)
-    return 0;
-  if (sizeof(DCTELEM) != 2)
-    return 0;
-
-  if (simd_support & JSIMD_NEON)
-    return 1;
-
-  return 0;
-}
-
-GLOBAL(int)
-jsimd_can_fdct_float(void)
-{
-  return 0;
-}
-
 GLOBAL(void)
 jsimd_fdct_islow(DCTELEM *data)
 {
   jsimd_fdct_islow_neon(data);
-}
-
-GLOBAL(void)
-jsimd_fdct_ifast(DCTELEM *data)
-{
-  jsimd_fdct_ifast_neon(data);
-}
-
-GLOBAL(void)
-jsimd_fdct_float(FAST_FLOAT *data)
-{
 }
 
 GLOBAL(int)
@@ -608,22 +562,10 @@ jsimd_can_quantize(void)
   return 0;
 }
 
-GLOBAL(int)
-jsimd_can_quantize_float(void)
-{
-  return 0;
-}
-
 GLOBAL(void)
 jsimd_quantize(JCOEFPTR coef_block, DCTELEM *divisors, DCTELEM *workspace)
 {
   jsimd_quantize_neon(coef_block, divisors, workspace);
-}
-
-GLOBAL(void)
-jsimd_quantize_float(JCOEFPTR coef_block, FAST_FLOAT *divisors,
-                     FAST_FLOAT *workspace)
-{
 }
 
 GLOBAL(int)
@@ -649,37 +591,6 @@ jsimd_can_idct_islow(void)
   return 0;
 }
 
-GLOBAL(int)
-jsimd_can_idct_ifast(void)
-{
-  init_simd();
-
-  /* The code is optimised for these values only */
-  if (DCTSIZE != 8)
-    return 0;
-  if (sizeof(JCOEF) != 2)
-    return 0;
-  if (BITS_IN_JSAMPLE != 8)
-    return 0;
-  if (sizeof(JDIMENSION) != 4)
-    return 0;
-  if (sizeof(IFAST_MULT_TYPE) != 2)
-    return 0;
-  if (IFAST_SCALE_BITS != 2)
-    return 0;
-
-  if (simd_support & JSIMD_NEON)
-    return 1;
-
-  return 0;
-}
-
-GLOBAL(int)
-jsimd_can_idct_float(void)
-{
-  return 0;
-}
-
 GLOBAL(void)
 jsimd_idct_islow(j_decompress_ptr cinfo, jpeg_component_info *compptr,
                  JCOEFPTR coef_block, JSAMPARRAY output_buf,
@@ -687,22 +598,6 @@ jsimd_idct_islow(j_decompress_ptr cinfo, jpeg_component_info *compptr,
 {
   jsimd_idct_islow_neon(compptr->dct_table, coef_block, output_buf,
                         output_col);
-}
-
-GLOBAL(void)
-jsimd_idct_ifast(j_decompress_ptr cinfo, jpeg_component_info *compptr,
-                 JCOEFPTR coef_block, JSAMPARRAY output_buf,
-                 JDIMENSION output_col)
-{
-  jsimd_idct_ifast_neon(compptr->dct_table, coef_block, output_buf,
-                        output_col);
-}
-
-GLOBAL(void)
-jsimd_idct_float(j_decompress_ptr cinfo, jpeg_component_info *compptr,
-                 JCOEFPTR coef_block, JSAMPARRAY output_buf,
-                 JDIMENSION output_col)
-{
 }
 
 GLOBAL(int)

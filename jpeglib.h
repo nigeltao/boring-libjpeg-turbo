@@ -372,7 +372,7 @@ struct jpeg_compress_struct {
   boolean do_fancy_downsampling; /* TRUE=apply fancy downsampling */
 #endif
   int smoothing_factor;         /* 1..100, or 0 for no input smoothing */
-  J_DCT_METHOD dct_method;      /* DCT algorithm selector */
+  J_DCT_METHOD notboring_dct_method;
 
   /* The restart interval can be specified in absolute MCUs by setting
    * restart_interval, or in MCU rows by setting restart_in_rows
@@ -497,7 +497,7 @@ struct jpeg_decompress_struct {
   boolean buffered_image;       /* TRUE=multiple output passes */
   boolean raw_data_out;         /* TRUE=downsampled data wanted */
 
-  J_DCT_METHOD dct_method;      /* IDCT algorithm selector */
+  J_DCT_METHOD notboring_dct_method;
   boolean do_fancy_upsampling;  /* TRUE=apply fancy upsampling */
   boolean do_block_smoothing;   /* TRUE=apply interblock smoothing */
 

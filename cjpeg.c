@@ -202,18 +202,6 @@ usage(void)
   fprintf(stderr, "  -targa         Input file is Targa format (usually not needed)\n");
 #endif
   fprintf(stderr, "Switches for advanced users:\n");
-#ifdef DCT_ISLOW_SUPPORTED
-  fprintf(stderr, "  -dct int       Use accurate integer DCT method%s\n",
-          (JDCT_DEFAULT == JDCT_ISLOW ? " (default)" : ""));
-#endif
-#ifdef DCT_IFAST_SUPPORTED
-  fprintf(stderr, "  -dct fast      Use less accurate integer DCT method [legacy feature]%s\n",
-          (JDCT_DEFAULT == JDCT_IFAST ? " (default)" : ""));
-#endif
-#ifdef DCT_FLOAT_SUPPORTED
-  fprintf(stderr, "  -dct float     Use floating-point DCT method [legacy feature]%s\n",
-          (JDCT_DEFAULT == JDCT_FLOAT ? " (default)" : ""));
-#endif
   fprintf(stderr, "  -icc FILE      Embed ICC profile contained in FILE\n");
   fprintf(stderr, "  -restart N     Set restart interval in rows, or in blocks with B\n");
 #ifdef INPUT_SMOOTHING_SUPPORTED
@@ -289,16 +277,9 @@ parse_switches(j_compress_ptr cinfo, int argc, char **argv,
 
     } else if (keymatch(arg, "dct", 2)) {
       /* Select DCT algorithm. */
-      if (++argn >= argc)       /* advance to next argument */
-        usage();
-      if (keymatch(argv[argn], "int", 1)) {
-        cinfo->dct_method = JDCT_ISLOW;
-      } else if (keymatch(argv[argn], "fast", 2)) {
-        cinfo->dct_method = JDCT_IFAST;
-      } else if (keymatch(argv[argn], "float", 2)) {
-        cinfo->dct_method = JDCT_FLOAT;
-      } else
-        usage();
+      fprintf(stderr, "%s: notboring: dct is not supported\n",
+              progname);
+      exit(EXIT_FAILURE);
 
     } else if (keymatch(arg, "debug", 1) || keymatch(arg, "verbose", 1)) {
       /* Enable debug printouts. */
