@@ -166,9 +166,6 @@ usage(void)
   fprintf(stderr, "Switches for advanced users:\n");
   fprintf(stderr, "  -icc FILE      Embed ICC profile contained in FILE\n");
   fprintf(stderr, "  -restart N     Set restart interval in rows, or in blocks with B\n");
-#ifdef INPUT_SMOOTHING_SUPPORTED
-  fprintf(stderr, "  -smooth N      Smooth dithered input (N=1..100 is strength)\n");
-#endif
   fprintf(stderr, "  -maxmemory N   Maximum memory to use (in kbytes)\n");
   fprintf(stderr, "  -outfile name  Specify name for output file\n");
 #if JPEG_LIB_VERSION >= 80 || defined(MEM_SRCDST_SUPPORTED)
@@ -381,15 +378,9 @@ parse_switches(j_compress_ptr cinfo, int argc, char **argv,
 
     } else if (keymatch(arg, "smooth", 2)) {
       /* Set input smoothing factor. */
-      int val;
-
-      if (++argn >= argc)       /* advance to next argument */
-        usage();
-      if (sscanf(argv[argn], "%d", &val) != 1)
-        usage();
-      if (val < 0 || val > 100)
-        usage();
-      cinfo->smoothing_factor = val;
+      fprintf(stderr, "%s: notboring: smooth is not supported\n",
+              progname);
+      exit(EXIT_FAILURE);
 
     } else if (keymatch(arg, "strict", 2)) {
       strict = TRUE;

@@ -73,6 +73,7 @@ what many Linux distributions ship as `/usr/bin/cjpeg`. This repository's
 - Alternative 'legacy' IDCT implementations.
 - Custom memory management, including virtual memory ('backing stores').
 - IDCT scaling.
+- Input smoothing, designed for 8-bit color input files (e.g. GIFs).
 - Merged upsampling (merging upsampling with color conversion, which is fast
   but 'sloppy', as opposed to higher quality, 'fancy' upsampling).
 - Quantization from 24-bit (or 32-bit) to 8-bit color.

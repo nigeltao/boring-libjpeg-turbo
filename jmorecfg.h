@@ -243,7 +243,7 @@ typedef int boolean;
  * The exact same statements apply for progressive JPEG: the default tables
  * don't work for progressive mode.  (This may get fixed, however.)
  */
-#define INPUT_SMOOTHING_SUPPORTED   /* Input image smoothing option? */
+/* notboring: #define INPUT_SMOOTHING_SUPPORTED */
 
 /* Decoder capability options: */
 

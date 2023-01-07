@@ -371,7 +371,7 @@ struct jpeg_compress_struct {
 #if JPEG_LIB_VERSION >= 70
   boolean do_fancy_downsampling; /* TRUE=apply fancy downsampling */
 #endif
-  int smoothing_factor;         /* 1..100, or 0 for no input smoothing */
+  int notboring_smoothing_factor;
   J_DCT_METHOD notboring_dct_method;
 
   /* The restart interval can be specified in absolute MCUs by setting
