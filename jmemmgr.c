@@ -94,7 +94,7 @@ round_up_pow2(size_t a, size_t b)
 
 /*
  * We allocate objects from "pools", where each pool is gotten with a single
- * request to jpeg_get_small() or jpeg_get_large().  There is no per-object
+ * request to malloc().  There is no per-object
  * overhead within a pool, except for alignment padding.  Each pool has a
  * header with a link to the next pool of the same class.
  * Small and large pool headers are identical.
@@ -135,7 +135,7 @@ typedef struct {
   jvirt_sarray_ptr virt_sarray_list;
   jvirt_barray_ptr virt_barray_list;
 
-  /* This counts total space obtained from jpeg_get_small/large */
+  /* This counts total space obtained from malloc */
   size_t total_space_allocated;
 
   /* alloc_sarray and alloc_barray set this value for use by virtual
@@ -277,12 +277,12 @@ alloc_small(j_common_ptr cinfo, int pool_id, size_t sizeofobject)
       slop = (size_t)(MAX_ALLOC_CHUNK - min_request);
     /* Try to get space, if fail reduce slop and try again */
     for (;;) {
-      hdr_ptr = (small_pool_ptr)jpeg_get_small(cinfo, min_request + slop);
+      hdr_ptr = (small_pool_ptr)malloc(min_request + slop);
       if (hdr_ptr != NULL)
         break;
       slop /= 2;
       if (slop < MIN_SLOP)      /* give up when it gets real small */
-        out_of_memory(cinfo, 2); /* jpeg_get_small failed */
+        out_of_memory(cinfo, 2); /* malloc failed */
     }
     mem->total_space_allocated += min_request + slop;
     /* Success, initialize the new pool header and add to end of list */
@@ -314,7 +314,7 @@ alloc_small(j_common_ptr cinfo, int pool_id, size_t sizeofobject)
  * The external semantics of these are the same as "small" objects.  However,
  * the pool management heuristics are quite different.  We assume that each
  * request is large enough that it may as well be passed directly to
- * jpeg_get_large; the pool management just links everything together
+ * malloc; the pool management just links everything together
  * so that we can free it all on demand.
  * Note: the major use of "large" objects is in JSAMPARRAY and JBLOCKARRAY
  * structures.  The routines that create these structures (see below)
@@ -350,11 +350,11 @@ alloc_large(j_common_ptr cinfo, int pool_id, size_t sizeofobject)
   if (pool_id < 0 || pool_id >= JPOOL_NUMPOOLS)
     ERREXIT1(cinfo, JERR_BAD_POOL_ID, pool_id); /* safety check */
 
-  hdr_ptr = (large_pool_ptr)jpeg_get_large(cinfo, sizeofobject +
+  hdr_ptr = (large_pool_ptr)malloc(sizeofobject +
                                            sizeof(large_pool_hdr) +
                                            ALIGN_SIZE - 1);
   if (hdr_ptr == NULL)
-    out_of_memory(cinfo, 4);    /* jpeg_get_large failed */
+    out_of_memory(cinfo, 4);    /* malloc failed */
   mem->total_space_allocated += sizeofobject + sizeof(large_pool_hdr) +
                                 ALIGN_SIZE - 1;
 
@@ -990,7 +990,7 @@ free_pool(j_common_ptr cinfo, int pool_id)
     space_freed = lhdr_ptr->bytes_used +
                   lhdr_ptr->bytes_left +
                   sizeof(large_pool_hdr) + ALIGN_SIZE - 1;
-    jpeg_free_large(cinfo, (void *)lhdr_ptr, space_freed);
+    free(lhdr_ptr);
     mem->total_space_allocated -= space_freed;
     lhdr_ptr = next_lhdr_ptr;
   }
@@ -1003,7 +1003,7 @@ free_pool(j_common_ptr cinfo, int pool_id)
     small_pool_ptr next_shdr_ptr = shdr_ptr->next;
     space_freed = shdr_ptr->bytes_used + shdr_ptr->bytes_left +
                   sizeof(small_pool_hdr) + ALIGN_SIZE - 1;
-    jpeg_free_small(cinfo, (void *)shdr_ptr, space_freed);
+    free(shdr_ptr);
     mem->total_space_allocated -= space_freed;
     shdr_ptr = next_shdr_ptr;
   }
@@ -1029,10 +1029,8 @@ self_destruct(j_common_ptr cinfo)
   }
 
   /* Release the memory manager control block too. */
-  jpeg_free_small(cinfo, (void *)cinfo->mem, sizeof(my_memory_mgr));
+  free(cinfo->mem);
   cinfo->mem = NULL;            /* ensures I will be called only once */
-
-  jpeg_mem_term(cinfo);         /* system-dependent cleanup */
 }
 
 
@@ -1045,7 +1043,6 @@ GLOBAL(void)
 jinit_memory_mgr(j_common_ptr cinfo)
 {
   my_mem_ptr mem;
-  long max_to_use;
   int pool;
   size_t test_mac;
 
@@ -1070,13 +1067,10 @@ jinit_memory_mgr(j_common_ptr cinfo)
       (MAX_ALLOC_CHUNK % ALIGN_SIZE) != 0)
     ERREXIT(cinfo, JERR_BAD_ALLOC_CHUNK);
 
-  max_to_use = jpeg_mem_init(cinfo); /* system-dependent initialization */
-
   /* Attempt to allocate memory manager's control block */
-  mem = (my_mem_ptr)jpeg_get_small(cinfo, sizeof(my_memory_mgr));
+  mem = (my_mem_ptr)malloc(sizeof(my_memory_mgr));
 
   if (mem == NULL) {
-    jpeg_mem_term(cinfo);       /* system-dependent cleanup */
     ERREXIT1(cinfo, JERR_OUT_OF_MEMORY, 0);
   }
 
@@ -1097,7 +1091,7 @@ jinit_memory_mgr(j_common_ptr cinfo)
   mem->pub.max_alloc_chunk = MAX_ALLOC_CHUNK;
 
   /* Initialize working state */
-  mem->pub.max_memory_to_use = max_to_use;
+  mem->pub.max_memory_to_use = 0;  /* notboring: hard-coded. */
 
   for (pool = JPOOL_NUMPOOLS - 1; pool >= JPOOL_PERMANENT; pool--) {
     mem->small_list[pool] = NULL;
