@@ -20,7 +20,6 @@ C_FILES=(
     jcphuff.c
     jcprepct.c
     jcsample.c
-    jctrans.c
     jdapimin.c
     jdapistd.c
     jdatadst.c
@@ -38,7 +37,6 @@ C_FILES=(
     jdphuff.c
     jdpostct.c
     jdsample.c
-    jdtrans.c
     jerror.c
     jfdctflt.c
     jfdctfst.c
