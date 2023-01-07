@@ -274,11 +274,7 @@ jpeg_make_d_derived_tbl(j_decompress_ptr cinfo, boolean isDC, int tblno,
  * average shift distance at the cost of more calls to jpeg_fill_bit_buffer.
  */
 
-#ifdef SLOW_SHIFT_32
-#define MIN_GET_BITS  15        /* minimum allowable value */
-#else
 #define MIN_GET_BITS  (BIT_BUF_SIZE - 7)
-#endif
 
 
 GLOBAL(boolean)
@@ -474,31 +470,9 @@ jpeg_huff_decode(bitread_working_state *state,
  * On some machines, a shift and add will be faster than a table lookup.
  */
 
-#define AVOID_TABLES
-#ifdef AVOID_TABLES
-
 #define NEG_1  ((unsigned int)-1)
 #define HUFF_EXTEND(x, s) \
   ((x) + ((((x) - (1 << ((s) - 1))) >> 31) & (((NEG_1) << (s)) + 1)))
-
-#else
-
-#define HUFF_EXTEND(x, s) \
-  ((x) < extend_test[s] ? (x) + extend_offset[s] : (x))
-
-static const int extend_test[16] = {   /* entry n is 2**(n-1) */
-  0, 0x0001, 0x0002, 0x0004, 0x0008, 0x0010, 0x0020, 0x0040, 0x0080,
-  0x0100, 0x0200, 0x0400, 0x0800, 0x1000, 0x2000, 0x4000
-};
-
-static const int extend_offset[16] = { /* entry n is (-1 << n) + 1 */
-  0, ((-1) << 1) + 1, ((-1) << 2) + 1, ((-1) << 3) + 1, ((-1) << 4) + 1,
-  ((-1) << 5) + 1, ((-1) << 6) + 1, ((-1) << 7) + 1, ((-1) << 8) + 1,
-  ((-1) << 9) + 1, ((-1) << 10) + 1, ((-1) << 11) + 1, ((-1) << 12) + 1,
-  ((-1) << 13) + 1, ((-1) << 14) + 1, ((-1) << 15) + 1
-};
-
-#endif /* AVOID_TABLES */
 
 
 /*
