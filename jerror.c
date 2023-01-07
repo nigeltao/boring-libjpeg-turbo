@@ -13,11 +13,6 @@
  * stderr is the right thing to do.  Many applications will want to replace
  * some or all of these routines.
  *
- * If you define USE_WINDOWS_MESSAGEBOX in jconfig.h or in the makefile,
- * you get a Windows-specific hack to display error messages in a dialog box.
- * It ain't much, but it beats dropping error messages into the bit bucket,
- * which is what happens to output to stderr under most Windows C compilers.
- *
  * These routines are used by both the compression and decompression code.
  */
 
@@ -26,10 +21,6 @@
 #include "jpeglib.h"
 #include "jversion.h"
 #include "jerror.h"
-
-#ifdef USE_WINDOWS_MESSAGEBOX
-#include <windows.h>
-#endif
 
 #ifndef EXIT_FAILURE            /* define exit() codes if not provided */
 #define EXIT_FAILURE  1
@@ -101,14 +92,8 @@ output_message(j_common_ptr cinfo)
   /* Create the message */
   (*cinfo->err->format_message) (cinfo, buffer);
 
-#ifdef USE_WINDOWS_MESSAGEBOX
-  /* Display it in a message dialog box */
-  MessageBox(GetActiveWindow(), buffer, "JPEG Library Error",
-             MB_OK | MB_ICONERROR);
-#else
   /* Send it to stderr, adding a newline */
   fprintf(stderr, "%s\n", buffer);
-#endif
 }
 
 
