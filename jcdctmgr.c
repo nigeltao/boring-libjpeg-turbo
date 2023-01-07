@@ -235,7 +235,7 @@ start_pass_fdctmgr(j_compress_ptr cinfo)
     qtbl = cinfo->quant_tbl_ptrs[qtblno];
     /* Compute divisors for this quant table */
     /* We may do this more than once for same table, but it's not a big deal */
-    if (NOTBORING_ALWAYS_TRUE) {
+    if (BORING_ALWAYS_TRUE) {
       /* For LL&M IDCT method, divisors are equal to raw quantization
        * coefficients multiplied by 8 (to counteract scaling).
        */
@@ -430,7 +430,7 @@ jinit_forward_dct(j_compress_ptr cinfo)
   fdct->pub.start_pass = start_pass_fdctmgr;
 
   /* First determine the DCT... */
-  if (NOTBORING_ALWAYS_TRUE) {
+  if (BORING_ALWAYS_TRUE) {
     fdct->pub.forward_DCT = forward_DCT;
     if (jsimd_can_fdct_islow())
       fdct->dct = jsimd_fdct_islow;
@@ -439,7 +439,7 @@ jinit_forward_dct(j_compress_ptr cinfo)
   }
 
   /* ...then the supporting stages. */
-  if (NOTBORING_ALWAYS_TRUE) {
+  if (BORING_ALWAYS_TRUE) {
     if (jsimd_can_convsamp())
       fdct->convsamp = jsimd_convsamp;
     else

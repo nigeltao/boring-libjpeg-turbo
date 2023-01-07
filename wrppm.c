@@ -337,7 +337,7 @@ jinit_write_ppm(j_decompress_ptr cinfo)
       ((j_common_ptr)cinfo, JPOOL_IMAGE,
        cinfo->output_width * cinfo->output_components, (JDIMENSION)1);
     dest->pub.buffer_height = 1;
-    if (NOTBORING_ALWAYS_TRUE) {
+    if (BORING_ALWAYS_TRUE) {
       if (IsExtRGB(cinfo->out_color_space))
         dest->pub.put_pixel_rows = put_rgb;
       else if (cinfo->out_color_space == JCS_CMYK)

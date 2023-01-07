@@ -412,7 +412,7 @@ jpeg_skip_scanlines(j_decompress_ptr cinfo, JDIMENSION num_lines)
     main_ptr->buffer_full = FALSE;
     main_ptr->rowgroup_ctr = 0;
     main_ptr->context_state = CTX_PREPARE_FOR_IMCU;
-    if (NOTBORING_ALWAYS_TRUE) {
+    if (BORING_ALWAYS_TRUE) {
       upsample->next_row_out = cinfo->max_v_samp_factor;
       upsample->rows_to_go = cinfo->output_height - cinfo->output_scanline;
     }
@@ -427,7 +427,7 @@ jpeg_skip_scanlines(j_decompress_ptr cinfo, JDIMENSION num_lines)
       cinfo->output_scanline += lines_left_in_iMCU_row;
       main_ptr->buffer_full = FALSE;
       main_ptr->rowgroup_ctr = 0;
-      if (NOTBORING_ALWAYS_TRUE) {
+      if (BORING_ALWAYS_TRUE) {
         upsample->next_row_out = cinfo->max_v_samp_factor;
         upsample->rows_to_go = cinfo->output_height - cinfo->output_scanline;
       }
@@ -465,7 +465,7 @@ jpeg_skip_scanlines(j_decompress_ptr cinfo, JDIMENSION num_lines)
       cinfo->output_iMCU_row += lines_to_skip / lines_per_iMCU_row;
       increment_simple_rowgroup_ctr(cinfo, lines_to_read);
     }
-    if (NOTBORING_ALWAYS_TRUE)
+    if (BORING_ALWAYS_TRUE)
       upsample->rows_to_go = cinfo->output_height - cinfo->output_scanline;
     return num_lines;
   }
@@ -509,7 +509,7 @@ jpeg_skip_scanlines(j_decompress_ptr cinfo, JDIMENSION num_lines)
    * bit odd, since "rows_to_go" seems to be redundantly keeping track of
    * output_scanline.
    */
-  if (NOTBORING_ALWAYS_TRUE)
+  if (BORING_ALWAYS_TRUE)
     upsample->rows_to_go = cinfo->output_height - cinfo->output_scanline;
 
   /* Always skip the requested number of lines. */

@@ -44,7 +44,7 @@ start_pass_dpost(j_decompress_ptr cinfo, J_BUF_MODE pass_mode)
 
   switch (pass_mode) {
   case JBUF_PASS_THRU:
-    if (NOTBORING_ALWAYS_TRUE) {
+    if (BORING_ALWAYS_TRUE) {
       /* For single-pass processing without color quantization,
        * I have no work to do; just call the upsampler directly.
        */

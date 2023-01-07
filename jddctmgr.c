@@ -87,7 +87,7 @@ start_pass(j_decompress_ptr cinfo)
   for (ci = 0, compptr = cinfo->comp_info; ci < cinfo->num_components;
        ci++, compptr++) {
     /* Select the proper IDCT routine for this component's scaling */
-    if (NOTBORING_ALWAYS_TRUE) {
+    if (BORING_ALWAYS_TRUE) {
         if (jsimd_can_idct_islow())
           method_ptr = jsimd_idct_islow;
         else
@@ -107,7 +107,7 @@ start_pass(j_decompress_ptr cinfo)
     if (qtbl == NULL)           /* happens if no data yet for component */
       continue;
     idct->cur_method[ci] = JDCT_ISLOW;
-    if (NOTBORING_ALWAYS_TRUE) {
+    if (BORING_ALWAYS_TRUE) {
         /* For LL&M IDCT method, multipliers are equal to raw quantization
          * coefficients, but are stored as ints to ensure access efficiency.
          */

@@ -208,7 +208,7 @@ master_selection(j_decompress_ptr cinfo)
 
   /* Post-processing: in particular, color conversion first */
   if (!cinfo->raw_data_out) {
-    if (NOTBORING_ALWAYS_TRUE) {
+    if (BORING_ALWAYS_TRUE) {
       jinit_color_deconverter(cinfo);
       jinit_upsampler(cinfo);
     }
@@ -217,7 +217,7 @@ master_selection(j_decompress_ptr cinfo)
   /* Inverse DCT */
   jinit_inverse_dct(cinfo);
   /* Entropy decoding: either Huffman or arithmetic coding. */
-  if (NOTBORING_ALWAYS_TRUE) {
+  if (BORING_ALWAYS_TRUE) {
     if (cinfo->progressive_mode) {
 #ifdef D_PROGRESSIVE_SUPPORTED
       jinit_phuff_decoder(cinfo);
@@ -289,7 +289,7 @@ prepare_for_output_pass(j_decompress_ptr cinfo)
 {
   my_master_ptr master = (my_master_ptr)cinfo->master;
 
-  if (NOTBORING_ALWAYS_TRUE) {
+  if (BORING_ALWAYS_TRUE) {
     (*cinfo->idct->start_pass) (cinfo);
     (*cinfo->coef->start_output_pass) (cinfo);
     if (!cinfo->raw_data_out) {

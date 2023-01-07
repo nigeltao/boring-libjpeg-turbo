@@ -45,7 +45,7 @@ jinit_compress_master(j_compress_ptr cinfo)
   /* Forward DCT */
   jinit_forward_dct(cinfo);
   /* Entropy encoding: either Huffman or arithmetic coding. */
-  if (NOTBORING_ALWAYS_TRUE) {
+  if (BORING_ALWAYS_TRUE) {
     if (cinfo->progressive_mode) {
 #ifdef C_PROGRESSIVE_SUPPORTED
       jinit_phuff_encoder(cinfo);

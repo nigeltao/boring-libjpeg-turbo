@@ -43,5 +43,19 @@
 #define FALLTHROUGH
 #endif
 
-#define NOTBORING_ALWAYS_FALSE 0
-#define NOTBORING_ALWAYS_TRUE  1
+/* This lets us say
+
+  if (BORING_ALWAYS_TRUE) {
+    foo();
+    bar();
+  }
+
+  Instead of
+
+  foo();
+  bar();
+
+  This looks redundant, at first glance, but the extra indentation minimizes
+  the line-by-line diff against the upstream libjpeg-turbo code.
+*/
+#define BORING_ALWAYS_TRUE  1

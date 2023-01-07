@@ -483,7 +483,7 @@ write_frame_header(j_compress_ptr cinfo)
   }
 
   /* Emit the proper SOF marker */
-  if (NOTBORING_ALWAYS_TRUE) {
+  if (BORING_ALWAYS_TRUE) {
     if (cinfo->progressive_mode)
       emit_sof(cinfo, M_SOF2);  /* SOF code for progressive Huffman */
     else if (is_baseline)
@@ -507,7 +507,7 @@ write_scan_header(j_compress_ptr cinfo)
   int i;
   jpeg_component_info *compptr;
 
-  if (NOTBORING_ALWAYS_TRUE) {
+  if (BORING_ALWAYS_TRUE) {
     /* Emit Huffman tables.
      * Note that emit_dht() suppresses any duplicate tables.
      */
@@ -564,7 +564,7 @@ write_tables_only(j_compress_ptr cinfo)
       (void)emit_dqt(cinfo, i);
   }
 
-  if (NOTBORING_ALWAYS_TRUE) {
+  if (BORING_ALWAYS_TRUE) {
     for (i = 0; i < NUM_HUFF_TBLS; i++) {
       if (cinfo->dc_huff_tbl_ptrs[i] != NULL)
         emit_dht(cinfo, i, FALSE);
