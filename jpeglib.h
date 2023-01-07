@@ -1075,39 +1075,6 @@ EXTERN(boolean) jpeg_read_icc_profile(j_decompress_ptr cinfo,
 #define JPEG_COM        0xFE    /* COM marker code */
 
 
-/* If we have a brain-damaged compiler that emits warnings (or worse, errors)
- * for structure definitions that are never filled in, keep it quiet by
- * supplying dummy definitions for the various substructures.
- */
-
-#ifdef INCOMPLETE_TYPES_BROKEN
-#ifndef JPEG_INTERNALS          /* will be defined in jpegint.h */
-struct jvirt_sarray_control { long dummy; };
-struct jvirt_barray_control { long dummy; };
-struct jpeg_comp_master { long dummy; };
-struct jpeg_c_main_controller { long dummy; };
-struct jpeg_c_prep_controller { long dummy; };
-struct jpeg_c_coef_controller { long dummy; };
-struct jpeg_marker_writer { long dummy; };
-struct jpeg_color_converter { long dummy; };
-struct jpeg_downsampler { long dummy; };
-struct jpeg_forward_dct { long dummy; };
-struct jpeg_entropy_encoder { long dummy; };
-struct jpeg_decomp_master { long dummy; };
-struct jpeg_d_main_controller { long dummy; };
-struct jpeg_d_coef_controller { long dummy; };
-struct jpeg_d_post_controller { long dummy; };
-struct jpeg_input_controller { long dummy; };
-struct jpeg_marker_reader { long dummy; };
-struct jpeg_entropy_decoder { long dummy; };
-struct jpeg_inverse_dct { long dummy; };
-struct jpeg_upsampler { long dummy; };
-struct jpeg_color_deconverter { long dummy; };
-struct jpeg_color_quantizer { long dummy; };
-#endif /* JPEG_INTERNALS */
-#endif /* INCOMPLETE_TYPES_BROKEN */
-
-
 /*
  * The JPEG library modules define JPEG_INTERNALS before including this file.
  * The internal structure declarations are read only when that is true.
