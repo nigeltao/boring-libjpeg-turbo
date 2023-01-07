@@ -61,8 +61,6 @@ ASM_FILES=(
     simd/x86_64/jcsample-sse2.asm
     simd/x86_64/jdcolor-avx2.asm
     simd/x86_64/jdcolor-sse2.asm
-    simd/x86_64/jdmerge-avx2.asm
-    simd/x86_64/jdmerge-sse2.asm
     simd/x86_64/jdsample-avx2.asm
     simd/x86_64/jdsample-sse2.asm
     simd/x86_64/jfdctflt-sse.asm

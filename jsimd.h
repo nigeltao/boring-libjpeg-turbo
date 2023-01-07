@@ -70,18 +70,6 @@ EXTERN(void) jsimd_h1v2_fancy_upsample(j_decompress_ptr cinfo,
                                        JSAMPARRAY input_data,
                                        JSAMPARRAY *output_data_ptr);
 
-EXTERN(int) jsimd_can_h2v2_merged_upsample(void);
-EXTERN(int) jsimd_can_h2v1_merged_upsample(void);
-
-EXTERN(void) jsimd_h2v2_merged_upsample(j_decompress_ptr cinfo,
-                                        JSAMPIMAGE input_buf,
-                                        JDIMENSION in_row_group_ctr,
-                                        JSAMPARRAY output_buf);
-EXTERN(void) jsimd_h2v1_merged_upsample(j_decompress_ptr cinfo,
-                                        JSAMPIMAGE input_buf,
-                                        JDIMENSION in_row_group_ctr,
-                                        JSAMPARRAY output_buf);
-
 EXTERN(int) jsimd_can_huff_encode_one_block(void);
 
 EXTERN(JOCTET *) jsimd_huff_encode_one_block(void *state, JOCTET *buffer,
