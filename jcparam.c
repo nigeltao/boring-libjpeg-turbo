@@ -57,7 +57,7 @@ jpeg_add_quant_table(j_compress_ptr cinfo, int which_tbl,
     if (temp > 32767L) temp = 32767L; /* max quantizer needed for 12 bits */
     if (force_baseline && temp > 255L)
       temp = 255L;              /* limit to baseline range if requested */
-    (*qtblptr)->quantval[i] = (UINT16)temp;
+    (*qtblptr)->quantval[i] = (uint16_t)temp;
   }
 
   /* Initialize sent_table FALSE so table will be written to JPEG file. */

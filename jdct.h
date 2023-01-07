@@ -126,10 +126,10 @@ EXTERN(void) jpeg_idct_islow(j_decompress_ptr cinfo,
  */
 
 #ifdef SHORTxSHORT_32           /* may work if 'int' is 32 bits */
-#define MULTIPLY16C16(var, const)  (((INT16)(var)) * ((INT16)(const)))
+#define MULTIPLY16C16(var, const)  (((int16_t)(var)) * ((int16_t)(const)))
 #endif
 #ifdef SHORTxLCONST_32          /* known to work with Microsoft C 6.0 */
-#define MULTIPLY16C16(var, const)  (((INT16)(var)) * ((JLONG)(const)))
+#define MULTIPLY16C16(var, const)  (((int16_t)(var)) * ((JLONG)(const)))
 #endif
 
 #ifndef MULTIPLY16C16           /* default definition */
@@ -139,7 +139,7 @@ EXTERN(void) jpeg_idct_islow(j_decompress_ptr cinfo,
 /* Same except both inputs are variables. */
 
 #ifdef SHORTxSHORT_32           /* may work if 'int' is 32 bits */
-#define MULTIPLY16V16(var1, var2)  (((INT16)(var1)) * ((INT16)(var2)))
+#define MULTIPLY16V16(var1, var2)  (((int16_t)(var1)) * ((int16_t)(var2)))
 #endif
 
 #ifndef MULTIPLY16V16           /* default definition */

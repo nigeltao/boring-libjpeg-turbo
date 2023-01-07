@@ -383,8 +383,8 @@ get_dht(j_decompress_ptr cinfo)
 /* Process a DHT marker */
 {
   JLONG length;
-  UINT8 bits[17];
-  UINT8 huffval[256];
+  uint8_t bits[17];
+  uint8_t huffval[256];
   int i, index, count;
   JHUFF_TBL **htblptr;
   INPUT_VARS(cinfo);
@@ -422,7 +422,7 @@ get_dht(j_decompress_ptr cinfo)
     for (i = 0; i < count; i++)
       INPUT_BYTE(cinfo, huffval[i], return FALSE);
 
-    memset(&huffval[count], 0, (256 - count) * sizeof(UINT8));
+    memset(&huffval[count], 0, (256 - count) * sizeof(uint8_t));
 
     length -= count;
 
@@ -485,7 +485,7 @@ get_dqt(j_decompress_ptr cinfo)
       else
         INPUT_BYTE(cinfo, tmp, return FALSE);
       /* We convert the zigzag-order table to natural array order. */
-      quant_ptr->quantval[jpeg_natural_order[i]] = (UINT16)tmp;
+      quant_ptr->quantval[jpeg_natural_order[i]] = (uint16_t)tmp;
     }
 
     if (cinfo->err->trace_level >= 2) {
@@ -642,7 +642,7 @@ examine_app14(j_decompress_ptr cinfo, JOCTET *data, unsigned int datalen,
     transform = data[11];
     TRACEMS4(cinfo, 1, JTRC_ADOBE, version, flags0, flags1, transform);
     cinfo->saw_Adobe_marker = TRUE;
-    cinfo->Adobe_transform = (UINT8)transform;
+    cinfo->Adobe_transform = (uint8_t)transform;
   } else {
     /* Start of APP14 does not match "Adobe", or too short */
     TRACEMS1(cinfo, 1, JTRC_APP14, (int)(datalen + remaining));
@@ -727,7 +727,7 @@ save_marker(j_decompress_ptr cinfo)
         (*cinfo->mem->alloc_large) ((j_common_ptr)cinfo, JPOOL_IMAGE,
                                     sizeof(struct jpeg_marker_struct) + limit);
       cur_marker->next = NULL;
-      cur_marker->marker = (UINT8)cinfo->unread_marker;
+      cur_marker->marker = (uint8_t)cinfo->unread_marker;
       cur_marker->original_length = (unsigned int)length;
       cur_marker->data_length = limit;
       /* data area is just beyond the jpeg_marker_struct */
