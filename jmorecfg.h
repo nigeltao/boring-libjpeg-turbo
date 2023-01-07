@@ -184,14 +184,6 @@ typedef unsigned int JDIMENSION;
 #define JMETHOD(type, methodname, arglist)  type (*methodname) arglist
 
 
-/* libjpeg-turbo no longer supports platforms that have far symbols (MS-DOS),
- * but again, some software relies on this macro.
- */
-
-#undef FAR
-#define FAR
-
-
 /*
  * On a few systems, type boolean and/or its values FALSE, TRUE may appear
  * in standard header files.  Or you may have conflicts with application-

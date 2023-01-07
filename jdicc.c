@@ -147,7 +147,7 @@ jpeg_read_icc_profile(j_decompress_ptr cinfo, JOCTET **icc_data_ptr,
   /* and fill it in */
   for (marker = cinfo->marker_list; marker != NULL; marker = marker->next) {
     if (marker_is_icc(marker)) {
-      JOCTET FAR *src_ptr;
+      JOCTET *src_ptr;
       JOCTET *dst_ptr;
       unsigned int length;
       seq_no = marker->data[12];
