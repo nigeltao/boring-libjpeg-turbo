@@ -62,5 +62,7 @@ what many Linux distributions ship as `/usr/bin/cjpeg`. This repository's
 
 ## Removed File Format Support
 
+- Arithmetic coding.
+
 
 ## Removed C Library Features

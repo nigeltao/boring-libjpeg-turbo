@@ -209,11 +209,6 @@ get_soi(j_decompress_ptr cinfo)
 
   /* Reset all parameters that are defined to be reset by SOI */
 
-  for (i = 0; i < NUM_ARITH_TBLS; i++) {
-    cinfo->arith_dc_L[i] = 0;
-    cinfo->arith_dc_U[i] = 1;
-    cinfo->arith_ac_K[i] = 5;
-  }
   cinfo->restart_interval = 0;
 
   /* Set initial assumptions for colorspace etc */
@@ -246,7 +241,6 @@ get_sof(j_decompress_ptr cinfo, boolean is_prog, boolean is_arith)
   INPUT_VARS(cinfo);
 
   cinfo->progressive_mode = is_prog;
-  cinfo->arith_code = is_arith;
 
   INPUT_2BYTES(cinfo, length, return FALSE);
 
@@ -381,52 +375,7 @@ id_found:
 }
 
 
-#ifdef D_ARITH_CODING_SUPPORTED
-
-LOCAL(boolean)
-get_dac(j_decompress_ptr cinfo)
-/* Process a DAC marker */
-{
-  JLONG length;
-  int index, val;
-  INPUT_VARS(cinfo);
-
-  INPUT_2BYTES(cinfo, length, return FALSE);
-  length -= 2;
-
-  while (length > 0) {
-    INPUT_BYTE(cinfo, index, return FALSE);
-    INPUT_BYTE(cinfo, val, return FALSE);
-
-    length -= 2;
-
-    TRACEMS2(cinfo, 1, JTRC_DAC, index, val);
-
-    if (index < 0 || index >= (2 * NUM_ARITH_TBLS))
-      ERREXIT1(cinfo, JERR_DAC_INDEX, index);
-
-    if (index >= NUM_ARITH_TBLS) { /* define AC table */
-      cinfo->arith_ac_K[index - NUM_ARITH_TBLS] = (UINT8)val;
-    } else {                    /* define DC table */
-      cinfo->arith_dc_L[index] = (UINT8)(val & 0x0F);
-      cinfo->arith_dc_U[index] = (UINT8)(val >> 4);
-      if (cinfo->arith_dc_L[index] > cinfo->arith_dc_U[index])
-        ERREXIT1(cinfo, JERR_DAC_VALUE, val);
-    }
-  }
-
-  if (length != 0)
-    ERREXIT(cinfo, JERR_BAD_LENGTH);
-
-  INPUT_SYNC(cinfo);
-  return TRUE;
-}
-
-#else /* !D_ARITH_CODING_SUPPORTED */
-
 #define get_dac(cinfo)  skip_variable(cinfo)
-
-#endif /* D_ARITH_CODING_SUPPORTED */
 
 
 LOCAL(boolean)

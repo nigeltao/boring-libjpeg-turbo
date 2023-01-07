@@ -224,55 +224,6 @@ emit_dht(j_compress_ptr cinfo, int index, boolean is_ac)
 
 
 LOCAL(void)
-emit_dac(j_compress_ptr cinfo)
-/* Emit a DAC marker */
-/* Since the useful info is so small, we want to emit all the tables in */
-/* one DAC marker.  Therefore this routine does its own scan of the table. */
-{
-#ifdef C_ARITH_CODING_SUPPORTED
-  char dc_in_use[NUM_ARITH_TBLS];
-  char ac_in_use[NUM_ARITH_TBLS];
-  int length, i;
-  jpeg_component_info *compptr;
-
-  for (i = 0; i < NUM_ARITH_TBLS; i++)
-    dc_in_use[i] = ac_in_use[i] = 0;
-
-  for (i = 0; i < cinfo->comps_in_scan; i++) {
-    compptr = cinfo->cur_comp_info[i];
-    /* DC needs no table for refinement scan */
-    if (cinfo->Ss == 0 && cinfo->Ah == 0)
-      dc_in_use[compptr->dc_tbl_no] = 1;
-    /* AC needs no table when not present */
-    if (cinfo->Se)
-      ac_in_use[compptr->ac_tbl_no] = 1;
-  }
-
-  length = 0;
-  for (i = 0; i < NUM_ARITH_TBLS; i++)
-    length += dc_in_use[i] + ac_in_use[i];
-
-  if (length) {
-    emit_marker(cinfo, M_DAC);
-
-    emit_2bytes(cinfo, length * 2 + 2);
-
-    for (i = 0; i < NUM_ARITH_TBLS; i++) {
-      if (dc_in_use[i]) {
-        emit_byte(cinfo, i);
-        emit_byte(cinfo, cinfo->arith_dc_L[i] + (cinfo->arith_dc_U[i] << 4));
-      }
-      if (ac_in_use[i]) {
-        emit_byte(cinfo, i + 0x10);
-        emit_byte(cinfo, cinfo->arith_ac_K[i]);
-      }
-    }
-  }
-#endif /* C_ARITH_CODING_SUPPORTED */
-}
-
-
-LOCAL(void)
 emit_dri(j_compress_ptr cinfo)
 /* Emit a DRI marker */
 {
@@ -514,7 +465,7 @@ write_frame_header(j_compress_ptr cinfo)
   /* Check for a non-baseline specification.
    * Note we assume that Huffman table numbers won't be changed later.
    */
-  if (cinfo->arith_code || cinfo->progressive_mode ||
+  if (cinfo->progressive_mode ||
       cinfo->data_precision != 8) {
     is_baseline = FALSE;
   } else {
@@ -532,12 +483,7 @@ write_frame_header(j_compress_ptr cinfo)
   }
 
   /* Emit the proper SOF marker */
-  if (cinfo->arith_code) {
-    if (cinfo->progressive_mode)
-      emit_sof(cinfo, M_SOF10); /* SOF code for progressive arithmetic */
-    else
-      emit_sof(cinfo, M_SOF9);  /* SOF code for sequential arithmetic */
-  } else {
+  if (NOTBORING_ALWAYS_TRUE) {
     if (cinfo->progressive_mode)
       emit_sof(cinfo, M_SOF2);  /* SOF code for progressive Huffman */
     else if (is_baseline)
@@ -561,13 +507,7 @@ write_scan_header(j_compress_ptr cinfo)
   int i;
   jpeg_component_info *compptr;
 
-  if (cinfo->arith_code) {
-    /* Emit arith conditioning info.  We may have some duplication
-     * if the file has multiple scans, but it's so small it's hardly
-     * worth worrying about.
-     */
-    emit_dac(cinfo);
-  } else {
+  if (NOTBORING_ALWAYS_TRUE) {
     /* Emit Huffman tables.
      * Note that emit_dht() suppresses any duplicate tables.
      */
@@ -624,7 +564,7 @@ write_tables_only(j_compress_ptr cinfo)
       (void)emit_dqt(cinfo, i);
   }
 
-  if (!cinfo->arith_code) {
+  if (NOTBORING_ALWAYS_TRUE) {
     for (i = 0; i < NUM_HUFF_TBLS; i++) {
       if (cinfo->dc_huff_tbl_ptrs[i] != NULL)
         emit_dht(cinfo, i, FALSE);

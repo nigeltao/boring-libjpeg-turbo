@@ -353,9 +353,9 @@ struct jpeg_compress_struct {
   JHUFF_TBL *ac_huff_tbl_ptrs[NUM_HUFF_TBLS];
   /* ptrs to Huffman coding tables, or NULL if not defined */
 
-  UINT8 arith_dc_L[NUM_ARITH_TBLS]; /* L values for DC arith-coding tables */
-  UINT8 arith_dc_U[NUM_ARITH_TBLS]; /* U values for DC arith-coding tables */
-  UINT8 arith_ac_K[NUM_ARITH_TBLS]; /* Kx values for AC arith-coding tables */
+  UINT8 notboring_arith_dc_L[NUM_ARITH_TBLS];
+  UINT8 notboring_arith_dc_U[NUM_ARITH_TBLS];
+  UINT8 notboring_arith_ac_K[NUM_ARITH_TBLS];
 
   int num_scans;                /* # of entries in scan_info array */
   const jpeg_scan_info *scan_info; /* script for multi-scan file, or NULL */
@@ -365,7 +365,7 @@ struct jpeg_compress_struct {
    */
 
   boolean raw_data_in;          /* TRUE=caller supplies downsampled data */
-  boolean arith_code;           /* TRUE=arithmetic coding, FALSE=Huffman */
+  boolean notboring_arith_code;
   boolean optimize_coding;      /* TRUE=optimize entropy encoding parms */
   boolean CCIR601_sampling;     /* TRUE=first samples are cosited */
 #if JPEG_LIB_VERSION >= 70
@@ -600,11 +600,11 @@ struct jpeg_decompress_struct {
   boolean is_baseline;          /* TRUE if Baseline SOF0 encountered */
 #endif
   boolean progressive_mode;     /* TRUE if SOFn specifies progressive mode */
-  boolean arith_code;           /* TRUE=arithmetic coding, FALSE=Huffman */
+  boolean notboring_arith_code;
 
-  UINT8 arith_dc_L[NUM_ARITH_TBLS]; /* L values for DC arith-coding tables */
-  UINT8 arith_dc_U[NUM_ARITH_TBLS]; /* U values for DC arith-coding tables */
-  UINT8 arith_ac_K[NUM_ARITH_TBLS]; /* Kx values for AC arith-coding tables */
+  UINT8 notboring_arith_dc_L[NUM_ARITH_TBLS];
+  UINT8 notboring_arith_dc_U[NUM_ARITH_TBLS];
+  UINT8 notboring_arith_ac_K[NUM_ARITH_TBLS];
 
   unsigned int restart_interval; /* MCUs per restart interval, or 0 for no restart */
 

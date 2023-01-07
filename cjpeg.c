@@ -204,9 +204,6 @@ usage(void)
   fprintf(stderr, "  -targa         Input file is Targa format (usually not needed)\n");
 #endif
   fprintf(stderr, "Switches for advanced users:\n");
-#ifdef C_ARITH_CODING_SUPPORTED
-  fprintf(stderr, "  -arithmetic    Use arithmetic coding\n");
-#endif
 #ifdef DCT_ISLOW_SUPPORTED
   fprintf(stderr, "  -dct int       Use accurate integer DCT method%s\n",
           (JDCT_DEFAULT == JDCT_ISLOW ? " (default)" : ""));
@@ -295,13 +292,9 @@ parse_switches(j_compress_ptr cinfo, int argc, char **argv,
 
     if (keymatch(arg, "arithmetic", 1)) {
       /* Use arithmetic coding. */
-#ifdef C_ARITH_CODING_SUPPORTED
-      cinfo->arith_code = TRUE;
-#else
       fprintf(stderr, "%s: sorry, arithmetic coding not supported\n",
               progname);
       exit(EXIT_FAILURE);
-#endif
 
     } else if (keymatch(arg, "baseline", 1)) {
       /* Force baseline-compatible output (8-bit quantizer values). */

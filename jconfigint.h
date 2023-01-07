@@ -42,3 +42,6 @@
 #else
 #define FALLTHROUGH
 #endif
+
+#define NOTBORING_ALWAYS_FALSE 0
+#define NOTBORING_ALWAYS_TRUE  1

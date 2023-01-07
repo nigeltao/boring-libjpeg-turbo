@@ -208,22 +208,12 @@ jpeg_set_defaults(j_compress_ptr cinfo)
   /* Set up two Huffman tables */
   std_huff_tables((j_common_ptr)cinfo);
 
-  /* Initialize default arithmetic coding conditioning */
-  for (i = 0; i < NUM_ARITH_TBLS; i++) {
-    cinfo->arith_dc_L[i] = 0;
-    cinfo->arith_dc_U[i] = 1;
-    cinfo->arith_ac_K[i] = 5;
-  }
-
   /* Default is no multiple-scan output */
   cinfo->scan_info = NULL;
   cinfo->num_scans = 0;
 
   /* Expect normal source image, not raw downsampled data */
   cinfo->raw_data_in = FALSE;
-
-  /* Use Huffman coding, not arithmetic coding, by default */
-  cinfo->arith_code = FALSE;
 
   /* By default, don't do extra passes to optimize entropy coding */
   cinfo->optimize_coding = FALSE;

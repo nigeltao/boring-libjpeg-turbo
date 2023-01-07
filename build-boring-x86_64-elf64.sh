@@ -4,10 +4,8 @@ CC=${CC:-gcc}
 CFLAGS=${CFLAGS:--O3}
 
 C_FILES=(
-    jaricom.c
     jcapimin.c
     jcapistd.c
-    jcarith.c
     jccoefct.c
     jccolor.c
     jcdctmgr.c
@@ -25,7 +23,6 @@ C_FILES=(
     jctrans.c
     jdapimin.c
     jdapistd.c
-    jdarith.c
     jdatadst.c
     jdatasrc.c
     jdcoefct.c
