@@ -65,31 +65,12 @@ static const char * const cdjpeg_message_table[] = {
  * or  4) don't put back the data, and modify the input_init methods to assume
  *        they start reading after the start of file.
  * #1 is attractive for MS-DOS but is untenable on Unix.
- *
- * The most portable solution for file types that can't be identified by their
- * first byte is to make the user tell us what they are.  This is also the
- * only approach for "raw" file types that contain only arbitrary values.
- * We presently apply this method for Targa files.  Most of the time Targa
- * files start with 0x00, so we recognize that case.  Potentially, however,
- * a Targa file could start with any byte value (byte 0 is the length of the
- * seldom-used ID field), so we provide a switch to force Targa input mode.
  */
-
-static boolean is_targa;        /* records user -targa switch */
-
 
 LOCAL(cjpeg_source_ptr)
 select_file_type(j_compress_ptr cinfo, FILE *infile)
 {
   int c;
-
-  if (is_targa) {
-#ifdef TARGA_SUPPORTED
-    return jinit_read_targa(cinfo);
-#else
-    ERREXIT(cinfo, JERR_TGA_NOTCOMP);
-#endif
-  }
 
   if ((c = getc(infile)) == EOF)
     ERREXIT(cinfo, JERR_INPUT_EMPTY);
@@ -97,21 +78,9 @@ select_file_type(j_compress_ptr cinfo, FILE *infile)
     ERREXIT(cinfo, JERR_UNGETC_FAILED);
 
   switch (c) {
-#ifdef BMP_SUPPORTED
-  case 'B':
-    return jinit_read_bmp(cinfo, TRUE);
-#endif
-#ifdef GIF_SUPPORTED
-  case 'G':
-    return jinit_read_gif(cinfo);
-#endif
 #ifdef PPM_SUPPORTED
   case 'P':
     return jinit_read_ppm(cinfo);
-#endif
-#ifdef TARGA_SUPPORTED
-  case 0x00:
-    return jinit_read_targa(cinfo);
 #endif
   default:
     ERREXIT(cinfo, JERR_UNKNOWN_FORMAT);
@@ -198,9 +167,6 @@ usage(void)
 #ifdef C_PROGRESSIVE_SUPPORTED
   fprintf(stderr, "  -progressive   Create progressive JPEG file\n");
 #endif
-#ifdef TARGA_SUPPORTED
-  fprintf(stderr, "  -targa         Input file is Targa format (usually not needed)\n");
-#endif
   fprintf(stderr, "Switches for advanced users:\n");
   fprintf(stderr, "  -icc FILE      Embed ICC profile contained in FILE\n");
   fprintf(stderr, "  -restart N     Set restart interval in rows, or in blocks with B\n");
@@ -243,7 +209,6 @@ parse_switches(j_compress_ptr cinfo, int argc, char **argv,
 
   force_baseline = FALSE;       /* by default, allow 16-bit quantizers */
   simple_progressive = FALSE;
-  is_targa = FALSE;
   icc_filename = NULL;
   outfilename = NULL;
   memdst = FALSE;
@@ -435,7 +400,9 @@ parse_switches(j_compress_ptr cinfo, int argc, char **argv,
 
     } else if (keymatch(arg, "targa", 1)) {
       /* Input file is Targa format. */
-      is_targa = TRUE;
+      fprintf(stderr, "%s: notboring: targa is not supported\n",
+              progname);
+      exit(EXIT_FAILURE);
 
     } else {
       usage();                  /* bogus switch */

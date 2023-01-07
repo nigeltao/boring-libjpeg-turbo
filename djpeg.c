@@ -109,27 +109,9 @@ usage(void)
   fprintf(stderr, "Switches (names may be abbreviated):\n");
   fprintf(stderr, "  -grayscale     Force grayscale output\n");
   fprintf(stderr, "  -rgb           Force RGB output\n");
-#ifdef BMP_SUPPORTED
-  fprintf(stderr, "  -bmp           Select BMP output format (Windows style)%s\n",
-          (DEFAULT_FMT == FMT_BMP ? " (default)" : ""));
-#endif
-#ifdef GIF_SUPPORTED
-  fprintf(stderr, "  -gif           Select GIF output format (LZW-compressed)%s\n",
-          (DEFAULT_FMT == FMT_GIF ? " (default)" : ""));
-  fprintf(stderr, "  -gif0          Select GIF output format (uncompressed)%s\n",
-          (DEFAULT_FMT == FMT_GIF0 ? " (default)" : ""));
-#endif
-#ifdef BMP_SUPPORTED
-  fprintf(stderr, "  -os2           Select BMP output format (OS/2 style)%s\n",
-          (DEFAULT_FMT == FMT_OS2 ? " (default)" : ""));
-#endif
 #ifdef PPM_SUPPORTED
   fprintf(stderr, "  -pnm           Select PBMPLUS (PPM/PGM) output format%s\n",
           (DEFAULT_FMT == FMT_PPM ? " (default)" : ""));
-#endif
-#ifdef TARGA_SUPPORTED
-  fprintf(stderr, "  -targa         Select Targa output format%s\n",
-          (DEFAULT_FMT == FMT_TARGA ? " (default)" : ""));
 #endif
   fprintf(stderr, "Switches for advanced users:\n");
   fprintf(stderr, "  -icc FILE      Extract ICC profile to FILE\n");
@@ -193,7 +175,9 @@ parse_switches(j_decompress_ptr cinfo, int argc, char **argv,
 
     if (keymatch(arg, "bmp", 1)) {
       /* BMP output format (Windows flavor). */
-      requested_fmt = FMT_BMP;
+      fprintf(stderr, "%s: notboring: bmp is not supported\n",
+              progname);
+      exit(EXIT_FAILURE);
 
     } else if (keymatch(arg, "colors", 1) || keymatch(arg, "colours", 1) ||
                keymatch(arg, "quantize", 1) || keymatch(arg, "quantise", 1)) {
@@ -242,11 +226,15 @@ parse_switches(j_decompress_ptr cinfo, int argc, char **argv,
 
     } else if (keymatch(arg, "gif", 1)) {
       /* GIF output format (LZW-compressed). */
-      requested_fmt = FMT_GIF;
+      fprintf(stderr, "%s: notboring: gif is not supported\n",
+              progname);
+      exit(EXIT_FAILURE);
 
     } else if (keymatch(arg, "gif0", 4)) {
       /* GIF output format (uncompressed). */
-      requested_fmt = FMT_GIF0;
+      fprintf(stderr, "%s: notboring: gif0 is not supported\n",
+              progname);
+      exit(EXIT_FAILURE);
 
     } else if (keymatch(arg, "grayscale", 2) ||
                keymatch(arg, "greyscale", 2)) {
@@ -309,7 +297,9 @@ parse_switches(j_decompress_ptr cinfo, int argc, char **argv,
 
     } else if (keymatch(arg, "os2", 3)) {
       /* BMP output format (OS/2 flavor). */
-      requested_fmt = FMT_OS2;
+      fprintf(stderr, "%s: notboring: os2 is not supported\n",
+              progname);
+      exit(EXIT_FAILURE);
 
     } else if (keymatch(arg, "outfile", 4)) {
       /* Set output file name. */
@@ -363,7 +353,9 @@ parse_switches(j_decompress_ptr cinfo, int argc, char **argv,
 
     } else if (keymatch(arg, "targa", 1)) {
       /* Targa output format. */
-      requested_fmt = FMT_TARGA;
+      fprintf(stderr, "%s: notboring: targa is not supported\n",
+              progname);
+      exit(EXIT_FAILURE);
 
     } else {
       usage();                  /* bogus switch */
@@ -602,30 +594,9 @@ main(int argc, char **argv)
    * option settings (for instance, GIF wants to force color quantization).
    */
   switch (requested_fmt) {
-#ifdef BMP_SUPPORTED
-  case FMT_BMP:
-    dest_mgr = jinit_write_bmp(&cinfo, FALSE, TRUE);
-    break;
-  case FMT_OS2:
-    dest_mgr = jinit_write_bmp(&cinfo, TRUE, TRUE);
-    break;
-#endif
-#ifdef GIF_SUPPORTED
-  case FMT_GIF:
-    dest_mgr = jinit_write_gif(&cinfo, TRUE);
-    break;
-  case FMT_GIF0:
-    dest_mgr = jinit_write_gif(&cinfo, FALSE);
-    break;
-#endif
 #ifdef PPM_SUPPORTED
   case FMT_PPM:
     dest_mgr = jinit_write_ppm(&cinfo);
-    break;
-#endif
-#ifdef TARGA_SUPPORTED
-  case FMT_TARGA:
-    dest_mgr = jinit_write_targa(&cinfo);
     break;
 #endif
   default:
