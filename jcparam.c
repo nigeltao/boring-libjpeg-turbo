@@ -198,10 +198,6 @@ jpeg_set_defaults(j_compress_ptr cinfo)
 
   /* Initialize everything not dependent on the color space */
 
-#if JPEG_LIB_VERSION >= 70
-  cinfo->scale_num = 1;         /* 1:1 scaling */
-  cinfo->scale_denom = 1;
-#endif
   cinfo->data_precision = BITS_IN_JSAMPLE;
   /* Set up two quantization tables using default quality of 75 */
   jpeg_set_quality(cinfo, 75, TRUE);

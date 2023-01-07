@@ -51,14 +51,13 @@ set_wraparound_pointers(j_decompress_ptr cinfo)
 {
   my_main_ptr main_ptr = (my_main_ptr)cinfo->main;
   int ci, i, rgroup;
-  int M = cinfo->_min_DCT_scaled_size;
+  int M = DCTSIZE;
   jpeg_component_info *compptr;
   JSAMPARRAY xbuf0, xbuf1;
 
   for (ci = 0, compptr = cinfo->comp_info; ci < cinfo->num_components;
        ci++, compptr++) {
-    rgroup = (compptr->v_samp_factor * compptr->_DCT_scaled_size) /
-      cinfo->_min_DCT_scaled_size; /* height of a row group of component */
+    rgroup = compptr->v_samp_factor; /* height of a row group of component */
     xbuf0 = main_ptr->xbuffer[0][ci];
     xbuf1 = main_ptr->xbuffer[1][ci];
     for (i = 0; i < rgroup; i++) {

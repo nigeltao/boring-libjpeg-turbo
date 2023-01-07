@@ -197,9 +197,9 @@ jpeg_crop_scanline(j_decompress_ptr cinfo, JDIMENSION *xoffset,
    * width for all of the components.
    */
   if (cinfo->comps_in_scan == 1 && cinfo->num_components == 1)
-    align = cinfo->_min_DCT_scaled_size;
+    align = DCTSIZE;
   else
-    align = cinfo->_min_DCT_scaled_size * cinfo->max_h_samp_factor;
+    align = DCTSIZE * cinfo->max_h_samp_factor;
 
   /* Adjust xoffset to the nearest iMCU boundary <= the requested value */
   input_xoffset = *xoffset;
@@ -444,7 +444,7 @@ jpeg_skip_scanlines(j_decompress_ptr cinfo, JDIMENSION num_lines)
   if (num_lines == 0)
     return 0;
 
-  lines_per_iMCU_row = cinfo->_min_DCT_scaled_size * cinfo->max_v_samp_factor;
+  lines_per_iMCU_row = DCTSIZE * cinfo->max_v_samp_factor;
   lines_left_in_iMCU_row =
     (lines_per_iMCU_row - (cinfo->output_scanline % lines_per_iMCU_row)) %
     lines_per_iMCU_row;
@@ -617,7 +617,7 @@ jpeg_read_raw_data(j_decompress_ptr cinfo, JSAMPIMAGE data,
   }
 
   /* Verify that at least one iMCU row can be returned. */
-  lines_per_iMCU_row = cinfo->max_v_samp_factor * cinfo->_min_DCT_scaled_size;
+  lines_per_iMCU_row = cinfo->max_v_samp_factor * DCTSIZE;
   if (max_lines < lines_per_iMCU_row)
     ERREXIT(cinfo, JERR_BUFFER_SIZE);
 

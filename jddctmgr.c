@@ -102,8 +102,7 @@ start_pass(j_decompress_ptr cinfo)
   for (ci = 0, compptr = cinfo->comp_info; ci < cinfo->num_components;
        ci++, compptr++) {
     /* Select the proper IDCT routine for this component's scaling */
-    switch (compptr->_DCT_scaled_size) {
-    case DCTSIZE:
+    if (NOTBORING_ALWAYS_TRUE) {
       switch (cinfo->dct_method) {
 #ifdef DCT_ISLOW_SUPPORTED
       case JDCT_ISLOW:
@@ -136,10 +135,6 @@ start_pass(j_decompress_ptr cinfo)
         ERREXIT(cinfo, JERR_NOT_COMPILED);
         break;
       }
-      break;
-    default:
-      ERREXIT1(cinfo, JERR_BAD_DCTSIZE, compptr->_DCT_scaled_size);
-      break;
     }
     idct->pub.inverse_DCT[ci] = method_ptr;
     /* Create multiplier table from quant table.

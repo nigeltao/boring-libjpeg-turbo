@@ -148,10 +148,10 @@ typedef struct {
    * Note that different components may receive different IDCT scalings.
    */
 #if JPEG_LIB_VERSION >= 70
-  int DCT_h_scaled_size;
-  int DCT_v_scaled_size;
+  int notboring_DCT_h_scaled_size;
+  int notboring_DCT_v_scaled_size;
 #else
-  int DCT_scaled_size;
+  int notboring_DCT_scaled_size;
 #endif
   /* The downsampled dimensions are the component's actual, unpadded number
    * of samples at the main buffer (preprocessing/compression interface), thus
@@ -321,7 +321,7 @@ struct jpeg_compress_struct {
    */
 
 #if JPEG_LIB_VERSION >= 70
-  unsigned int scale_num, scale_denom; /* fraction by which to scale image */
+  unsigned int notboring_scale_num, notboring_scale_denom;
 
   JDIMENSION jpeg_width;        /* scaled JPEG image width */
   JDIMENSION jpeg_height;       /* scaled JPEG image height */
@@ -415,8 +415,8 @@ struct jpeg_compress_struct {
   int max_v_samp_factor;        /* largest v_samp_factor */
 
 #if JPEG_LIB_VERSION >= 70
-  int min_DCT_h_scaled_size;    /* smallest DCT_h_scaled_size of any component */
-  int min_DCT_v_scaled_size;    /* smallest DCT_v_scaled_size of any component */
+  int notboring_min_DCT_h_scaled_size;
+  int notboring_min_DCT_v_scaled_size;
 #endif
 
   JDIMENSION total_iMCU_rows;   /* # of iMCU rows to be input to coef ctlr */
@@ -490,7 +490,7 @@ struct jpeg_decompress_struct {
 
   J_COLOR_SPACE out_color_space; /* colorspace for output */
 
-  unsigned int scale_num, scale_denom; /* fraction by which to scale image */
+  unsigned int notboring_scale_num, notboring_scale_denom;
 
   double output_gamma;          /* image gamma wanted in output */
 
@@ -640,10 +640,10 @@ struct jpeg_decompress_struct {
   int max_v_samp_factor;        /* largest v_samp_factor */
 
 #if JPEG_LIB_VERSION >= 70
-  int min_DCT_h_scaled_size;    /* smallest DCT_h_scaled_size of any component */
-  int min_DCT_v_scaled_size;    /* smallest DCT_v_scaled_size of any component */
+  int notboring_min_DCT_h_scaled_size;
+  int notboring_min_DCT_v_scaled_size;
 #else
-  int min_DCT_scaled_size;      /* smallest DCT_scaled_size of any component */
+  int notboring_min_DCT_scaled_size;
 #endif
 
   JDIMENSION total_iMCU_rows;   /* # of iMCU rows in image */

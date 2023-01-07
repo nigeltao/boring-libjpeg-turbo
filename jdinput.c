@@ -83,24 +83,9 @@ initial_setup(j_decompress_ptr cinfo)
   cinfo->lim_Se = DCTSIZE2 - 1;
 #endif
 
-  /* We initialize DCT_scaled_size and min_DCT_scaled_size to DCTSIZE.
-   * In the full decompressor, this will be overridden by jdmaster.c;
-   * but in the transcoder, jdmaster.c is not used, so we must do it here.
-   */
-#if JPEG_LIB_VERSION >= 70
-  cinfo->min_DCT_h_scaled_size = cinfo->min_DCT_v_scaled_size = DCTSIZE;
-#else
-  cinfo->min_DCT_scaled_size = DCTSIZE;
-#endif
-
   /* Compute dimensions of components */
   for (ci = 0, compptr = cinfo->comp_info; ci < cinfo->num_components;
        ci++, compptr++) {
-#if JPEG_LIB_VERSION >= 70
-    compptr->DCT_h_scaled_size = compptr->DCT_v_scaled_size = DCTSIZE;
-#else
-    compptr->DCT_scaled_size = DCTSIZE;
-#endif
     /* Size in DCT blocks */
     compptr->width_in_blocks = (JDIMENSION)
       jdiv_round_up((long)cinfo->image_width * (long)compptr->h_samp_factor,
@@ -164,7 +149,7 @@ per_scan_setup(j_decompress_ptr cinfo)
     compptr->MCU_width = 1;
     compptr->MCU_height = 1;
     compptr->MCU_blocks = 1;
-    compptr->MCU_sample_width = compptr->_DCT_scaled_size;
+    compptr->MCU_sample_width = DCTSIZE;
     compptr->last_col_width = 1;
     /* For noninterleaved scans, it is convenient to define last_row_height
      * as the number of block rows present in the last iMCU row.
@@ -200,8 +185,7 @@ per_scan_setup(j_decompress_ptr cinfo)
       compptr->MCU_width = compptr->h_samp_factor;
       compptr->MCU_height = compptr->v_samp_factor;
       compptr->MCU_blocks = compptr->MCU_width * compptr->MCU_height;
-      compptr->MCU_sample_width = compptr->MCU_width *
-                                  compptr->_DCT_scaled_size;
+      compptr->MCU_sample_width = compptr->MCU_width * DCTSIZE;
       /* Figure number of non-dummy blocks in last MCU column & row */
       tmp = (int)(compptr->width_in_blocks % compptr->MCU_width);
       if (tmp == 0) tmp = compptr->MCU_width;

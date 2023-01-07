@@ -72,8 +72,6 @@ jpeg_calc_jpeg_dimensions(j_compress_ptr cinfo)
   /* Hardwire it to "no scaling" */
   cinfo->jpeg_width = cinfo->image_width;
   cinfo->jpeg_height = cinfo->image_height;
-  cinfo->min_DCT_h_scaled_size = DCTSIZE;
-  cinfo->min_DCT_v_scaled_size = DCTSIZE;
 }
 #endif
 
@@ -140,12 +138,6 @@ initial_setup(j_compress_ptr cinfo, boolean transcode_only)
        ci++, compptr++) {
     /* Fill in the correct component_index value; don't rely on application */
     compptr->component_index = ci;
-    /* For compression, we never do DCT scaling. */
-#if JPEG_LIB_VERSION >= 70
-    compptr->DCT_h_scaled_size = compptr->DCT_v_scaled_size = DCTSIZE;
-#else
-    compptr->DCT_scaled_size = DCTSIZE;
-#endif
     /* Size in DCT blocks */
     compptr->width_in_blocks = (JDIMENSION)
       jdiv_round_up((long)cinfo->_jpeg_width * (long)compptr->h_samp_factor,

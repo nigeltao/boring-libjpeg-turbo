@@ -64,11 +64,6 @@ use_merged_upsample(j_decompress_ptr cinfo)
       cinfo->comp_info[1].v_samp_factor != 1 ||
       cinfo->comp_info[2].v_samp_factor != 1)
     return FALSE;
-  /* furthermore, it doesn't work if we've scaled the IDCTs differently */
-  if (cinfo->comp_info[0]._DCT_scaled_size != cinfo->_min_DCT_scaled_size ||
-      cinfo->comp_info[1]._DCT_scaled_size != cinfo->_min_DCT_scaled_size ||
-      cinfo->comp_info[2]._DCT_scaled_size != cinfo->_min_DCT_scaled_size)
-    return FALSE;
   /* ??? also need to test for upsample-time rescaling, when & if supported */
   return TRUE;                  /* by golly, it'll work... */
 #else
@@ -96,9 +91,6 @@ jpeg_core_output_dimensions(j_decompress_ptr cinfo)
   /* Hardwire it to "no scaling" */
   cinfo->output_width = cinfo->image_width;
   cinfo->output_height = cinfo->image_height;
-  /* jdinput.c has already initialized DCT_scaled_size,
-   * and has computed unscaled downsampled_width and downsampled_height.
-   */
 }
 
 
@@ -123,9 +115,6 @@ jpeg_calc_output_dimensions(j_decompress_ptr cinfo)
   /* Hardwire it to "no scaling" */
   cinfo->output_width = cinfo->image_width;
   cinfo->output_height = cinfo->image_height;
-  /* jdinput.c has already initialized DCT_scaled_size to DCTSIZE,
-   * and has computed unscaled downsampled_width and downsampled_height.
-   */
 
   /* Report number of components in selected colorspace. */
   /* Probably this should be in the color conversion module... */

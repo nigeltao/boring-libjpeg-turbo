@@ -198,8 +198,6 @@ default_decompress_parms(j_decompress_ptr cinfo)
   }
 
   /* Set defaults for other decompression parameters. */
-  cinfo->scale_num = 1;         /* 1:1 scaling */
-  cinfo->scale_denom = 1;
   cinfo->output_gamma = 1.0;
   cinfo->buffered_image = FALSE;
   cinfo->raw_data_out = FALSE;
