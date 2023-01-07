@@ -150,8 +150,6 @@ typedef my_memory_mgr *my_mem_ptr;
 /*
  * The control blocks for virtual arrays.
  * Note that these blocks are allocated in the "small" pool area.
- * System-dependent info for the associated backing store (if any) is hidden
- * inside the backing_store_info struct.
  */
 
 struct jvirt_sarray_control {
@@ -165,9 +163,9 @@ struct jvirt_sarray_control {
   JDIMENSION first_undef_row;   /* row # of first uninitialized row */
   boolean pre_zero;             /* pre-zero mode requested? */
   boolean dirty;                /* do current buffer contents need written? */
-  boolean b_s_open;             /* is backing-store data valid? */
+  boolean notboring_b_s_open;
   jvirt_sarray_ptr next;        /* link to next virtual sarray control block */
-  backing_store_info b_s_info;  /* System-dependent control info */
+  size_t notboring_b_s_info;
 };
 
 struct jvirt_barray_control {
@@ -181,9 +179,9 @@ struct jvirt_barray_control {
   JDIMENSION first_undef_row;   /* row # of first uninitialized row */
   boolean pre_zero;             /* pre-zero mode requested? */
   boolean dirty;                /* do current buffer contents need written? */
-  boolean b_s_open;             /* is backing-store data valid? */
+  boolean notboring_b_s_open;
   jvirt_barray_ptr next;        /* link to next virtual barray control block */
-  backing_store_info b_s_info;  /* System-dependent control info */
+  size_t notboring_b_s_info;
 };
 
 
@@ -558,7 +556,6 @@ request_virt_sarray(j_common_ptr cinfo, int pool_id, boolean pre_zero,
   result->samplesperrow = samplesperrow;
   result->maxaccess = maxaccess;
   result->pre_zero = pre_zero;
-  result->b_s_open = FALSE;     /* no associated backing-store object */
   result->next = mem->virt_sarray_list; /* add to list of virtual arrays */
   mem->virt_sarray_list = result;
 
@@ -588,7 +585,6 @@ request_virt_barray(j_common_ptr cinfo, int pool_id, boolean pre_zero,
   result->blocksperrow = blocksperrow;
   result->maxaccess = maxaccess;
   result->pre_zero = pre_zero;
-  result->b_s_open = FALSE;     /* no associated backing-store object */
   result->next = mem->virt_barray_list; /* add to list of virtual arrays */
   mem->virt_barray_list = result;
 
@@ -670,11 +666,7 @@ realize_virt_arrays(j_common_ptr cinfo)
       } else {
         /* It doesn't fit in memory, create backing store. */
         sptr->rows_in_mem = (JDIMENSION)(max_minheights * sptr->maxaccess);
-        jpeg_open_backing_store(cinfo, &sptr->b_s_info,
-                                (long)sptr->rows_in_array *
-                                (long)sptr->samplesperrow *
-                                (long)sizeof(JSAMPLE));
-        sptr->b_s_open = TRUE;
+        ERREXIT(cinfo, JERR_NO_BACKING_STORE);
       }
       sptr->mem_buffer = alloc_sarray(cinfo, JPOOL_IMAGE,
                                       sptr->samplesperrow, sptr->rows_in_mem);
@@ -694,11 +686,7 @@ realize_virt_arrays(j_common_ptr cinfo)
       } else {
         /* It doesn't fit in memory, create backing store. */
         bptr->rows_in_mem = (JDIMENSION)(max_minheights * bptr->maxaccess);
-        jpeg_open_backing_store(cinfo, &bptr->b_s_info,
-                                (long)bptr->rows_in_array *
-                                (long)bptr->blocksperrow *
-                                (long)sizeof(JBLOCK));
-        bptr->b_s_open = TRUE;
+        ERREXIT(cinfo, JERR_NO_BACKING_STORE);
       }
       bptr->mem_buffer = alloc_barray(cinfo, JPOOL_IMAGE,
                                       bptr->blocksperrow, bptr->rows_in_mem);
@@ -707,72 +695,6 @@ realize_virt_arrays(j_common_ptr cinfo)
       bptr->first_undef_row = 0;
       bptr->dirty = FALSE;
     }
-  }
-}
-
-
-LOCAL(void)
-do_sarray_io(j_common_ptr cinfo, jvirt_sarray_ptr ptr, boolean writing)
-/* Do backing store read or write of a virtual sample array */
-{
-  long bytesperrow, file_offset, byte_count, rows, thisrow, i;
-
-  bytesperrow = (long)ptr->samplesperrow * sizeof(JSAMPLE);
-  file_offset = ptr->cur_start_row * bytesperrow;
-  /* Loop to read or write each allocation chunk in mem_buffer */
-  for (i = 0; i < (long)ptr->rows_in_mem; i += ptr->rowsperchunk) {
-    /* One chunk, but check for short chunk at end of buffer */
-    rows = MIN((long)ptr->rowsperchunk, (long)ptr->rows_in_mem - i);
-    /* Transfer no more than is currently defined */
-    thisrow = (long)ptr->cur_start_row + i;
-    rows = MIN(rows, (long)ptr->first_undef_row - thisrow);
-    /* Transfer no more than fits in file */
-    rows = MIN(rows, (long)ptr->rows_in_array - thisrow);
-    if (rows <= 0)              /* this chunk might be past end of file! */
-      break;
-    byte_count = rows * bytesperrow;
-    if (writing)
-      (*ptr->b_s_info.write_backing_store) (cinfo, &ptr->b_s_info,
-                                            (void *)ptr->mem_buffer[i],
-                                            file_offset, byte_count);
-    else
-      (*ptr->b_s_info.read_backing_store) (cinfo, &ptr->b_s_info,
-                                           (void *)ptr->mem_buffer[i],
-                                           file_offset, byte_count);
-    file_offset += byte_count;
-  }
-}
-
-
-LOCAL(void)
-do_barray_io(j_common_ptr cinfo, jvirt_barray_ptr ptr, boolean writing)
-/* Do backing store read or write of a virtual coefficient-block array */
-{
-  long bytesperrow, file_offset, byte_count, rows, thisrow, i;
-
-  bytesperrow = (long)ptr->blocksperrow * sizeof(JBLOCK);
-  file_offset = ptr->cur_start_row * bytesperrow;
-  /* Loop to read or write each allocation chunk in mem_buffer */
-  for (i = 0; i < (long)ptr->rows_in_mem; i += ptr->rowsperchunk) {
-    /* One chunk, but check for short chunk at end of buffer */
-    rows = MIN((long)ptr->rowsperchunk, (long)ptr->rows_in_mem - i);
-    /* Transfer no more than is currently defined */
-    thisrow = (long)ptr->cur_start_row + i;
-    rows = MIN(rows, (long)ptr->first_undef_row - thisrow);
-    /* Transfer no more than fits in file */
-    rows = MIN(rows, (long)ptr->rows_in_array - thisrow);
-    if (rows <= 0)              /* this chunk might be past end of file! */
-      break;
-    byte_count = rows * bytesperrow;
-    if (writing)
-      (*ptr->b_s_info.write_backing_store) (cinfo, &ptr->b_s_info,
-                                            (void *)ptr->mem_buffer[i],
-                                            file_offset, byte_count);
-    else
-      (*ptr->b_s_info.read_backing_store) (cinfo, &ptr->b_s_info,
-                                           (void *)ptr->mem_buffer[i],
-                                           file_offset, byte_count);
-    file_offset += byte_count;
   }
 }
 
@@ -795,36 +717,8 @@ access_virt_sarray(j_common_ptr cinfo, jvirt_sarray_ptr ptr,
   /* Make the desired part of the virtual array accessible */
   if (start_row < ptr->cur_start_row ||
       end_row > ptr->cur_start_row + ptr->rows_in_mem) {
-    if (!ptr->b_s_open)
+    if (BORING_ALWAYS_TRUE)
       ERREXIT(cinfo, JERR_VIRTUAL_BUG);
-    /* Flush old buffer contents if necessary */
-    if (ptr->dirty) {
-      do_sarray_io(cinfo, ptr, TRUE);
-      ptr->dirty = FALSE;
-    }
-    /* Decide what part of virtual array to access.
-     * Algorithm: if target address > current window, assume forward scan,
-     * load starting at target address.  If target address < current window,
-     * assume backward scan, load so that target area is top of window.
-     * Note that when switching from forward write to forward read, will have
-     * start_row = 0, so the limiting case applies and we load from 0 anyway.
-     */
-    if (start_row > ptr->cur_start_row) {
-      ptr->cur_start_row = start_row;
-    } else {
-      /* use long arithmetic here to avoid overflow & unsigned problems */
-      long ltemp;
-
-      ltemp = (long)end_row - (long)ptr->rows_in_mem;
-      if (ltemp < 0)
-        ltemp = 0;              /* don't fall off front end of file */
-      ptr->cur_start_row = (JDIMENSION)ltemp;
-    }
-    /* Read in the selected part of the array.
-     * During the initial write pass, we will do no actual read
-     * because the selected part is all undefined.
-     */
-    do_sarray_io(cinfo, ptr, FALSE);
   }
   /* Ensure the accessed part of the array is defined; prezero if needed.
    * To improve locality of access, we only prezero the part of the array
@@ -879,36 +773,8 @@ access_virt_barray(j_common_ptr cinfo, jvirt_barray_ptr ptr,
   /* Make the desired part of the virtual array accessible */
   if (start_row < ptr->cur_start_row ||
       end_row > ptr->cur_start_row + ptr->rows_in_mem) {
-    if (!ptr->b_s_open)
+    if (BORING_ALWAYS_TRUE)
       ERREXIT(cinfo, JERR_VIRTUAL_BUG);
-    /* Flush old buffer contents if necessary */
-    if (ptr->dirty) {
-      do_barray_io(cinfo, ptr, TRUE);
-      ptr->dirty = FALSE;
-    }
-    /* Decide what part of virtual array to access.
-     * Algorithm: if target address > current window, assume forward scan,
-     * load starting at target address.  If target address < current window,
-     * assume backward scan, load so that target area is top of window.
-     * Note that when switching from forward write to forward read, will have
-     * start_row = 0, so the limiting case applies and we load from 0 anyway.
-     */
-    if (start_row > ptr->cur_start_row) {
-      ptr->cur_start_row = start_row;
-    } else {
-      /* use long arithmetic here to avoid overflow & unsigned problems */
-      long ltemp;
-
-      ltemp = (long)end_row - (long)ptr->rows_in_mem;
-      if (ltemp < 0)
-        ltemp = 0;              /* don't fall off front end of file */
-      ptr->cur_start_row = (JDIMENSION)ltemp;
-    }
-    /* Read in the selected part of the array.
-     * During the initial write pass, we will do no actual read
-     * because the selected part is all undefined.
-     */
-    do_barray_io(cinfo, ptr, FALSE);
   }
   /* Ensure the accessed part of the array is defined; prezero if needed.
    * To improve locality of access, we only prezero the part of the array
@@ -962,22 +828,7 @@ free_pool(j_common_ptr cinfo, int pool_id)
 
   /* If freeing IMAGE pool, close any virtual arrays first */
   if (pool_id == JPOOL_IMAGE) {
-    jvirt_sarray_ptr sptr;
-    jvirt_barray_ptr bptr;
-
-    for (sptr = mem->virt_sarray_list; sptr != NULL; sptr = sptr->next) {
-      if (sptr->b_s_open) {     /* there may be no backing store */
-        sptr->b_s_open = FALSE; /* prevent recursive close if error */
-        (*sptr->b_s_info.close_backing_store) (cinfo, &sptr->b_s_info);
-      }
-    }
     mem->virt_sarray_list = NULL;
-    for (bptr = mem->virt_barray_list; bptr != NULL; bptr = bptr->next) {
-      if (bptr->b_s_open) {     /* there may be no backing store */
-        bptr->b_s_open = FALSE; /* prevent recursive close if error */
-        (*bptr->b_s_info.close_backing_store) (cinfo, &bptr->b_s_info);
-      }
-    }
     mem->virt_barray_list = NULL;
   }
 

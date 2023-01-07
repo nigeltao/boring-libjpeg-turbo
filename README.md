@@ -71,7 +71,7 @@ what many Linux distributions ship as `/usr/bin/cjpeg`. This repository's
 ### Removed C Library Features
 
 - Alternative 'legacy' IDCT implementations.
-- Custom system-dependent memory management.
+- Custom memory management, including virtual memory ('backing stores').
 - IDCT scaling.
 - Merged upsampling (merging upsampling with color conversion, which is fast
   but 'sloppy', as opposed to higher quality, 'fancy' upsampling).

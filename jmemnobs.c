@@ -41,17 +41,3 @@ jpeg_mem_available(j_common_ptr cinfo, size_t min_bytes_needed,
     return max_bytes_needed;
   }
 }
-
-
-/*
- * Backing store (temporary file) management.
- * Since jpeg_mem_available always promised the moon,
- * this should never be called and we can just error out.
- */
-
-GLOBAL(void)
-jpeg_open_backing_store(j_common_ptr cinfo, backing_store_ptr info,
-                        long total_bytes_needed)
-{
-  ERREXIT(cinfo, JERR_NO_BACKING_STORE);
-}
