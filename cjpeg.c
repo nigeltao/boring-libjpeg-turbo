@@ -152,11 +152,7 @@ usage(void)
 /* complain about bad command line */
 {
   fprintf(stderr, "usage: %s [switches] ", progname);
-#ifdef TWO_FILE_COMMANDLINE
-  fprintf(stderr, "inputfile outputfile\n");
-#else
   fprintf(stderr, "[inputfile]\n");
-#endif
 
   fprintf(stderr, "Switches (names may be abbreviated):\n");
   fprintf(stderr, "  -grayscale     Create monochrome JPEG file\n");
@@ -493,31 +489,11 @@ main(int argc, char **argv)
   if (strict)
     jerr.emit_message = my_emit_message;
 
-#ifdef TWO_FILE_COMMANDLINE
-  if (!memdst) {
-    /* Must have either -outfile switch or explicit output file name */
-    if (outfilename == NULL) {
-      if (file_index != argc - 2) {
-        fprintf(stderr, "%s: must name one input and one output file\n",
-                progname);
-        usage();
-      }
-      outfilename = argv[file_index + 1];
-    } else {
-      if (file_index != argc - 1) {
-        fprintf(stderr, "%s: must name one input and one output file\n",
-                progname);
-        usage();
-      }
-    }
-  }
-#else
   /* Unix style: expect zero or one file name */
   if (file_index < argc - 1) {
     fprintf(stderr, "%s: only one input file\n", progname);
     usage();
   }
-#endif /* TWO_FILE_COMMANDLINE */
 
   /* Open the input file. */
   if (file_index < argc) {
