@@ -1034,7 +1034,6 @@ asm_function jsimd_idct_islow_neon
     uaddw           v20.8h, v20.8h, v0.8b
     uaddw           v24.8h, v24.8h, v0.8b
     uaddw           v28.8h, v28.8h, v0.8b
-  .if \bpp != 16  /**************** rgb24/rgb32 ******************************/
     sqxtun          v1\g_offs\defsize, v20.8h
     ld1             {v0.8b}, [Y], 8
     sqxtun          v1\r_offs\defsize, v24.8h
@@ -1050,25 +1049,6 @@ asm_function jsimd_idct_islow_neon
     smlal2          v22.4s, v8.8h, v1.h[2]  /* multiply by -23401 */
     smull           v24.4s, v8.4h, v1.h[0]  /* multiply by 22971 */
     smull2          v26.4s, v8.8h, v1.h[0]  /* multiply by 22971 */
-  .else  /**************************** rgb565 ********************************/
-    sqshlu          v21.8h, v20.8h, #8
-    sqshlu          v25.8h, v24.8h, #8
-    sqshlu          v29.8h, v28.8h, #8
-    uaddw           v6.8h, v2.8h, v4.8b     /* v6.16b = u - 128 */
-    uaddw           v8.8h, v2.8h, v5.8b     /* q2 = v - 128 */
-    ld1             {v0.8b}, [Y], 8
-    smull           v20.4s, v6.4h, v1.h[1]  /* multiply by -11277 */
-    smlal           v20.4s, v8.4h, v1.h[2]  /* multiply by -23401 */
-    smull2          v22.4s, v6.8h, v1.h[1]  /* multiply by -11277 */
-    smlal2          v22.4s, v8.8h, v1.h[2]  /* multiply by -23401 */
-    sri             v25.8h, v21.8h, #5
-    smull           v24.4s, v8.4h, v1.h[0]  /* multiply by 22971 */
-    smull2          v26.4s, v8.8h, v1.h[0]  /* multiply by 22971 */
-    prfm            pldl1keep, [U, #64]
-    prfm            pldl1keep, [V, #64]
-    prfm            pldl1keep, [Y, #64]
-    sri             v25.8h, v29.8h, #11
-  .endif
     do_store        \bpp, 8, \fast_st3
     smull           v28.4s, v6.4h, v1.h[3]  /* multiply by 29033 */
     smull2          v30.4s, v6.8h, v1.h[3]  /* multiply by 29033 */
@@ -1208,7 +1188,6 @@ generate_jsimd_ycc_rgb_convert_neon extrgbx, 32, 0, .4h,  1, .4h,  2, .4h,  .8b,
 generate_jsimd_ycc_rgb_convert_neon extbgrx, 32, 2, .4h,  1, .4h,  0, .4h,  .8b,    1
 generate_jsimd_ycc_rgb_convert_neon extxbgr, 32, 3, .4h,  2, .4h,  1, .4h,  .8b,    1
 generate_jsimd_ycc_rgb_convert_neon extxrgb, 32, 1, .4h,  2, .4h,  3, .4h,  .8b,    1
-generate_jsimd_ycc_rgb_convert_neon rgb565,  16, 0, .4h,  0, .4h,  0, .4h,  .8b,    1
 
 generate_jsimd_ycc_rgb_convert_neon extrgb,  24, 0, .4h,  1, .4h,  2, .4h,  .8b,    0
 generate_jsimd_ycc_rgb_convert_neon extbgr,  24, 2, .4h,  1, .4h,  0, .4h,  .8b,    0

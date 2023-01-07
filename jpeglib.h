@@ -238,7 +238,7 @@ typedef enum {
   JCS_EXT_BGRA,           /* blue/green/red/alpha */
   JCS_EXT_ABGR,           /* alpha/blue/green/red */
   JCS_EXT_ARGB,           /* alpha/red/green/blue */
-  JCS_RGB565              /* 5-bit red/6-bit green/5-bit blue */
+  NOTBORING_JCS_RGB565
 } J_COLOR_SPACE;
 
 /* DCT/IDCT algorithm options. */

@@ -72,6 +72,7 @@ what many Linux distributions ship as `/usr/bin/cjpeg`. This repository's
 
 - IDCT scaling.
 - Quantization from 24-bit (or 32-bit) to 8-bit color.
+- RGB565 color space.
 
 
 ### Removed SIMD Code

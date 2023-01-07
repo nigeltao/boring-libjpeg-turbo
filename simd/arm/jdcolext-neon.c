@@ -154,16 +154,7 @@ void jsimd_ycc_rgb_convert_neon(JDIMENSION output_width, JSAMPIMAGE input_buf,
       /* Store RGB pixel data to memory. */
       vst3q_u8(outptr, rgb);
 #else
-      /* Pack R, G, and B values in ratio 5:6:5. */
-      uint16x8_t rgb565_l = vqshluq_n_s16(r_l, 8);
-      rgb565_l = vsriq_n_u16(rgb565_l, vqshluq_n_s16(g_l, 8), 5);
-      rgb565_l = vsriq_n_u16(rgb565_l, vqshluq_n_s16(b_l, 8), 11);
-      uint16x8_t rgb565_h = vqshluq_n_s16(r_h, 8);
-      rgb565_h = vsriq_n_u16(rgb565_h, vqshluq_n_s16(g_h, 8), 5);
-      rgb565_h = vsriq_n_u16(rgb565_h, vqshluq_n_s16(b_h, 8), 11);
-      /* Store RGB pixel data to memory. */
-      vst1q_u16((uint16_t *)outptr, rgb565_l);
-      vst1q_u16(((uint16_t *)outptr) + 8, rgb565_h);
+#error NOTBORING_RGB565_NOT_SUPPORTED
 #endif
 
       /* Increment pointers. */
@@ -223,12 +214,7 @@ void jsimd_ycc_rgb_convert_neon(JDIMENSION output_width, JSAMPIMAGE input_buf,
       /* Store RGB pixel data to memory. */
       vst3_u8(outptr, rgb);
 #else
-      /* Pack R, G, and B values in ratio 5:6:5. */
-      uint16x8_t rgb565 = vqshluq_n_s16(r, 8);
-      rgb565 = vsriq_n_u16(rgb565, vqshluq_n_s16(g, 8), 5);
-      rgb565 = vsriq_n_u16(rgb565, vqshluq_n_s16(b, 8), 11);
-      /* Store RGB pixel data to memory. */
-      vst1q_u16((uint16_t *)outptr, rgb565);
+#error NOTBORING_RGB565_NOT_SUPPORTED
 #endif
 
       /* Increment pointers. */
@@ -338,36 +324,7 @@ void jsimd_ycc_rgb_convert_neon(JDIMENSION output_width, JSAMPIMAGE input_buf,
         break;
       }
 #else
-      /* Pack R, G, and B values in ratio 5:6:5. */
-      uint16x8_t rgb565 = vqshluq_n_s16(r, 8);
-      rgb565 = vsriq_n_u16(rgb565, vqshluq_n_s16(g, 8), 5);
-      rgb565 = vsriq_n_u16(rgb565, vqshluq_n_s16(b, 8), 11);
-      /* Store RGB565 pixel data to memory. */
-      switch (cols_remaining) {
-      case 7:
-        vst1q_lane_u16((uint16_t *)(outptr + 6 * RGB_PIXELSIZE), rgb565, 6);
-        FALLTHROUGH             /*FALLTHROUGH*/
-      case 6:
-        vst1q_lane_u16((uint16_t *)(outptr + 5 * RGB_PIXELSIZE), rgb565, 5);
-        FALLTHROUGH             /*FALLTHROUGH*/
-      case 5:
-        vst1q_lane_u16((uint16_t *)(outptr + 4 * RGB_PIXELSIZE), rgb565, 4);
-        FALLTHROUGH             /*FALLTHROUGH*/
-      case 4:
-        vst1q_lane_u16((uint16_t *)(outptr + 3 * RGB_PIXELSIZE), rgb565, 3);
-        FALLTHROUGH             /*FALLTHROUGH*/
-      case 3:
-        vst1q_lane_u16((uint16_t *)(outptr + 2 * RGB_PIXELSIZE), rgb565, 2);
-        FALLTHROUGH             /*FALLTHROUGH*/
-      case 2:
-        vst1q_lane_u16((uint16_t *)(outptr + RGB_PIXELSIZE), rgb565, 1);
-        FALLTHROUGH             /*FALLTHROUGH*/
-      case 1:
-        vst1q_lane_u16((uint16_t *)outptr, rgb565, 0);
-        FALLTHROUGH             /*FALLTHROUGH*/
-      default:
-        break;
-      }
+#error NOTBORING_RGB565_NOT_SUPPORTED
 #endif
     }
   }

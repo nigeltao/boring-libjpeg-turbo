@@ -233,8 +233,6 @@ merged_2v_upsample(j_decompress_ptr cinfo, JSAMPIMAGE input_buf,
   if (upsample->spare_full) {
     /* If we have a spare row saved from a previous cycle, just return it. */
     JDIMENSION size = upsample->out_row_width;
-    if (cinfo->out_color_space == JCS_RGB565)
-      size = cinfo->output_width * 2;
     jcopy_sample_rows(&upsample->spare_row, 0, output_buf + *out_row_ctr, 0, 1,
                       size);
     num_rows = 1;
@@ -389,144 +387,6 @@ h2v2_merged_upsample(j_decompress_ptr cinfo, JSAMPIMAGE input_buf,
 
 
 /*
- * RGB565 conversion
- */
-
-#define PACK_SHORT_565_LE(r, g, b) \
-  ((((r) << 8) & 0xF800) | (((g) << 3) & 0x7E0) | ((b) >> 3))
-#define PACK_SHORT_565_BE(r, g, b) \
-  (((r) & 0xF8) | ((g) >> 5) | (((g) << 11) & 0xE000) | (((b) << 5) & 0x1F00))
-
-#define PACK_TWO_PIXELS_LE(l, r)    ((r << 16) | l)
-#define PACK_TWO_PIXELS_BE(l, r)    ((l << 16) | r)
-
-#define WRITE_TWO_PIXELS_LE(addr, pixels) { \
-  ((INT16 *)(addr))[0] = (INT16)(pixels); \
-  ((INT16 *)(addr))[1] = (INT16)((pixels) >> 16); \
-}
-#define WRITE_TWO_PIXELS_BE(addr, pixels) { \
-  ((INT16 *)(addr))[1] = (INT16)(pixels); \
-  ((INT16 *)(addr))[0] = (INT16)((pixels) >> 16); \
-}
-
-#define DITHER_565_R(r, dither)  ((r) + ((dither) & 0xFF))
-#define DITHER_565_G(g, dither)  ((g) + (((dither) & 0xFF) >> 1))
-#define DITHER_565_B(b, dither)  ((b) + ((dither) & 0xFF))
-
-
-/* Declarations for ordered dithering
- *
- * We use a 4x4 ordered dither array packed into 32 bits.  This array is
- * sufficient for dithering RGB888 to RGB565.
- */
-
-#define DITHER_MASK       0x3
-#define DITHER_ROTATE(x)  ((((x) & 0xFF) << 24) | (((x) >> 8) & 0x00FFFFFF))
-static const JLONG dither_matrix[4] = {
-  0x0008020A,
-  0x0C040E06,
-  0x030B0109,
-  0x0F070D05
-};
-
-
-/* Include inline routines for RGB565 conversion */
-
-#define PACK_SHORT_565  PACK_SHORT_565_LE
-#define PACK_TWO_PIXELS  PACK_TWO_PIXELS_LE
-#define WRITE_TWO_PIXELS  WRITE_TWO_PIXELS_LE
-#define h2v1_merged_upsample_565_internal  h2v1_merged_upsample_565_le
-#define h2v1_merged_upsample_565D_internal  h2v1_merged_upsample_565D_le
-#define h2v2_merged_upsample_565_internal  h2v2_merged_upsample_565_le
-#define h2v2_merged_upsample_565D_internal  h2v2_merged_upsample_565D_le
-#include "jdmrg565.c"
-#undef PACK_SHORT_565
-#undef PACK_TWO_PIXELS
-#undef WRITE_TWO_PIXELS
-#undef h2v1_merged_upsample_565_internal
-#undef h2v1_merged_upsample_565D_internal
-#undef h2v2_merged_upsample_565_internal
-#undef h2v2_merged_upsample_565D_internal
-
-#define PACK_SHORT_565  PACK_SHORT_565_BE
-#define PACK_TWO_PIXELS  PACK_TWO_PIXELS_BE
-#define WRITE_TWO_PIXELS  WRITE_TWO_PIXELS_BE
-#define h2v1_merged_upsample_565_internal  h2v1_merged_upsample_565_be
-#define h2v1_merged_upsample_565D_internal  h2v1_merged_upsample_565D_be
-#define h2v2_merged_upsample_565_internal  h2v2_merged_upsample_565_be
-#define h2v2_merged_upsample_565D_internal  h2v2_merged_upsample_565D_be
-#include "jdmrg565.c"
-#undef PACK_SHORT_565
-#undef PACK_TWO_PIXELS
-#undef WRITE_TWO_PIXELS
-#undef h2v1_merged_upsample_565_internal
-#undef h2v1_merged_upsample_565D_internal
-#undef h2v2_merged_upsample_565_internal
-#undef h2v2_merged_upsample_565D_internal
-
-
-static INLINE boolean is_big_endian(void)
-{
-  int test_value = 1;
-  if (*(char *)&test_value != 1)
-    return TRUE;
-  return FALSE;
-}
-
-
-METHODDEF(void)
-h2v1_merged_upsample_565(j_decompress_ptr cinfo, JSAMPIMAGE input_buf,
-                         JDIMENSION in_row_group_ctr, JSAMPARRAY output_buf)
-{
-  if (is_big_endian())
-    h2v1_merged_upsample_565_be(cinfo, input_buf, in_row_group_ctr,
-                                output_buf);
-  else
-    h2v1_merged_upsample_565_le(cinfo, input_buf, in_row_group_ctr,
-                                output_buf);
-}
-
-
-METHODDEF(void)
-h2v1_merged_upsample_565D(j_decompress_ptr cinfo, JSAMPIMAGE input_buf,
-                          JDIMENSION in_row_group_ctr, JSAMPARRAY output_buf)
-{
-  if (is_big_endian())
-    h2v1_merged_upsample_565D_be(cinfo, input_buf, in_row_group_ctr,
-                                 output_buf);
-  else
-    h2v1_merged_upsample_565D_le(cinfo, input_buf, in_row_group_ctr,
-                                 output_buf);
-}
-
-
-METHODDEF(void)
-h2v2_merged_upsample_565(j_decompress_ptr cinfo, JSAMPIMAGE input_buf,
-                         JDIMENSION in_row_group_ctr, JSAMPARRAY output_buf)
-{
-  if (is_big_endian())
-    h2v2_merged_upsample_565_be(cinfo, input_buf, in_row_group_ctr,
-                                output_buf);
-  else
-    h2v2_merged_upsample_565_le(cinfo, input_buf, in_row_group_ctr,
-                                output_buf);
-}
-
-
-METHODDEF(void)
-h2v2_merged_upsample_565D(j_decompress_ptr cinfo, JSAMPIMAGE input_buf,
-                          JDIMENSION in_row_group_ctr, JSAMPARRAY output_buf)
-{
-  if (is_big_endian())
-    h2v2_merged_upsample_565D_be(cinfo, input_buf, in_row_group_ctr,
-                                 output_buf);
-  else
-    h2v2_merged_upsample_565D_le(cinfo, input_buf, in_row_group_ctr,
-                                 output_buf);
-}
-
-
-/*
  * Module initialization routine for merged upsampling/color conversion.
  *
  * NB: this is called under the conditions determined by use_merged_upsample()
@@ -554,9 +414,6 @@ jinit_merged_upsampler(j_decompress_ptr cinfo)
       upsample->upmethod = jsimd_h2v2_merged_upsample;
     else
       upsample->upmethod = h2v2_merged_upsample;
-    if (cinfo->out_color_space == JCS_RGB565) {
-      upsample->upmethod = h2v2_merged_upsample_565;
-    }
     /* Allocate a spare row buffer */
     upsample->spare_row = (JSAMPROW)
       (*cinfo->mem->alloc_large) ((j_common_ptr)cinfo, JPOOL_IMAGE,
@@ -567,9 +424,6 @@ jinit_merged_upsampler(j_decompress_ptr cinfo)
       upsample->upmethod = jsimd_h2v1_merged_upsample;
     else
       upsample->upmethod = h2v1_merged_upsample;
-    if (cinfo->out_color_space == JCS_RGB565) {
-      upsample->upmethod = h2v1_merged_upsample_565;
-    }
     /* No spare row needed */
     upsample->spare_row = NULL;
   }

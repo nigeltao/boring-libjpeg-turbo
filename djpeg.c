@@ -109,7 +109,6 @@ usage(void)
   fprintf(stderr, "Switches (names may be abbreviated):\n");
   fprintf(stderr, "  -grayscale     Force grayscale output\n");
   fprintf(stderr, "  -rgb           Force RGB output\n");
-  fprintf(stderr, "  -rgb565        Force RGB565 output\n");
 #ifdef BMP_SUPPORTED
   fprintf(stderr, "  -bmp           Select BMP output format (Windows style)%s\n",
           (DEFAULT_FMT == FMT_BMP ? " (default)" : ""));
@@ -280,7 +279,9 @@ parse_switches(j_decompress_ptr cinfo, int argc, char **argv,
 
     } else if (keymatch(arg, "rgb565", 2)) {
       /* Force RGB565 output. */
-      cinfo->out_color_space = JCS_RGB565;
+      fprintf(stderr, "%s: notboring: rgb565 is not supported\n",
+              progname);
+      exit(EXIT_FAILURE);
 
     } else if (keymatch(arg, "icc", 1)) {
       /* Set ICC filename. */

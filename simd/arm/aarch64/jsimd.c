@@ -219,23 +219,6 @@ jsimd_can_ycc_rgb(void)
   return 0;
 }
 
-GLOBAL(int)
-jsimd_can_ycc_rgb565(void)
-{
-  init_simd();
-
-  /* The code is optimised for these values only */
-  if (BITS_IN_JSAMPLE != 8)
-    return 0;
-  if (sizeof(JDIMENSION) != 4)
-    return 0;
-
-  if (simd_support & JSIMD_NEON)
-    return 1;
-
-  return 0;
-}
-
 GLOBAL(void)
 jsimd_rgb_ycc_convert(j_compress_ptr cinfo, JSAMPARRAY input_buf,
                       JSAMPIMAGE output_buf, JDIMENSION output_row,
@@ -390,15 +373,6 @@ jsimd_ycc_rgb_convert(j_decompress_ptr cinfo, JSAMPIMAGE input_buf,
   }
 
   neonfct(cinfo->output_width, input_buf, input_row, output_buf, num_rows);
-}
-
-GLOBAL(void)
-jsimd_ycc_rgb565_convert(j_decompress_ptr cinfo, JSAMPIMAGE input_buf,
-                         JDIMENSION input_row, JSAMPARRAY output_buf,
-                         int num_rows)
-{
-  jsimd_ycc_rgb565_convert_neon(cinfo->output_width, input_buf, input_row,
-                                output_buf, num_rows);
 }
 
 GLOBAL(int)
