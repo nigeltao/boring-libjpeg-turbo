@@ -100,7 +100,7 @@ decompress_onepass(j_decompress_ptr cinfo, JSAMPIMAGE output_buf)
     for (MCU_col_num = coef->MCU_ctr; MCU_col_num <= last_MCU_col;
          MCU_col_num++) {
       /* Try to fetch an MCU.  Entropy decoder expects buffer to be zeroed. */
-      jzero_far((void *)coef->MCU_buffer[0],
+      memset((void *)coef->MCU_buffer[0], 0,
                 (size_t)(cinfo->blocks_in_MCU * sizeof(JBLOCK)));
       if (!cinfo->entropy->insufficient_data)
         cinfo->master->last_good_iMCU_row = cinfo->input_iMCU_row;

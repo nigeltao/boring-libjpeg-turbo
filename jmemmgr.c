@@ -739,7 +739,7 @@ access_virt_sarray(j_common_ptr cinfo, jvirt_sarray_ptr ptr,
       undef_row -= ptr->cur_start_row; /* make indexes relative to buffer */
       end_row -= ptr->cur_start_row;
       while (undef_row < end_row) {
-        jzero_far((void *)ptr->mem_buffer[undef_row], bytesperrow);
+        memset((void *)ptr->mem_buffer[undef_row], 0, bytesperrow);
         undef_row++;
       }
     } else {
@@ -795,7 +795,7 @@ access_virt_barray(j_common_ptr cinfo, jvirt_barray_ptr ptr,
       undef_row -= ptr->cur_start_row; /* make indexes relative to buffer */
       end_row -= ptr->cur_start_row;
       while (undef_row < end_row) {
-        jzero_far((void *)ptr->mem_buffer[undef_row], bytesperrow);
+        memset((void *)ptr->mem_buffer[undef_row], 0, bytesperrow);
         undef_row++;
       }
     } else {

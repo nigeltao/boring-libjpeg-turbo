@@ -178,7 +178,7 @@ compress_data(j_compress_ptr cinfo, JSAMPIMAGE input_buf)
                                          ypos, xpos, (JDIMENSION)blockcnt);
             if (blockcnt < compptr->MCU_width) {
               /* Create some dummy blocks at the right edge of the image. */
-              jzero_far((void *)coef->MCU_buffer[blkn + blockcnt],
+              memset((void *)coef->MCU_buffer[blkn + blockcnt], 0,
                         (compptr->MCU_width - blockcnt) * sizeof(JBLOCK));
               for (bi = blockcnt; bi < compptr->MCU_width; bi++) {
                 coef->MCU_buffer[blkn + bi][0][0] =
@@ -187,7 +187,7 @@ compress_data(j_compress_ptr cinfo, JSAMPIMAGE input_buf)
             }
           } else {
             /* Create a row of dummy blocks at the bottom of the image. */
-            jzero_far((void *)coef->MCU_buffer[blkn],
+            memset((void *)coef->MCU_buffer[blkn], 0,
                       compptr->MCU_width * sizeof(JBLOCK));
             for (bi = 0; bi < compptr->MCU_width; bi++) {
               coef->MCU_buffer[blkn + bi][0][0] =
@@ -286,7 +286,7 @@ compress_first_pass(j_compress_ptr cinfo, JSAMPIMAGE input_buf)
       if (ndummy > 0) {
         /* Create dummy blocks at the right edge of the image. */
         thisblockrow += blocks_across; /* => first dummy block */
-        jzero_far((void *)thisblockrow, ndummy * sizeof(JBLOCK));
+        memset((void *)thisblockrow, 0, ndummy * sizeof(JBLOCK));
         lastDC = thisblockrow[-1][0];
         for (bi = 0; bi < ndummy; bi++) {
           thisblockrow[bi][0] = lastDC;
@@ -305,7 +305,7 @@ compress_first_pass(j_compress_ptr cinfo, JSAMPIMAGE input_buf)
            block_row++) {
         thisblockrow = buffer[block_row];
         lastblockrow = buffer[block_row - 1];
-        jzero_far((void *)thisblockrow,
+        memset((void *)thisblockrow, 0,
                   (size_t)(blocks_across * sizeof(JBLOCK)));
         for (MCUindex = 0; MCUindex < MCUs_across; MCUindex++) {
           lastDC = lastblockrow[h_samp_factor - 1][0];
