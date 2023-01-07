@@ -175,8 +175,6 @@ usage(void)
   fprintf(stderr, "  -strict        Treat all warnings as fatal\n");
   fprintf(stderr, "  -verbose  or  -debug   Emit debug output\n");
   fprintf(stderr, "  -version       Print version information and exit\n");
-  fprintf(stderr, "Switches for wizards:\n");
-  fprintf(stderr, "  -baseline      Force baseline quantization tables\n");
   exit(EXIT_FAILURE);
 }
 
@@ -195,12 +193,10 @@ parse_switches(j_compress_ptr cinfo, int argc, char **argv,
 {
   int argn;
   char *arg;
-  boolean force_baseline;
   boolean simple_progressive;
 
   /* Set up default JPEG parameters. */
 
-  force_baseline = FALSE;       /* by default, allow 16-bit quantizers */
   simple_progressive = FALSE;
   icc_filename = NULL;
   outfilename = NULL;
@@ -231,7 +227,9 @@ parse_switches(j_compress_ptr cinfo, int argc, char **argv,
 
     } else if (keymatch(arg, "baseline", 1)) {
       /* Force baseline-compatible output (8-bit quantizer values). */
-      force_baseline = TRUE;
+      fprintf(stderr, "%s: notboring: baseline is not supported\n",
+              progname);
+      exit(EXIT_FAILURE);
 
     } else if (keymatch(arg, "dct", 2)) {
       /* Select DCT algorithm. */
