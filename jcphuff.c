@@ -134,21 +134,7 @@ typedef phuff_entropy_encoder *phuff_entropy_ptr;
 
 #define MAX_CORR_BITS  1000     /* Max # of correction bits I can buffer */
 
-/* IRIGHT_SHIFT is like RIGHT_SHIFT, but works on int rather than JLONG.
- * We assume that int right shift is unsigned if JLONG right shift is,
- * which should be safe.
- */
-
-#ifdef RIGHT_SHIFT_IS_UNSIGNED
-#define ISHIFT_TEMPS    int ishift_temp;
-#define IRIGHT_SHIFT(x, shft) \
-  ((ishift_temp = (x)) < 0 ? \
-   (ishift_temp >> (shft)) | ((~0) << (16 - (shft))) : \
-   (ishift_temp >> (shft)))
-#else
-#define ISHIFT_TEMPS
 #define IRIGHT_SHIFT(x, shft)   ((x) >> (shft))
-#endif
 
 #define PAD(v, p)  ((v + (p) - 1) & (~((p) - 1)))
 
@@ -489,7 +475,6 @@ encode_mcu_DC_first(j_compress_ptr cinfo, JBLOCKROW *MCU_data)
   int Al = cinfo->Al;
   JBLOCKROW block;
   jpeg_component_info *compptr;
-  ISHIFT_TEMPS
 
   entropy->next_output_byte = cinfo->dest->next_output_byte;
   entropy->free_in_buffer = cinfo->dest->free_in_buffer;

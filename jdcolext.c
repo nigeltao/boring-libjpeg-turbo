@@ -44,7 +44,6 @@ ycc_rgb_convert_internal(j_decompress_ptr cinfo, JSAMPIMAGE input_buf,
   register int *Cbbtab = cconvert->Cb_b_tab;
   register JLONG *Crgtab = cconvert->Cr_g_tab;
   register JLONG *Cbgtab = cconvert->Cb_g_tab;
-  SHIFT_TEMPS
 
   while (--num_rows >= 0) {
     inptr0 = input_buf[0][input_row];

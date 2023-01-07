@@ -184,7 +184,6 @@ jpeg_idct_islow(j_decompress_ptr cinfo, jpeg_component_info *compptr,
   JSAMPLE *range_limit = IDCT_range_limit(cinfo);
   int ctr;
   int workspace[DCTSIZE2];      /* buffers data between passes */
-  SHIFT_TEMPS
 
   /* Pass 1: process columns from input, store into work array. */
   /* Note results are scaled up by sqrt(8) compared to a true IDCT; */

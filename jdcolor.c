@@ -213,7 +213,6 @@ build_ycc_rgb_table(j_decompress_ptr cinfo)
   my_cconvert_ptr cconvert = (my_cconvert_ptr)cinfo->cconvert;
   int i;
   JLONG x;
-  SHIFT_TEMPS
 
   cconvert->Cr_r_tab = (int *)
     (*cinfo->mem->alloc_small) ((j_common_ptr)cinfo, JPOOL_IMAGE,
@@ -540,7 +539,6 @@ ycck_cmyk_convert(j_decompress_ptr cinfo, JSAMPIMAGE input_buf,
   register int *Cbbtab = cconvert->Cb_b_tab;
   register JLONG *Crgtab = cconvert->Cr_g_tab;
   register JLONG *Cbgtab = cconvert->Cb_g_tab;
-  SHIFT_TEMPS
 
   while (--num_rows >= 0) {
     inptr0 = input_buf[0][input_row];

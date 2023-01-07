@@ -147,7 +147,6 @@ jpeg_fdct_islow(DCTELEM *data)
   JLONG z1, z2, z3, z4, z5;
   DCTELEM *dataptr;
   int ctr;
-  SHIFT_TEMPS
 
   /* Pass 1: process rows. */
   /* Note results are scaled up by sqrt(8) compared to a true DCT; */
