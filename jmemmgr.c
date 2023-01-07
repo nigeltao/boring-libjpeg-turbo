@@ -187,45 +187,10 @@ struct jvirt_barray_control {
 };
 
 
-#ifdef MEM_STATS                /* optional extra stuff for statistics */
-
-LOCAL(void)
-print_mem_stats(j_common_ptr cinfo, int pool_id)
-{
-  my_mem_ptr mem = (my_mem_ptr)cinfo->mem;
-  small_pool_ptr shdr_ptr;
-  large_pool_ptr lhdr_ptr;
-
-  /* Since this is only a debugging stub, we can cheat a little by using
-   * fprintf directly rather than going through the trace message code.
-   * This is helpful because message parm array can't handle longs.
-   */
-  fprintf(stderr, "Freeing pool %d, total space = %ld\n",
-          pool_id, mem->total_space_allocated);
-
-  for (lhdr_ptr = mem->large_list[pool_id]; lhdr_ptr != NULL;
-       lhdr_ptr = lhdr_ptr->next) {
-    fprintf(stderr, "  Large chunk used %ld\n", (long)lhdr_ptr->bytes_used);
-  }
-
-  for (shdr_ptr = mem->small_list[pool_id]; shdr_ptr != NULL;
-       shdr_ptr = shdr_ptr->next) {
-    fprintf(stderr, "  Small chunk used %ld free %ld\n",
-            (long)shdr_ptr->bytes_used, (long)shdr_ptr->bytes_left);
-  }
-}
-
-#endif /* MEM_STATS */
-
-
 LOCAL(void)
 out_of_memory(j_common_ptr cinfo, int which)
 /* Report an out-of-memory error and stop execution */
-/* If we compiled MEM_STATS support, report alloc requests before dying */
 {
-#ifdef MEM_STATS
-  cinfo->err->trace_level = 2;  /* force self_destruct to report stats */
-#endif
   ERREXIT1(cinfo, JERR_OUT_OF_MEMORY, which);
 }
 
@@ -994,11 +959,6 @@ free_pool(j_common_ptr cinfo, int pool_id)
 
   if (pool_id < 0 || pool_id >= JPOOL_NUMPOOLS)
     ERREXIT1(cinfo, JERR_BAD_POOL_ID, pool_id); /* safety check */
-
-#ifdef MEM_STATS
-  if (cinfo->err->trace_level > 1)
-    print_mem_stats(cinfo, pool_id); /* print pool's memory usage statistics */
-#endif
 
   /* If freeing IMAGE pool, close any virtual arrays first */
   if (pool_id == JPOOL_IMAGE) {
