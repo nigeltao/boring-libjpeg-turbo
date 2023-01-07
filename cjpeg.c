@@ -190,8 +190,6 @@ usage(void)
 #endif
 
   fprintf(stderr, "Switches (names may be abbreviated):\n");
-  fprintf(stderr, "  -quality N[,...]   Compression quality (0..100; 5-95 is most useful range,\n");
-  fprintf(stderr, "                     default is 75)\n");
   fprintf(stderr, "  -grayscale     Create monochrome JPEG file\n");
   fprintf(stderr, "  -rgb           Create RGB JPEG file\n");
 #ifdef ENTROPY_OPT_SUPPORTED
@@ -232,12 +230,6 @@ usage(void)
   fprintf(stderr, "  -version       Print version information and exit\n");
   fprintf(stderr, "Switches for wizards:\n");
   fprintf(stderr, "  -baseline      Force baseline quantization tables\n");
-  fprintf(stderr, "  -qtables FILE  Use quantization tables given in FILE\n");
-  fprintf(stderr, "  -qslots N[,...]    Set component quantization tables\n");
-  fprintf(stderr, "  -sample HxV[,...]  Set component sampling factors\n");
-#ifdef C_MULTISCAN_FILES_SUPPORTED
-  fprintf(stderr, "  -scans FILE    Create multi-scan JPEG per script FILE\n");
-#endif
   exit(EXIT_FAILURE);
 }
 
@@ -258,11 +250,6 @@ parse_switches(j_compress_ptr cinfo, int argc, char **argv,
   char *arg;
   boolean force_baseline;
   boolean simple_progressive;
-  char *qualityarg = NULL;      /* saves -quality parm if any */
-  char *qtablefile = NULL;      /* saves -qtables filename if any */
-  char *qslotsarg = NULL;       /* saves -qslots parm if any */
-  char *samplearg = NULL;       /* saves -sample parm if any */
-  char *scansarg = NULL;        /* saves -scans parm if any */
 
   /* Set up default JPEG parameters. */
 
@@ -400,26 +387,21 @@ parse_switches(j_compress_ptr cinfo, int argc, char **argv,
 
     } else if (keymatch(arg, "quality", 1)) {
       /* Quality ratings (quantization table scaling factors). */
-      if (++argn >= argc)       /* advance to next argument */
-        usage();
-      qualityarg = argv[argn];
+      fprintf(stderr, "%s: notboring: quality is not supported\n",
+              progname);
+      exit(EXIT_FAILURE);
 
     } else if (keymatch(arg, "qslots", 2)) {
       /* Quantization table slot numbers. */
-      if (++argn >= argc)       /* advance to next argument */
-        usage();
-      qslotsarg = argv[argn];
-      /* Must delay setting qslots until after we have processed any
-       * colorspace-determining switches, since jpeg_set_colorspace sets
-       * default quant table numbers.
-       */
+      fprintf(stderr, "%s: notboring: qslots is not supported\n",
+              progname);
+      exit(EXIT_FAILURE);
 
     } else if (keymatch(arg, "qtables", 2)) {
       /* Quantization tables fetched from file. */
-      if (++argn >= argc)       /* advance to next argument */
-        usage();
-      qtablefile = argv[argn];
-      /* We postpone actually reading the file in case -quality comes later. */
+      fprintf(stderr, "%s: notboring: qtables is not supported\n",
+              progname);
+      exit(EXIT_FAILURE);
 
     } else if (keymatch(arg, "report", 3)) {
       report = TRUE;
@@ -445,26 +427,15 @@ parse_switches(j_compress_ptr cinfo, int argc, char **argv,
 
     } else if (keymatch(arg, "sample", 2)) {
       /* Set sampling factors. */
-      if (++argn >= argc)       /* advance to next argument */
-        usage();
-      samplearg = argv[argn];
-      /* Must delay setting sample factors until after we have processed any
-       * colorspace-determining switches, since jpeg_set_colorspace sets
-       * default sampling factors.
-       */
+      fprintf(stderr, "%s: notboring: sample is not supported\n",
+              progname);
+      exit(EXIT_FAILURE);
 
     } else if (keymatch(arg, "scans", 4)) {
       /* Set scan script. */
-#ifdef C_MULTISCAN_FILES_SUPPORTED
-      if (++argn >= argc)       /* advance to next argument */
-        usage();
-      scansarg = argv[argn];
-      /* We must postpone reading the file in case -progressive appears. */
-#else
-      fprintf(stderr, "%s: sorry, multi-scan output was not compiled in\n",
+      fprintf(stderr, "%s: notboring: scans is not supported\n",
               progname);
       exit(EXIT_FAILURE);
-#endif
 
     } else if (keymatch(arg, "smooth", 2)) {
       /* Set input smoothing factor. */
@@ -493,34 +464,9 @@ parse_switches(j_compress_ptr cinfo, int argc, char **argv,
   /* Post-switch-scanning cleanup */
 
   if (for_real) {
-
-    /* Set quantization tables for selected quality. */
-    /* Some or all may be overridden if -qtables is present. */
-    if (qualityarg != NULL)     /* process -quality if it was present */
-      if (!set_quality_ratings(cinfo, qualityarg, force_baseline))
-        usage();
-
-    if (qtablefile != NULL)     /* process -qtables if it was present */
-      if (!read_quant_tables(cinfo, qtablefile, force_baseline))
-        usage();
-
-    if (qslotsarg != NULL)      /* process -qslots if it was present */
-      if (!set_quant_slots(cinfo, qslotsarg))
-        usage();
-
-    if (samplearg != NULL)      /* process -sample if it was present */
-      if (!set_sample_factors(cinfo, samplearg))
-        usage();
-
 #ifdef C_PROGRESSIVE_SUPPORTED
     if (simple_progressive)     /* process -progressive; -scans can override */
       jpeg_simple_progression(cinfo);
-#endif
-
-#ifdef C_MULTISCAN_FILES_SUPPORTED
-    if (scansarg != NULL)       /* process -scans if it was present */
-      if (!read_scan_script(cinfo, scansarg))
-        usage();
 #endif
   }
 

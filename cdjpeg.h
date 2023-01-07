@@ -114,20 +114,6 @@ EXTERN(djpeg_dest_ptr) jinit_write_ppm(j_decompress_ptr cinfo);
 EXTERN(cjpeg_source_ptr) jinit_read_targa(j_compress_ptr cinfo);
 EXTERN(djpeg_dest_ptr) jinit_write_targa(j_decompress_ptr cinfo);
 
-/* cjpeg support routines (in rdswitch.c) */
-
-EXTERN(boolean) read_quant_tables(j_compress_ptr cinfo, char *filename,
-                                  boolean force_baseline);
-EXTERN(boolean) read_scan_script(j_compress_ptr cinfo, char *filename);
-EXTERN(boolean) set_quality_ratings(j_compress_ptr cinfo, char *arg,
-                                    boolean force_baseline);
-EXTERN(boolean) set_quant_slots(j_compress_ptr cinfo, char *arg);
-EXTERN(boolean) set_sample_factors(j_compress_ptr cinfo, char *arg);
-
-/* djpeg support routines (in rdcolmap.c) */
-
-EXTERN(void) read_color_map(j_decompress_ptr cinfo, FILE *infile);
-
 /* common support routines (in cdjpeg.c) */
 
 EXTERN(void) start_progress_monitor(j_common_ptr cinfo,

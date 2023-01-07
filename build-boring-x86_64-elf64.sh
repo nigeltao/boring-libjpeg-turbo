@@ -98,7 +98,7 @@ done
 
 echo Building cjpeg
 $CC $CFLAGS -I . -D PPM_SUPPORTED ${OBJ_FILES[@]} \
-    cjpeg.c cdjpeg.c rdppm.c rdswitch.c -o cjpeg
+    cjpeg.c cdjpeg.c rdppm.c -o cjpeg
 
 echo Building djpeg
 $CC $CFLAGS -I . -D PPM_SUPPORTED ${OBJ_FILES[@]} \
