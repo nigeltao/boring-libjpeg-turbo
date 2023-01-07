@@ -611,11 +611,6 @@ jinit_color_converter(j_compress_ptr cinfo)
         rgb_green[cinfo->in_color_space] == 1 &&
         rgb_blue[cinfo->in_color_space] == 2 &&
         rgb_pixelsize[cinfo->in_color_space] == 3) {
-#if defined(__mips__)
-      if (jsimd_c_can_null_convert())
-        cconvert->pub.color_convert = jsimd_c_null_convert;
-      else
-#endif
         cconvert->pub.color_convert = null_convert;
     } else if (cinfo->in_color_space == JCS_RGB ||
                cinfo->in_color_space == JCS_EXT_RGB ||
@@ -654,11 +649,6 @@ jinit_color_converter(j_compress_ptr cinfo)
         cconvert->pub.color_convert = rgb_ycc_convert;
       }
     } else if (cinfo->in_color_space == JCS_YCbCr) {
-#if defined(__mips__)
-      if (jsimd_c_can_null_convert())
-        cconvert->pub.color_convert = jsimd_c_null_convert;
-      else
-#endif
         cconvert->pub.color_convert = null_convert;
     } else
       ERREXIT(cinfo, JERR_CONVERSION_NOTIMPL);
@@ -668,11 +658,6 @@ jinit_color_converter(j_compress_ptr cinfo)
     if (cinfo->num_components != 4)
       ERREXIT(cinfo, JERR_BAD_J_COLORSPACE);
     if (cinfo->in_color_space == JCS_CMYK) {
-#if defined(__mips__)
-      if (jsimd_c_can_null_convert())
-        cconvert->pub.color_convert = jsimd_c_null_convert;
-      else
-#endif
         cconvert->pub.color_convert = null_convert;
     } else
       ERREXIT(cinfo, JERR_CONVERSION_NOTIMPL);
@@ -685,11 +670,6 @@ jinit_color_converter(j_compress_ptr cinfo)
       cconvert->pub.start_pass = rgb_ycc_start;
       cconvert->pub.color_convert = cmyk_ycck_convert;
     } else if (cinfo->in_color_space == JCS_YCCK) {
-#if defined(__mips__)
-      if (jsimd_c_can_null_convert())
-        cconvert->pub.color_convert = jsimd_c_null_convert;
-      else
-#endif
         cconvert->pub.color_convert = null_convert;
     } else
       ERREXIT(cinfo, JERR_CONVERSION_NOTIMPL);
@@ -699,11 +679,6 @@ jinit_color_converter(j_compress_ptr cinfo)
     if (cinfo->jpeg_color_space != cinfo->in_color_space ||
         cinfo->num_components != cinfo->input_components)
       ERREXIT(cinfo, JERR_CONVERSION_NOTIMPL);
-#if defined(__mips__)
-    if (jsimd_c_can_null_convert())
-      cconvert->pub.color_convert = jsimd_c_null_convert;
-    else
-#endif
       cconvert->pub.color_convert = null_convert;
     break;
   }

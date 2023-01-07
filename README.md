@@ -60,11 +60,22 @@ what many Linux distributions ship as `/usr/bin/cjpeg`. This repository's
 `cjpeg` only exists to support the previously mentioned basic regression test.
 
 
-## Removed File Format Support
+## Compared to Upstream libjpeg-turbo
+
+
+### Removed File Format Support
 
 - Arithmetic coding.
 
 
-## Removed C Library Features
+### Removed C Library Features
 
 - IDCT scaling.
+
+
+### Removed SIMD Code
+
+- i386 (but not x86\_64).
+- MIPS.
+- MIPS64.
+- PowerPC.

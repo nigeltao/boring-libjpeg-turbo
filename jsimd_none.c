@@ -44,12 +44,6 @@ jsimd_can_ycc_rgb565(void)
   return 0;
 }
 
-GLOBAL(int)
-jsimd_c_can_null_convert(void)
-{
-  return 0;
-}
-
 GLOBAL(void)
 jsimd_rgb_ycc_convert(j_compress_ptr cinfo, JSAMPARRAY input_buf,
                       JSAMPIMAGE output_buf, JDIMENSION output_row,
@@ -78,13 +72,6 @@ jsimd_ycc_rgb565_convert(j_decompress_ptr cinfo, JSAMPIMAGE input_buf,
 {
 }
 
-GLOBAL(void)
-jsimd_c_null_convert(j_compress_ptr cinfo, JSAMPARRAY input_buf,
-                     JSAMPIMAGE output_buf, JDIMENSION output_row,
-                     int num_rows)
-{
-}
-
 GLOBAL(int)
 jsimd_can_h2v2_downsample(void)
 {
@@ -97,22 +84,9 @@ jsimd_can_h2v1_downsample(void)
   return 0;
 }
 
-GLOBAL(int)
-jsimd_can_h2v2_smooth_downsample(void)
-{
-  return 0;
-}
-
 GLOBAL(void)
 jsimd_h2v2_downsample(j_compress_ptr cinfo, jpeg_component_info *compptr,
                       JSAMPARRAY input_data, JSAMPARRAY output_data)
-{
-}
-
-GLOBAL(void)
-jsimd_h2v2_smooth_downsample(j_compress_ptr cinfo,
-                             jpeg_component_info *compptr,
-                             JSAMPARRAY input_data, JSAMPARRAY output_data)
 {
 }
 
@@ -132,18 +106,6 @@ GLOBAL(int)
 jsimd_can_h2v1_upsample(void)
 {
   return 0;
-}
-
-GLOBAL(int)
-jsimd_can_int_upsample(void)
-{
-  return 0;
-}
-
-GLOBAL(void)
-jsimd_int_upsample(j_decompress_ptr cinfo, jpeg_component_info *compptr,
-                   JSAMPARRAY input_data, JSAMPARRAY *output_data_ptr)
-{
 }
 
 GLOBAL(void)

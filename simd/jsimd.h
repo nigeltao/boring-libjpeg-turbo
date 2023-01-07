@@ -527,11 +527,6 @@ EXTERN(void) jsimd_ycc_extxrgb_convert_altivec
   (JDIMENSION out_width, JSAMPIMAGE input_buf, JDIMENSION input_row,
    JSAMPARRAY output_buf, int num_rows);
 
-/* NULL Colorspace Conversion */
-EXTERN(void) jsimd_c_null_convert_dspr2
-  (JDIMENSION img_width, JSAMPARRAY input_buf, JSAMPIMAGE output_buf,
-   JDIMENSION output_row, int num_rows, int num_components);
-
 /* h2v1 Downsampling */
 EXTERN(void) jsimd_h2v1_downsample_mmx
   (JDIMENSION image_width, int max_v_samp_factor, JDIMENSION v_samp_factor,
@@ -586,13 +581,6 @@ EXTERN(void) jsimd_h2v2_downsample_altivec
   (JDIMENSION image_width, int max_v_samp_factor, JDIMENSION v_samp_factor,
    JDIMENSION width_in_blocks, JSAMPARRAY input_data, JSAMPARRAY output_data);
 
-/* h2v2 Smooth Downsampling */
-EXTERN(void) jsimd_h2v2_smooth_downsample_dspr2
-  (JSAMPARRAY input_data, JSAMPARRAY output_data, JDIMENSION v_samp_factor,
-   int max_v_samp_factor, int smoothing_factor, JDIMENSION width_in_blocks,
-   JDIMENSION image_width);
-
-
 /* Upsampling */
 EXTERN(void) jsimd_h2v1_upsample_mmx
   (int max_v_samp_factor, JDIMENSION output_width, JSAMPARRAY input_data,
@@ -628,11 +616,6 @@ EXTERN(void) jsimd_h2v1_upsample_dspr2
 EXTERN(void) jsimd_h2v2_upsample_dspr2
   (int max_v_samp_factor, JDIMENSION output_width, JSAMPARRAY input_data,
    JSAMPARRAY *output_data_ptr);
-
-EXTERN(void) jsimd_int_upsample_dspr2
-  (UINT8 h_expand, UINT8 v_expand, JSAMPARRAY input_data,
-   JSAMPARRAY *output_data_ptr, JDIMENSION output_width,
-   int max_v_samp_factor);
 
 EXTERN(void) jsimd_h2v1_upsample_altivec
   (int max_v_samp_factor, JDIMENSION output_width, JSAMPARRAY input_data,
