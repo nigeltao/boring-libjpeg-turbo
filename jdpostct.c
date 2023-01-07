@@ -28,18 +28,6 @@
 
 typedef struct {
   struct jpeg_d_post_controller pub; /* public fields */
-
-  /* Color quantization source buffer: this holds output data from
-   * the upsample/color conversion step to be passed to the quantizer.
-   * For two-pass color quantization, we need a full-image buffer;
-   * for one-pass operation, a strip buffer is sufficient.
-   */
-  jvirt_sarray_ptr whole_image; /* virtual array, or NULL if one-pass */
-  JSAMPARRAY buffer;            /* strip buffer, or current strip of virtual */
-  JDIMENSION strip_height;      /* buffer size in rows */
-  /* for two-pass mode only: */
-  JDIMENSION starting_row;      /* row # of first row in current strip */
-  JDIMENSION next_row;          /* index of next row to fill/empty in strip */
 } my_post_controller;
 
 typedef my_post_controller *my_post_ptr;
@@ -67,7 +55,6 @@ start_pass_dpost(j_decompress_ptr cinfo, J_BUF_MODE pass_mode)
     ERREXIT(cinfo, JERR_BAD_BUFFER_MODE);
     break;
   }
-  post->starting_row = post->next_row = 0;
 }
 
 
@@ -85,6 +72,4 @@ jinit_d_post_controller(j_decompress_ptr cinfo, boolean need_full_buffer)
                                 sizeof(my_post_controller));
   cinfo->post = (struct jpeg_d_post_controller *)post;
   post->pub.start_pass = start_pass_dpost;
-  post->whole_image = NULL;     /* flag for no virtual arrays */
-  post->buffer = NULL;          /* flag for no strip buffer */
 }
