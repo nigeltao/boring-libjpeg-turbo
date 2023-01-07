@@ -76,6 +76,8 @@ what many Linux distributions ship as `/usr/bin/cjpeg`. This repository's
   but 'sloppy', as opposed to higher quality, 'fancy' upsampling).
 - Quantization from 24-bit (or 32-bit) to 8-bit color.
 - RGB565 color space.
+- Runtime configuration via environment variables (e.g. JPEGMEM,
+  JSIMD\_FORCENONE, etc).
 
 
 ### Removed SIMD Code

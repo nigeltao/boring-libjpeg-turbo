@@ -1110,31 +1110,4 @@ jinit_memory_mgr(j_common_ptr cinfo)
 
   /* Declare ourselves open for business */
   cinfo->mem = &mem->pub;
-
-  /* Check for an environment variable JPEGMEM; if found, override the
-   * default max_memory setting from jpeg_mem_init.  Note that the
-   * surrounding application may again override this value.
-   * If your system doesn't support getenv(), define NO_GETENV to disable
-   * this feature.
-   */
-#ifndef NO_GETENV
-  {
-    char memenv[30] = { 0 };
-
-    if (!GETENV_S(memenv, 30, "JPEGMEM") && strlen(memenv) > 0) {
-      char ch = 'x';
-
-#ifdef _MSC_VER
-      if (sscanf_s(memenv, "%ld%c", &max_to_use, &ch, 1) > 0) {
-#else
-      if (sscanf(memenv, "%ld%c", &max_to_use, &ch) > 0) {
-#endif
-        if (ch == 'm' || ch == 'M')
-          max_to_use *= 1000L;
-        mem->pub.max_memory_to_use = max_to_use * 1000L;
-      }
-    }
-  }
-#endif
-
 }
