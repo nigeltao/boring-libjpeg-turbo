@@ -433,6 +433,8 @@ jinit_upsampler(j_decompress_ptr cinfo)
     ERREXIT(cinfo, JERR_CCIR601_NOTIMPL);
 
   do_fancy = cinfo->do_fancy_upsampling;
+  if (!do_fancy)
+    ERREXIT(cinfo, JERR_NOTBORING_DO_FANCY_UPSAMPLING);
 
   /* Verify we can handle the sampling factors, select per-component methods,
    * and create storage as needed.

@@ -145,7 +145,6 @@ usage(void)
           (JDCT_DEFAULT == JDCT_FLOAT ? " (default)" : ""));
 #endif
   fprintf(stderr, "  -icc FILE      Extract ICC profile to FILE\n");
-  fprintf(stderr, "  -nosmooth      Don't use high-quality upsampling\n");
   fprintf(stderr, "  -maxmemory N   Maximum memory to use (in kbytes)\n");
   fprintf(stderr, "  -maxscans N    Maximum number of scans to allow in input file\n");
   fprintf(stderr, "  -outfile name  Specify name for output file\n");
@@ -317,7 +316,9 @@ parse_switches(j_decompress_ptr cinfo, int argc, char **argv,
 
     } else if (keymatch(arg, "nosmooth", 3)) {
       /* Suppress fancy upsampling */
-      cinfo->do_fancy_upsampling = FALSE;
+      fprintf(stderr, "%s: notboring: nosmooth is not supported\n",
+              progname);
+      exit(EXIT_FAILURE);
 
     } else if (keymatch(arg, "onepass", 3)) {
       /* Use fast one-pass quantization. */

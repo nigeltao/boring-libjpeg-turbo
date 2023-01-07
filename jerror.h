@@ -207,6 +207,8 @@ JMESSAGE(JWRN_BOGUS_ICC, "Corrupt JPEG data: bad ICC marker")
 JMESSAGE(JERR_BAD_DROP_SAMPLING,
          "Component index %d: mismatching sampling ratio %d:%d, %d:%d, %c")
 #endif
+JMESSAGE(JERR_NOTBORING_DO_FANCY_UPSAMPLING,
+         "'do_fancy_upsampling=FALSE' not implemented in boring-libjpeg-turbo")
 
 #ifdef JMAKE_ENUM_LIST
 
