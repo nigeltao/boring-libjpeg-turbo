@@ -33,7 +33,6 @@ C_FILES=(
     jdmainct.c
     jdmarker.c
     jdmaster.c
-    jdmerge.c
     jdphuff.c
     jdpostct.c
     jdsample.c

@@ -71,6 +71,8 @@ what many Linux distributions ship as `/usr/bin/cjpeg`. This repository's
 ### Removed C Library Features
 
 - IDCT scaling.
+- Merged upsampling (merging upsampling with color conversion, which is fast
+  but 'sloppy', as opposed to higher quality, 'fancy' upsampling).
 - Quantization from 24-bit (or 32-bit) to 8-bit color.
 - RGB565 color space.
 

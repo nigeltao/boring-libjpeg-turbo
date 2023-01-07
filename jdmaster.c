@@ -25,48 +25,6 @@
 
 
 /*
- * Determine whether merged upsample/color conversion should be used.
- * CRUCIAL: this must match the actual capabilities of jdmerge.c!
- */
-
-LOCAL(boolean)
-use_merged_upsample(j_decompress_ptr cinfo)
-{
-#ifdef UPSAMPLE_MERGING_SUPPORTED
-  /* Merging is the equivalent of plain box-filter upsampling */
-  if (cinfo->do_fancy_upsampling || cinfo->CCIR601_sampling)
-    return FALSE;
-  /* jdmerge.c only supports YCC=>RGB color conversion */
-  if (cinfo->jpeg_color_space != JCS_YCbCr || cinfo->num_components != 3 ||
-      (cinfo->out_color_space != JCS_RGB &&
-       cinfo->out_color_space != JCS_EXT_RGB &&
-       cinfo->out_color_space != JCS_EXT_RGBX &&
-       cinfo->out_color_space != JCS_EXT_BGR &&
-       cinfo->out_color_space != JCS_EXT_BGRX &&
-       cinfo->out_color_space != JCS_EXT_XBGR &&
-       cinfo->out_color_space != JCS_EXT_XRGB &&
-       cinfo->out_color_space != JCS_EXT_RGBA &&
-       cinfo->out_color_space != JCS_EXT_BGRA &&
-       cinfo->out_color_space != JCS_EXT_ABGR &&
-       cinfo->out_color_space != JCS_EXT_ARGB))
-    return FALSE;
-  /* and it only handles 2h1v or 2h2v sampling ratios */
-  if (cinfo->comp_info[0].h_samp_factor != 2 ||
-      cinfo->comp_info[1].h_samp_factor != 1 ||
-      cinfo->comp_info[2].h_samp_factor != 1 ||
-      cinfo->comp_info[0].v_samp_factor >  2 ||
-      cinfo->comp_info[1].v_samp_factor != 1 ||
-      cinfo->comp_info[2].v_samp_factor != 1)
-    return FALSE;
-  /* ??? also need to test for upsample-time rescaling, when & if supported */
-  return TRUE;                  /* by golly, it'll work... */
-#else
-  return FALSE;
-#endif
-}
-
-
-/*
  * Compute output image dimensions and related values.
  * NOTE: this is exported for possible use by application.
  * Hence it mustn't do anything that can't be done twice.
@@ -142,11 +100,7 @@ jpeg_calc_output_dimensions(j_decompress_ptr cinfo)
   }
   cinfo->output_components = cinfo->out_color_components;
 
-  /* See if upsampler will want to emit more than one row at a time */
-  if (use_merged_upsample(cinfo))
-    cinfo->rec_outbuf_height = cinfo->max_v_samp_factor;
-  else
-    cinfo->rec_outbuf_height = 1;
+  cinfo->rec_outbuf_height = 1;
 }
 
 
@@ -251,17 +205,10 @@ master_selection(j_decompress_ptr cinfo)
 
   /* Initialize my private state */
   master->pass_number = 0;
-  master->using_merged_upsample = use_merged_upsample(cinfo);
 
   /* Post-processing: in particular, color conversion first */
   if (!cinfo->raw_data_out) {
-    if (master->using_merged_upsample) {
-#ifdef UPSAMPLE_MERGING_SUPPORTED
-      jinit_merged_upsampler(cinfo); /* does color conversion too */
-#else
-      ERREXIT(cinfo, JERR_NOT_COMPILED);
-#endif
-    } else {
+    if (NOTBORING_ALWAYS_TRUE) {
       jinit_color_deconverter(cinfo);
       jinit_upsampler(cinfo);
     }
@@ -346,8 +293,7 @@ prepare_for_output_pass(j_decompress_ptr cinfo)
     (*cinfo->idct->start_pass) (cinfo);
     (*cinfo->coef->start_output_pass) (cinfo);
     if (!cinfo->raw_data_out) {
-      if (!master->using_merged_upsample)
-        (*cinfo->cconvert->start_pass) (cinfo);
+      (*cinfo->cconvert->start_pass) (cinfo);
       (*cinfo->upsample->start_pass) (cinfo);
       (*cinfo->post->start_pass) (cinfo, JBUF_PASS_THRU);
       (*cinfo->main->start_pass) (cinfo, JBUF_PASS_THRU);

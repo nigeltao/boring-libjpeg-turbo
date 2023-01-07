@@ -22,7 +22,6 @@
 #include "jdmainct.h"
 #include "jdcoefct.h"
 #include "jdmaster.h"
-#include "jdmerge.h"
 #include "jdsample.h"
 #include "jmemsys.h"
 
@@ -132,9 +131,6 @@ jpeg_crop_scanline(j_decompress_ptr cinfo, JDIMENSION *xoffset,
   JDIMENSION input_xoffset;
   boolean reinit_upsampler = FALSE;
   jpeg_component_info *compptr;
-#ifdef UPSAMPLE_MERGING_SUPPORTED
-  my_master_ptr master = (my_master_ptr)cinfo->master;
-#endif
 
   if ((cinfo->global_state != DSTATE_SCANNING &&
        cinfo->global_state != DSTATE_BUFIMAGE) || cinfo->output_scanline != 0)
@@ -185,13 +181,6 @@ jpeg_crop_scanline(j_decompress_ptr cinfo, JDIMENSION *xoffset,
    */
   *width = *width + input_xoffset - *xoffset;
   cinfo->output_width = *width;
-#ifdef UPSAMPLE_MERGING_SUPPORTED
-  if (master->using_merged_upsample && cinfo->max_v_samp_factor == 2) {
-    my_merged_upsample_ptr upsample = (my_merged_upsample_ptr)cinfo->upsample;
-    upsample->out_row_width =
-      cinfo->output_width * cinfo->out_color_components;
-  }
-#endif
 
   /* Set the first and last iMCU columns that we must decompress.  These values
    * will be used in single-scan decompressions.
@@ -294,9 +283,6 @@ LOCAL(void)
 read_and_discard_scanlines(j_decompress_ptr cinfo, JDIMENSION num_lines)
 {
   JDIMENSION n;
-#ifdef UPSAMPLE_MERGING_SUPPORTED
-  my_master_ptr master = (my_master_ptr)cinfo->master;
-#endif
   JSAMPLE dummy_sample[1] = { 0 };
   JSAMPROW dummy_row = dummy_sample;
   JSAMPARRAY scanlines = NULL;
@@ -312,13 +298,6 @@ read_and_discard_scanlines(j_decompress_ptr cinfo, JDIMENSION num_lines)
      */
     scanlines = &dummy_row;
   }
-
-#ifdef UPSAMPLE_MERGING_SUPPORTED
-  if (master->using_merged_upsample && cinfo->max_v_samp_factor == 2) {
-    my_merged_upsample_ptr upsample = (my_merged_upsample_ptr)cinfo->upsample;
-    scanlines = &upsample->spare_row;
-  }
-#endif
 
   for (n = 0; n < num_lines; n++)
     jpeg_read_scanlines(cinfo, scanlines, 1);
@@ -339,11 +318,6 @@ increment_simple_rowgroup_ctr(j_decompress_ptr cinfo, JDIMENSION rows)
   JDIMENSION rows_left;
   my_main_ptr main_ptr = (my_main_ptr)cinfo->main;
   my_master_ptr master = (my_master_ptr)cinfo->master;
-
-  if (master->using_merged_upsample && cinfo->max_v_samp_factor == 2) {
-    read_and_discard_scanlines(cinfo, rows);
-    return;
-  }
 
   /* Increment the counter to the next row group after the skipped rows. */
   main_ptr->rowgroup_ctr += rows / cinfo->max_v_samp_factor;
@@ -438,7 +412,7 @@ jpeg_skip_scanlines(j_decompress_ptr cinfo, JDIMENSION num_lines)
     main_ptr->buffer_full = FALSE;
     main_ptr->rowgroup_ctr = 0;
     main_ptr->context_state = CTX_PREPARE_FOR_IMCU;
-    if (!master->using_merged_upsample) {
+    if (NOTBORING_ALWAYS_TRUE) {
       upsample->next_row_out = cinfo->max_v_samp_factor;
       upsample->rows_to_go = cinfo->output_height - cinfo->output_scanline;
     }
@@ -453,7 +427,7 @@ jpeg_skip_scanlines(j_decompress_ptr cinfo, JDIMENSION num_lines)
       cinfo->output_scanline += lines_left_in_iMCU_row;
       main_ptr->buffer_full = FALSE;
       main_ptr->rowgroup_ctr = 0;
-      if (!master->using_merged_upsample) {
+      if (NOTBORING_ALWAYS_TRUE) {
         upsample->next_row_out = cinfo->max_v_samp_factor;
         upsample->rows_to_go = cinfo->output_height - cinfo->output_scanline;
       }
@@ -491,7 +465,7 @@ jpeg_skip_scanlines(j_decompress_ptr cinfo, JDIMENSION num_lines)
       cinfo->output_iMCU_row += lines_to_skip / lines_per_iMCU_row;
       increment_simple_rowgroup_ctr(cinfo, lines_to_read);
     }
-    if (!master->using_merged_upsample)
+    if (NOTBORING_ALWAYS_TRUE)
       upsample->rows_to_go = cinfo->output_height - cinfo->output_scanline;
     return num_lines;
   }
@@ -535,7 +509,7 @@ jpeg_skip_scanlines(j_decompress_ptr cinfo, JDIMENSION num_lines)
    * bit odd, since "rows_to_go" seems to be redundantly keeping track of
    * output_scanline.
    */
-  if (!master->using_merged_upsample)
+  if (NOTBORING_ALWAYS_TRUE)
     upsample->rows_to_go = cinfo->output_height - cinfo->output_scanline;
 
   /* Always skip the requested number of lines. */

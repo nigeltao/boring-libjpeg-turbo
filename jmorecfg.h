@@ -260,8 +260,8 @@ typedef int boolean;
 #define SAVE_MARKERS_SUPPORTED      /* jpeg_save_markers() needed? */
 #define BLOCK_SMOOTHING_SUPPORTED   /* Block smoothing? (Progressive only) */
 /* notboring: #define IDCT_SCALING_SUPPORTED */
-#undef  UPSAMPLE_SCALING_SUPPORTED  /* Output rescaling at upsample stage? */
-#define UPSAMPLE_MERGING_SUPPORTED  /* Fast path for sloppy upsampling? */
+/* notboring: #undef  UPSAMPLE_SCALING_SUPPORTED */
+/* notboring: #define UPSAMPLE_MERGING_SUPPORTED */
 /* notboring: #define QUANT_1PASS_SUPPORTED */
 /* notboring: #define QUANT_2PASS_SUPPORTED */
 

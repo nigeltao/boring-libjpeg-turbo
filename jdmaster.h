@@ -16,7 +16,7 @@ typedef struct {
 
   int pass_number;              /* # of passes completed */
 
-  boolean using_merged_upsample; /* TRUE if using merged upsample/cconvert */
+  boolean notboring_using_merged_upsample;
 
   void *notboring_quantizer_1pass;
   void *notboring_quantizer_2pass;

@@ -342,7 +342,6 @@ EXTERN(void) jinit_phuff_decoder(j_decompress_ptr cinfo);
 EXTERN(void) jinit_inverse_dct(j_decompress_ptr cinfo);
 EXTERN(void) jinit_upsampler(j_decompress_ptr cinfo);
 EXTERN(void) jinit_color_deconverter(j_decompress_ptr cinfo);
-EXTERN(void) jinit_merged_upsampler(j_decompress_ptr cinfo);
 /* Memory manager initialization */
 EXTERN(void) jinit_memory_mgr(j_common_ptr cinfo);
 
