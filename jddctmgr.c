@@ -75,14 +75,6 @@ typedef union {
 } multiplier_table;
 
 
-/* The current scaled-IDCT routines require ISLOW-style multiplier tables,
- * so be sure to compile that code if either ISLOW or SCALING is requested.
- */
-#ifdef DCT_ISLOW_SUPPORTED
-#define PROVIDE_ISLOW_TABLES
-#endif
-
-
 /*
  * Prepare for an output pass.
  * Here we select the proper IDCT routine for each component and build
@@ -151,7 +143,6 @@ start_pass(j_decompress_ptr cinfo)
       continue;
     idct->cur_method[ci] = method;
     switch (method) {
-#ifdef PROVIDE_ISLOW_TABLES
     case JDCT_ISLOW:
       {
         /* For LL&M IDCT method, multipliers are equal to raw quantization
@@ -163,7 +154,6 @@ start_pass(j_decompress_ptr cinfo)
         }
       }
       break;
-#endif
 #ifdef DCT_IFAST_SUPPORTED
     case JDCT_IFAST:
       {
