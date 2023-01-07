@@ -66,3 +66,5 @@ what many Linux distributions ship as `/usr/bin/cjpeg`. This repository's
 
 
 ## Removed C Library Features
+
+- IDCT scaling.

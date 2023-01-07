@@ -44,7 +44,6 @@ C_FILES=(
     jidctflt.c
     jidctfst.c
     jidctint.c
-    jidctred.c
     jmemmgr.c
     jmemnobs.c
     jquant1.c
@@ -77,7 +76,6 @@ ASM_FILES=(
     simd/x86_64/jidctfst-sse2.asm
     simd/x86_64/jidctint-avx2.asm
     simd/x86_64/jidctint-sse2.asm
-    simd/x86_64/jidctred-sse2.asm
     simd/x86_64/jquantf-sse2.asm
     simd/x86_64/jquanti-avx2.asm
     simd/x86_64/jquanti-sse2.asm

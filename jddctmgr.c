@@ -80,10 +80,6 @@ typedef union {
  */
 #ifdef DCT_ISLOW_SUPPORTED
 #define PROVIDE_ISLOW_TABLES
-#else
-#ifdef IDCT_SCALING_SUPPORTED
-#define PROVIDE_ISLOW_TABLES
-#endif
 #endif
 
 
@@ -107,47 +103,6 @@ start_pass(j_decompress_ptr cinfo)
        ci++, compptr++) {
     /* Select the proper IDCT routine for this component's scaling */
     switch (compptr->_DCT_scaled_size) {
-#ifdef IDCT_SCALING_SUPPORTED
-    case 1:
-      method_ptr = jpeg_idct_1x1;
-      method = JDCT_ISLOW;      /* jidctred uses islow-style table */
-      break;
-    case 2:
-      if (jsimd_can_idct_2x2())
-        method_ptr = jsimd_idct_2x2;
-      else
-        method_ptr = jpeg_idct_2x2;
-      method = JDCT_ISLOW;      /* jidctred uses islow-style table */
-      break;
-    case 3:
-      method_ptr = jpeg_idct_3x3;
-      method = JDCT_ISLOW;      /* jidctint uses islow-style table */
-      break;
-    case 4:
-      if (jsimd_can_idct_4x4())
-        method_ptr = jsimd_idct_4x4;
-      else
-        method_ptr = jpeg_idct_4x4;
-      method = JDCT_ISLOW;      /* jidctred uses islow-style table */
-      break;
-    case 5:
-      method_ptr = jpeg_idct_5x5;
-      method = JDCT_ISLOW;      /* jidctint uses islow-style table */
-      break;
-    case 6:
-#if defined(__mips__)
-      if (jsimd_can_idct_6x6())
-        method_ptr = jsimd_idct_6x6;
-      else
-#endif
-      method_ptr = jpeg_idct_6x6;
-      method = JDCT_ISLOW;      /* jidctint uses islow-style table */
-      break;
-    case 7:
-      method_ptr = jpeg_idct_7x7;
-      method = JDCT_ISLOW;      /* jidctint uses islow-style table */
-      break;
-#endif
     case DCTSIZE:
       switch (cinfo->dct_method) {
 #ifdef DCT_ISLOW_SUPPORTED
@@ -182,45 +137,6 @@ start_pass(j_decompress_ptr cinfo)
         break;
       }
       break;
-#ifdef IDCT_SCALING_SUPPORTED
-    case 9:
-      method_ptr = jpeg_idct_9x9;
-      method = JDCT_ISLOW;      /* jidctint uses islow-style table */
-      break;
-    case 10:
-      method_ptr = jpeg_idct_10x10;
-      method = JDCT_ISLOW;      /* jidctint uses islow-style table */
-      break;
-    case 11:
-      method_ptr = jpeg_idct_11x11;
-      method = JDCT_ISLOW;      /* jidctint uses islow-style table */
-      break;
-    case 12:
-#if defined(__mips__)
-      if (jsimd_can_idct_12x12())
-        method_ptr = jsimd_idct_12x12;
-      else
-#endif
-      method_ptr = jpeg_idct_12x12;
-      method = JDCT_ISLOW;      /* jidctint uses islow-style table */
-      break;
-    case 13:
-      method_ptr = jpeg_idct_13x13;
-      method = JDCT_ISLOW;      /* jidctint uses islow-style table */
-      break;
-    case 14:
-      method_ptr = jpeg_idct_14x14;
-      method = JDCT_ISLOW;      /* jidctint uses islow-style table */
-      break;
-    case 15:
-      method_ptr = jpeg_idct_15x15;
-      method = JDCT_ISLOW;      /* jidctint uses islow-style table */
-      break;
-    case 16:
-      method_ptr = jpeg_idct_16x16;
-      method = JDCT_ISLOW;      /* jidctint uses islow-style table */
-      break;
-#endif
     default:
       ERREXIT1(cinfo, JERR_BAD_DCTSIZE, compptr->_DCT_scaled_size);
       break;

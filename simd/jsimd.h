@@ -1111,43 +1111,6 @@ EXTERN(void) jsimd_quantize_float_sse2
 EXTERN(void) jsimd_quantize_float_dspr2
   (JCOEFPTR coef_block, FAST_FLOAT *divisors, FAST_FLOAT *workspace);
 
-/* Scaled Inverse DCT */
-EXTERN(void) jsimd_idct_2x2_mmx
-  (void *dct_table, JCOEFPTR coef_block, JSAMPARRAY output_buf,
-   JDIMENSION output_col);
-EXTERN(void) jsimd_idct_4x4_mmx
-  (void *dct_table, JCOEFPTR coef_block, JSAMPARRAY output_buf,
-   JDIMENSION output_col);
-
-extern const int jconst_idct_red_sse2[];
-EXTERN(void) jsimd_idct_2x2_sse2
-  (void *dct_table, JCOEFPTR coef_block, JSAMPARRAY output_buf,
-   JDIMENSION output_col);
-EXTERN(void) jsimd_idct_4x4_sse2
-  (void *dct_table, JCOEFPTR coef_block, JSAMPARRAY output_buf,
-   JDIMENSION output_col);
-
-EXTERN(void) jsimd_idct_2x2_neon
-  (void *dct_table, JCOEFPTR coef_block, JSAMPARRAY output_buf,
-   JDIMENSION output_col);
-EXTERN(void) jsimd_idct_4x4_neon
-  (void *dct_table, JCOEFPTR coef_block, JSAMPARRAY output_buf,
-   JDIMENSION output_col);
-
-EXTERN(void) jsimd_idct_2x2_dspr2
-  (void *dct_table, JCOEFPTR coef_block, JSAMPARRAY output_buf,
-   JDIMENSION output_col);
-EXTERN(void) jsimd_idct_4x4_dspr2
-  (void *dct_table, JCOEFPTR coef_block, JSAMPARRAY output_buf,
-   JDIMENSION output_col, int *workspace);
-EXTERN(void) jsimd_idct_6x6_dspr2
-  (void *dct_table, JCOEFPTR coef_block, JSAMPARRAY output_buf,
-   JDIMENSION output_col);
-EXTERN(void) jsimd_idct_12x12_pass1_dspr2
-  (JCOEFPTR coef_block, void *dct_table, int *workspace);
-EXTERN(void) jsimd_idct_12x12_pass2_dspr2
-  (int *workspace, int *output);
-
 /* Accurate Integer Inverse DCT */
 EXTERN(void) jsimd_idct_islow_mmx
   (void *dct_table, JCOEFPTR coef_block, JSAMPARRAY output_buf,
