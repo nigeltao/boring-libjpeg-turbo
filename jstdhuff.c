@@ -17,8 +17,8 @@
  */
 
 LOCAL(void)
-add_huff_table(j_common_ptr cinfo, JHUFF_TBL **htblptr, const uint8_t *bits,
-               const uint8_t *val)
+add_huff_table(j_common_ptr cinfo, JHUFF_TBL **htblptr, const UINT8 *bits,
+               const UINT8 *val)
 /* Define a Huffman table */
 {
   int nsymbols, len;
@@ -41,9 +41,9 @@ add_huff_table(j_common_ptr cinfo, JHUFF_TBL **htblptr, const uint8_t *bits,
   if (nsymbols < 1 || nsymbols > 256)
     ERREXIT(cinfo, JERR_BAD_HUFF_TABLE);
 
-  memcpy((*htblptr)->huffval, val, nsymbols * sizeof(uint8_t));
+  memcpy((*htblptr)->huffval, val, nsymbols * sizeof(UINT8));
   memset(&((*htblptr)->huffval[nsymbols]), 0,
-         (256 - nsymbols) * sizeof(uint8_t));
+         (256 - nsymbols) * sizeof(UINT8));
 
   /* Initialize sent_table FALSE so table will be written to JPEG file. */
   (*htblptr)->sent_table = FALSE;
@@ -57,24 +57,24 @@ std_huff_tables(j_common_ptr cinfo)
 {
   JHUFF_TBL **dc_huff_tbl_ptrs, **ac_huff_tbl_ptrs;
 
-  static const uint8_t bits_dc_luminance[17] = {
+  static const UINT8 bits_dc_luminance[17] = {
     /* 0-base */ 0, 0, 1, 5, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0
   };
-  static const uint8_t val_dc_luminance[] = {
+  static const UINT8 val_dc_luminance[] = {
     0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
   };
 
-  static const uint8_t bits_dc_chrominance[17] = {
+  static const UINT8 bits_dc_chrominance[17] = {
     /* 0-base */ 0, 0, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0
   };
-  static const uint8_t val_dc_chrominance[] = {
+  static const UINT8 val_dc_chrominance[] = {
     0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
   };
 
-  static const uint8_t bits_ac_luminance[17] = {
+  static const UINT8 bits_ac_luminance[17] = {
     /* 0-base */ 0, 0, 2, 1, 3, 3, 2, 4, 3, 5, 5, 4, 4, 0, 0, 1, 0x7d
   };
-  static const uint8_t val_ac_luminance[] = {
+  static const UINT8 val_ac_luminance[] = {
     0x01, 0x02, 0x03, 0x00, 0x04, 0x11, 0x05, 0x12,
     0x21, 0x31, 0x41, 0x06, 0x13, 0x51, 0x61, 0x07,
     0x22, 0x71, 0x14, 0x32, 0x81, 0x91, 0xa1, 0x08,
@@ -98,10 +98,10 @@ std_huff_tables(j_common_ptr cinfo)
     0xf9, 0xfa
   };
 
-  static const uint8_t bits_ac_chrominance[17] = {
+  static const UINT8 bits_ac_chrominance[17] = {
     /* 0-base */ 0, 0, 2, 1, 2, 4, 4, 3, 4, 7, 5, 4, 4, 0, 1, 2, 0x77
   };
-  static const uint8_t val_ac_chrominance[] = {
+  static const UINT8 val_ac_chrominance[] = {
     0x00, 0x01, 0x02, 0x03, 0x11, 0x04, 0x05, 0x21,
     0x31, 0x06, 0x12, 0x41, 0x51, 0x07, 0x61, 0x71,
     0x13, 0x22, 0x32, 0x81, 0x08, 0x14, 0x42, 0x91,

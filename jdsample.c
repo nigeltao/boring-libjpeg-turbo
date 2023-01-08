@@ -501,8 +501,8 @@ jinit_upsampler(j_decompress_ptr cinfo)
                (v_out_group % v_in_group) == 0) {
       /* Generic integral-factors upsampling method */
       upsample->methods[ci] = int_upsample;
-      upsample->h_expand[ci] = (uint8_t)(h_out_group / h_in_group);
-      upsample->v_expand[ci] = (uint8_t)(v_out_group / v_in_group);
+      upsample->h_expand[ci] = (UINT8)(h_out_group / h_in_group);
+      upsample->v_expand[ci] = (UINT8)(v_out_group / v_in_group);
     } else
       ERREXIT(cinfo, JERR_FRACT_SAMPLE_NOTIMPL);
     if (need_buffer && !cinfo->master->jinit_upsampler_no_alloc) {

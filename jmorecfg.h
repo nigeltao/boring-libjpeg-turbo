@@ -15,9 +15,6 @@
  */
 
 
-#include <stdint.h>
-
-
 /*
  * Maximum number of components (color channels) allowed in JPEG image.
  * To meet the letter of Rec. ITU-T T.81 | ISO/IEC 10918-1, set this to 255.
@@ -87,7 +84,64 @@ typedef short JCOEF;
  */
 
 typedef unsigned char JOCTET;
+#define GETJOCTET(value)  (value)
 
+
+/* These typedefs are used for various table entries and so forth.
+ * They must be at least as wide as specified; but making them too big
+ * won't cost a huge amount of memory, so we don't provide special
+ * extraction code like we did for JSAMPLE.  (In other words, these
+ * typedefs live at a different point on the speed/space tradeoff curve.)
+ */
+
+/* UINT8 must hold at least the values 0..255. */
+
+typedef unsigned char UINT8;
+
+/* UINT16 must hold at least the values 0..65535. */
+
+typedef unsigned short UINT16;
+
+/* INT16 must hold at least the values -32768..32767. */
+
+#ifndef XMD_H                   /* X11/xmd.h correctly defines INT16 */
+typedef short INT16;
+#endif
+
+/* INT32 must hold at least signed 32-bit values.
+ *
+ * NOTE: The INT32 typedef dates back to libjpeg v5 (1994.)  Integers were
+ * sometimes 16-bit back then (MS-DOS), which is why INT32 is typedef'd to
+ * long.  It also wasn't common (or at least as common) in 1994 for INT32 to be
+ * defined by platform headers.  Since then, however, INT32 is defined in
+ * several other common places:
+ *
+ * Xmd.h (X11 header) typedefs INT32 to int on 64-bit platforms and long on
+ * 32-bit platforms (i.e always a 32-bit signed type.)
+ *
+ * basetsd.h (Win32 header) typedefs INT32 to int (always a 32-bit signed type
+ * on modern platforms.)
+ *
+ * qglobal.h (Qt header) typedefs INT32 to int (always a 32-bit signed type on
+ * modern platforms.)
+ *
+ * This is a recipe for conflict, since "long" and "int" aren't always
+ * compatible types.  Since the definition of INT32 has technically been part
+ * of the libjpeg API for more than 20 years, we can't remove it, but we do not
+ * use it internally any longer.  We instead define a separate type (JLONG)
+ * for internal use, which ensures that internal behavior will always be the
+ * same regardless of any external headers that may be included.
+ */
+
+#ifndef XMD_H                   /* X11/xmd.h correctly defines INT32 */
+#ifndef _BASETSD_H_             /* Microsoft defines it in basetsd.h */
+#ifndef _BASETSD_H              /* MinGW is slightly different */
+#ifndef QGLOBAL_H               /* Qt defines it in qglobal.h */
+typedef long INT32;
+#endif
+#endif
+#endif
+#endif
 
 /* Datatype used for image dimensions.  The JPEG standard only supports
  * images up to 64K*64K due to 16-bit fields in SOF markers.  Therefore

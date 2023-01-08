@@ -64,7 +64,7 @@ typedef my_fdct_controller *my_fdct_ptr;
  */
 
 LOCAL(int)
-flss(uint16_t val)
+flss(UINT16 val)
 {
   int bit;
 
@@ -154,7 +154,7 @@ flss(uint16_t val)
  */
 
 LOCAL(int)
-compute_reciprocal(uint16_t divisor, DCTELEM *dtbl)
+compute_reciprocal(UINT16 divisor, DCTELEM *dtbl)
 {
   UDCTELEM2 fq, fr;
   UDCTELEM c;

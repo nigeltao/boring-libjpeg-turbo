@@ -43,8 +43,8 @@ typedef struct {
   /* These arrays save pixel expansion factors so that int_expand need not
    * recompute them each time.  They are unused for other upsampling methods.
    */
-  uint8_t h_expand[MAX_COMPONENTS];
-  uint8_t v_expand[MAX_COMPONENTS];
+  UINT8 h_expand[MAX_COMPONENTS];
+  UINT8 v_expand[MAX_COMPONENTS];
 } my_upsampler;
 
 typedef my_upsampler *my_upsample_ptr;

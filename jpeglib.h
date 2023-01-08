@@ -88,7 +88,7 @@ typedef struct {
    * (not the zigzag order in which they are stored in a JPEG DQT marker).
    * CAUTION: IJG versions prior to v6a kept this array in zigzag order.
    */
-  uint16_t quantval[DCTSIZE2];    /* quantization step for each coefficient */
+  UINT16 quantval[DCTSIZE2];    /* quantization step for each coefficient */
   /* This field is used only during compression.  It's initialized FALSE when
    * the table is created, and set TRUE when it's been output to the file.
    * You could suppress output of a table by setting this to TRUE.
@@ -102,9 +102,9 @@ typedef struct {
 
 typedef struct {
   /* These two fields directly represent the contents of a JPEG DHT marker */
-  uint8_t bits[17];             /* bits[k] = # of symbols with codes of */
+  UINT8 bits[17];               /* bits[k] = # of symbols with codes of */
                                 /* length k bits; bits[0] is unused */
-  uint8_t huffval[256];         /* The symbols, in order of incr code length */
+  UINT8 huffval[256];           /* The symbols, in order of incr code length */
   /* This field is used only during compression.  It's initialized FALSE when
    * the table is created, and set TRUE when it's been output to the file.
    * You could suppress output of a table by setting this to TRUE.
@@ -202,7 +202,7 @@ typedef struct jpeg_marker_struct *jpeg_saved_marker_ptr;
 
 struct jpeg_marker_struct {
   jpeg_saved_marker_ptr next;   /* next in list, or NULL */
-  uint8_t marker;               /* marker code: JPEG_COM, or JPEG_APP0+n */
+  UINT8 marker;                 /* marker code: JPEG_COM, or JPEG_APP0+n */
   unsigned int original_length; /* # bytes of data in the file */
   unsigned int data_length;     /* # bytes of data saved at data[] */
   JOCTET *data;                 /* the data contained in the marker */
@@ -353,9 +353,9 @@ struct jpeg_compress_struct {
   JHUFF_TBL *ac_huff_tbl_ptrs[NUM_HUFF_TBLS];
   /* ptrs to Huffman coding tables, or NULL if not defined */
 
-  uint8_t notboring_arith_dc_L[NUM_ARITH_TBLS];
-  uint8_t notboring_arith_dc_U[NUM_ARITH_TBLS];
-  uint8_t notboring_arith_ac_K[NUM_ARITH_TBLS];
+  UINT8 notboring_arith_dc_L[NUM_ARITH_TBLS];
+  UINT8 notboring_arith_dc_U[NUM_ARITH_TBLS];
+  UINT8 notboring_arith_ac_K[NUM_ARITH_TBLS];
 
   int num_scans;                /* # of entries in scan_info array */
   const jpeg_scan_info *scan_info; /* script for multi-scan file, or NULL */
@@ -385,15 +385,15 @@ struct jpeg_compress_struct {
   /* Parameters controlling emission of special markers. */
 
   boolean write_JFIF_header;    /* should a JFIF marker be written? */
-  uint8_t JFIF_major_version;   /* What to write for the JFIF version number */
-  uint8_t JFIF_minor_version;
+  UINT8 JFIF_major_version;     /* What to write for the JFIF version number */
+  UINT8 JFIF_minor_version;
   /* These three values are not used by the JPEG code, merely copied */
   /* into the JFIF APP0 marker.  density_unit can be 0 for unknown, */
   /* 1 for dots/inch, or 2 for dots/cm.  Note that the pixel aspect */
   /* ratio is defined by X_density/Y_density even when density_unit=0. */
-  uint8_t density_unit;         /* JFIF code for pixel size units */
-  uint16_t X_density;           /* Horizontal pixel density */
-  uint16_t Y_density;           /* Vertical pixel density */
+  UINT8 density_unit;           /* JFIF code for pixel size units */
+  UINT16 X_density;             /* Horizontal pixel density */
+  UINT16 Y_density;             /* Vertical pixel density */
   boolean write_Adobe_marker;   /* should an Adobe marker be written? */
 
   /* State variable: index of next scanline to be written to
@@ -600,9 +600,9 @@ struct jpeg_decompress_struct {
   boolean progressive_mode;     /* TRUE if SOFn specifies progressive mode */
   boolean notboring_arith_code;
 
-  uint8_t notboring_arith_dc_L[NUM_ARITH_TBLS];
-  uint8_t notboring_arith_dc_U[NUM_ARITH_TBLS];
-  uint8_t notboring_arith_ac_K[NUM_ARITH_TBLS];
+  UINT8 notboring_arith_dc_L[NUM_ARITH_TBLS];
+  UINT8 notboring_arith_dc_U[NUM_ARITH_TBLS];
+  UINT8 notboring_arith_ac_K[NUM_ARITH_TBLS];
 
   unsigned int restart_interval; /* MCUs per restart interval, or 0 for no restart */
 
@@ -611,13 +611,13 @@ struct jpeg_decompress_struct {
    */
   boolean saw_JFIF_marker;      /* TRUE iff a JFIF APP0 marker was found */
   /* Data copied from JFIF marker; only valid if saw_JFIF_marker is TRUE: */
-  uint8_t JFIF_major_version;   /* JFIF version number */
-  uint8_t JFIF_minor_version;
-  uint8_t density_unit;         /* JFIF code for pixel size units */
-  uint16_t X_density;           /* Horizontal pixel density */
-  uint16_t Y_density;           /* Vertical pixel density */
+  UINT8 JFIF_major_version;     /* JFIF version number */
+  UINT8 JFIF_minor_version;
+  UINT8 density_unit;           /* JFIF code for pixel size units */
+  UINT16 X_density;             /* Horizontal pixel density */
+  UINT16 Y_density;             /* Vertical pixel density */
   boolean saw_Adobe_marker;     /* TRUE iff an Adobe APP14 marker was found */
-  uint8_t Adobe_transform;      /* Color transform code from Adobe marker */
+  UINT8 Adobe_transform;        /* Color transform code from Adobe marker */
 
   boolean CCIR601_sampling;     /* TRUE=first samples are cosited */
 
