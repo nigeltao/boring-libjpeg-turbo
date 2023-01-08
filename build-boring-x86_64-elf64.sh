@@ -85,9 +85,13 @@ for f in ${ASM_FILES[@]}; do
 done
 
 echo Building cjpeg
-$CC $CFLAGS -I . -D PPM_SUPPORTED ${OBJ_FILES[@]} \
-    cjpeg.c cdjpeg.c rdppm.c -o cjpeg
+$CC -I . -D PPM_SUPPORTED -fdata-sections -ffunction-sections $CFLAGS \
+    ${OBJ_FILES[@]} \
+    cjpeg.c cdjpeg.c rdppm.c -o cjpeg \
+    -Wl,--gc-sections -Wl,-s
 
 echo Building djpeg
-$CC $CFLAGS -I . -D PPM_SUPPORTED ${OBJ_FILES[@]} \
-    djpeg.c cdjpeg.c wrppm.c -o djpeg
+$CC -I . -D PPM_SUPPORTED -fdata-sections -ffunction-sections $CFLAGS \
+    ${OBJ_FILES[@]} \
+    djpeg.c cdjpeg.c wrppm.c -o djpeg \
+    -Wl,--gc-sections -Wl,-s
