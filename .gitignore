@@ -1,4 +1,4 @@
 *.o
 *~
-cjpeg
-djpeg
+boring-cjpeg
+boring-djpeg

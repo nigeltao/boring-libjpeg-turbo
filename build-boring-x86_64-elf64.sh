@@ -84,14 +84,14 @@ for f in ${ASM_FILES[@]}; do
     OBJ_FILES+="$DST "
 done
 
-echo Building cjpeg
+echo Building boring-cjpeg
 $CC -I . -D PPM_SUPPORTED -fdata-sections -ffunction-sections $CFLAGS \
     ${OBJ_FILES[@]} \
-    cjpeg.c cdjpeg.c rdppm.c -o cjpeg \
+    cjpeg.c cdjpeg.c rdppm.c -o boring-cjpeg \
     -Wl,--gc-sections -Wl,-s
 
-echo Building djpeg
+echo Building boring-djpeg
 $CC -I . -D PPM_SUPPORTED -fdata-sections -ffunction-sections $CFLAGS \
     ${OBJ_FILES[@]} \
-    djpeg.c cdjpeg.c wrppm.c -o djpeg \
+    djpeg.c cdjpeg.c wrppm.c -o boring-djpeg \
     -Wl,--gc-sections -Wl,-s

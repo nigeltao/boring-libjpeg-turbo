@@ -3,8 +3,8 @@
 # This is just a very basic consistency check, comparing the cjpeg and djpeg
 # programs' output on a small suite of golden test cases.
 
-if [ ! -f ./cjpeg ] || [ ! -f ./djpeg ]; then
-    echo "./cjpeg or ./djpeg not found; run a build-*.sh script first"
+if [ ! -f ./boring-cjpeg ] || [ ! -f ./boring-djpeg ]; then
+    echo "./boring-cjpeg or ./boring-djpeg not found; run a build-*.sh script first"
     exit 1
 fi
 
@@ -13,9 +13,9 @@ while read LINE; do
     if [[ -z $LINE || ${A[0]} == "#" ]]; then
         continue
     elif [[ ${A[1]} == *.ppm ]]; then
-        HASH=$(./cjpeg ${A[1]} | sha256sum | cut -d ' ' -f1)
+        HASH=$(./boring-cjpeg ${A[1]} | sha256sum | cut -d ' ' -f1)
     elif [[ ${A[1]} == *.jpeg || ${A[1]} == *.jpg ]]; then
-        HASH=$(./djpeg ${A[1]} | sha256sum | cut -d ' ' -f1)
+        HASH=$(./boring-djpeg ${A[1]} | sha256sum | cut -d ' ' -f1)
     else
         echo "UNEXPECTED $LINE"
         exit 1
