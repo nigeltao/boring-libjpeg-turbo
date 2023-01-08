@@ -19,6 +19,33 @@
 #define JPEGLIB_H
 
 /*
+ * This macro lets application code (that #include's this file) conditionally
+ * enable or disable code (via #ifdef) depending on whether it's using the
+ * upstream libjpeg-turbo (or plain libjpeg) or boring-libjpeg-turbo.
+ */
+#define BORING_LIBJPEG_TURBO 1
+
+/*
+ * BORING_LIBJPEG_TURBO_USES_SAME_NAMES is not defined by default, which means
+ * that the libjpeg struct fields and enum names that no longer have any effect
+ * have been renamed. For example, "cinfo.arith_code" becomes
+ * "cinfo.notboring_arith_code" and setting that field does nothing.
+ *
+ * Thus, application code that refers to those names won't compile (when using
+ * boring-libjpeg-turbo instead of libjpeg-turbo). Failing noisily is
+ * preferable to silently accepting (but ignoring) those fields. However, if
+ * it's not easy to edit that application code, you can define this macro
+ * instead (whether by a #define in its C code or by a compiler flag) before
+ * #include'ing this file. The names will be the same and setting those struct
+ * fields or using those enum values will compile but silently have no effect.
+ */
+#ifdef BORING_LIBJPEG_TURBO_USES_SAME_NAMES
+#define BORING_NAME(x) x
+#else
+#define BORING_NAME(x) notboring_##x
+#endif
+
+/*
  * First we include the configuration files that record how this
  * installation of the JPEG library is set up.  jconfig.h can be
  * generated automatically for many systems.  jmorecfg.h contains
@@ -148,10 +175,10 @@ typedef struct {
    * Note that different components may receive different IDCT scalings.
    */
 #if JPEG_LIB_VERSION >= 70
-  int notboring_DCT_h_scaled_size;
-  int notboring_DCT_v_scaled_size;
+  int BORING_NAME(DCT_h_scaled_size);
+  int BORING_NAME(DCT_v_scaled_size);
 #else
-  int notboring_DCT_scaled_size;
+  int BORING_NAME(DCT_scaled_size);
 #endif
   /* The downsampled dimensions are the component's actual, unpadded number
    * of samples at the main buffer (preprocessing/compression interface), thus
@@ -238,7 +265,7 @@ typedef enum {
   JCS_EXT_BGRA,           /* blue/green/red/alpha */
   JCS_EXT_ABGR,           /* alpha/blue/green/red */
   JCS_EXT_ARGB,           /* alpha/red/green/blue */
-  NOTBORING_JCS_RGB565
+  BORING_NAME(JCS_RGB565)
 } J_COLOR_SPACE;
 
 /* DCT/IDCT algorithm options. */
@@ -321,7 +348,7 @@ struct jpeg_compress_struct {
    */
 
 #if JPEG_LIB_VERSION >= 70
-  unsigned int notboring_scale_num, notboring_scale_denom;
+  unsigned int BORING_NAME(scale_num), BORING_NAME(scale_denom);
 
   JDIMENSION jpeg_width;        /* scaled JPEG image width */
   JDIMENSION jpeg_height;       /* scaled JPEG image height */
@@ -353,9 +380,9 @@ struct jpeg_compress_struct {
   JHUFF_TBL *ac_huff_tbl_ptrs[NUM_HUFF_TBLS];
   /* ptrs to Huffman coding tables, or NULL if not defined */
 
-  UINT8 notboring_arith_dc_L[NUM_ARITH_TBLS];
-  UINT8 notboring_arith_dc_U[NUM_ARITH_TBLS];
-  UINT8 notboring_arith_ac_K[NUM_ARITH_TBLS];
+  UINT8 BORING_NAME(arith_dc_L)[NUM_ARITH_TBLS];
+  UINT8 BORING_NAME(arith_dc_U)[NUM_ARITH_TBLS];
+  UINT8 BORING_NAME(arith_ac_K)[NUM_ARITH_TBLS];
 
   int num_scans;                /* # of entries in scan_info array */
   const jpeg_scan_info *scan_info; /* script for multi-scan file, or NULL */
@@ -365,14 +392,14 @@ struct jpeg_compress_struct {
    */
 
   boolean raw_data_in;          /* TRUE=caller supplies downsampled data */
-  boolean notboring_arith_code;
+  boolean BORING_NAME(arith_code);
   boolean optimize_coding;      /* TRUE=optimize entropy encoding parms */
   boolean CCIR601_sampling;     /* TRUE=first samples are cosited */
 #if JPEG_LIB_VERSION >= 70
   boolean do_fancy_downsampling; /* TRUE=apply fancy downsampling */
 #endif
-  int notboring_smoothing_factor;
-  J_DCT_METHOD notboring_dct_method;
+  int BORING_NAME(smoothing_factor);
+  J_DCT_METHOD BORING_NAME(dct_method);
 
   /* The restart interval can be specified in absolute MCUs by setting
    * restart_interval, or in MCU rows by setting restart_in_rows
@@ -415,8 +442,8 @@ struct jpeg_compress_struct {
   int max_v_samp_factor;        /* largest v_samp_factor */
 
 #if JPEG_LIB_VERSION >= 70
-  int notboring_min_DCT_h_scaled_size;
-  int notboring_min_DCT_v_scaled_size;
+  int BORING_NAME(min_DCT_h_scaled_size);
+  int BORING_NAME(min_DCT_v_scaled_size);
 #endif
 
   JDIMENSION total_iMCU_rows;   /* # of iMCU rows to be input to coef ctlr */
@@ -490,24 +517,26 @@ struct jpeg_decompress_struct {
 
   J_COLOR_SPACE out_color_space; /* colorspace for output */
 
-  unsigned int notboring_scale_num, notboring_scale_denom;
+  unsigned int BORING_NAME(scale_num), BORING_NAME(scale_denom);
 
   double output_gamma;          /* image gamma wanted in output */
 
   boolean buffered_image;       /* TRUE=multiple output passes */
   boolean raw_data_out;         /* TRUE=downsampled data wanted */
 
-  J_DCT_METHOD notboring_dct_method;
+  J_DCT_METHOD BORING_NAME(dct_method);
   boolean do_fancy_upsampling;  /* TRUE=apply fancy upsampling */
   boolean do_block_smoothing;   /* TRUE=apply interblock smoothing */
 
-  boolean notboring_quantize_colors;
-  J_DITHER_MODE notboring_dither_mode;
-  boolean notboring_two_pass_quantize;
-  int notboring_desired_number_of_colors;
-  boolean notboring_enable_1pass_quant;
-  boolean notboring_enable_external_quant;
-  boolean notboring_enable_2pass_quant;
+  boolean BORING_NAME(quantize_colors);
+  /* the following are ignored if not quantize_colors: */
+  J_DITHER_MODE BORING_NAME(dither_mode);
+  boolean BORING_NAME(two_pass_quantize);
+  int BORING_NAME(desired_number_of_colors);
+  /* these are significant only in buffered-image mode: */
+  boolean BORING_NAME(enable_1pass_quant);
+  boolean BORING_NAME(enable_external_quant);
+  boolean BORING_NAME(enable_2pass_quant);
 
   /* Description of actual output image that will be returned to application.
    * These fields are computed by jpeg_start_decompress().
@@ -598,11 +627,11 @@ struct jpeg_decompress_struct {
   boolean is_baseline;          /* TRUE if Baseline SOF0 encountered */
 #endif
   boolean progressive_mode;     /* TRUE if SOFn specifies progressive mode */
-  boolean notboring_arith_code;
+  boolean BORING_NAME(arith_code);
 
-  UINT8 notboring_arith_dc_L[NUM_ARITH_TBLS];
-  UINT8 notboring_arith_dc_U[NUM_ARITH_TBLS];
-  UINT8 notboring_arith_ac_K[NUM_ARITH_TBLS];
+  UINT8 BORING_NAME(arith_dc_L)[NUM_ARITH_TBLS];
+  UINT8 BORING_NAME(arith_dc_U)[NUM_ARITH_TBLS];
+  UINT8 BORING_NAME(arith_ac_K)[NUM_ARITH_TBLS];
 
   unsigned int restart_interval; /* MCUs per restart interval, or 0 for no restart */
 
@@ -638,10 +667,10 @@ struct jpeg_decompress_struct {
   int max_v_samp_factor;        /* largest v_samp_factor */
 
 #if JPEG_LIB_VERSION >= 70
-  int notboring_min_DCT_h_scaled_size;
-  int notboring_min_DCT_v_scaled_size;
+  int BORING_NAME(min_DCT_h_scaled_size);
+  int BORING_NAME(min_DCT_v_scaled_size);
 #else
-  int notboring_min_DCT_scaled_size;
+  int BORING_NAME(min_DCT_scaled_size);
 #endif
 
   JDIMENSION total_iMCU_rows;   /* # of iMCU rows in image */
@@ -701,7 +730,7 @@ struct jpeg_decompress_struct {
   struct jpeg_inverse_dct *idct;
   struct jpeg_upsampler *upsample;
   struct jpeg_color_deconverter *cconvert;
-  void *notboring_cquantize;
+  struct jpeg_color_quantizer *BORING_NAME(cquantize);
 };
 
 
@@ -1011,6 +1040,7 @@ EXTERN(boolean) jpeg_has_multiple_scans(j_decompress_ptr cinfo);
 EXTERN(boolean) jpeg_start_output(j_decompress_ptr cinfo, int scan_number);
 EXTERN(boolean) jpeg_finish_output(j_decompress_ptr cinfo);
 EXTERN(boolean) jpeg_input_complete(j_decompress_ptr cinfo);
+EXTERN(void) jpeg_new_colormap(j_decompress_ptr cinfo);
 EXTERN(int) jpeg_consume_input(j_decompress_ptr cinfo);
 /* Return value is one of: */
 /* #define JPEG_SUSPENDED       0    Suspended due to lack of input data */
@@ -1073,6 +1103,39 @@ EXTERN(boolean) jpeg_read_icc_profile(j_decompress_ptr cinfo,
 #define JPEG_EOI        0xD9    /* EOI marker code */
 #define JPEG_APP0       0xE0    /* APP0 marker code */
 #define JPEG_COM        0xFE    /* COM marker code */
+
+
+/* If we have a brain-damaged compiler that emits warnings (or worse, errors)
+ * for structure definitions that are never filled in, keep it quiet by
+ * supplying dummy definitions for the various substructures.
+ */
+
+#ifdef INCOMPLETE_TYPES_BROKEN
+#ifndef JPEG_INTERNALS          /* will be defined in jpegint.h */
+struct jvirt_sarray_control { long dummy; };
+struct jvirt_barray_control { long dummy; };
+struct jpeg_comp_master { long dummy; };
+struct jpeg_c_main_controller { long dummy; };
+struct jpeg_c_prep_controller { long dummy; };
+struct jpeg_c_coef_controller { long dummy; };
+struct jpeg_marker_writer { long dummy; };
+struct jpeg_color_converter { long dummy; };
+struct jpeg_downsampler { long dummy; };
+struct jpeg_forward_dct { long dummy; };
+struct jpeg_entropy_encoder { long dummy; };
+struct jpeg_decomp_master { long dummy; };
+struct jpeg_d_main_controller { long dummy; };
+struct jpeg_d_coef_controller { long dummy; };
+struct jpeg_d_post_controller { long dummy; };
+struct jpeg_input_controller { long dummy; };
+struct jpeg_marker_reader { long dummy; };
+struct jpeg_entropy_decoder { long dummy; };
+struct jpeg_inverse_dct { long dummy; };
+struct jpeg_upsampler { long dummy; };
+struct jpeg_color_deconverter { long dummy; };
+struct jpeg_color_quantizer { long dummy; };
+#endif /* JPEG_INTERNALS */
+#endif /* INCOMPLETE_TYPES_BROKEN */
 
 
 /*

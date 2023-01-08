@@ -5,9 +5,9 @@ This is a slimmed-down fork of the
 
 It is based on version 2.1.4 (commit 8162eddf, August 2022).
 
-From there, it removes (or modifies, marked with "notboring") a lot of code.
-The original libjpeg-turbo library is relatively featureful and flexible. For
-example, it allows:
+From there, it removes (or ignores, marked with "BORING\_NAME" or "notboring")
+a lot of code. The original libjpeg-turbo library is relatively featureful and
+flexible. For example, it allows:
 
 - Arithmetic-coded JPEG images. Even though the relevant patents have finally
   expired, such images are very, very rare in practice.

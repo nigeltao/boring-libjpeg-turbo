@@ -327,6 +327,21 @@ finish_output_pass(j_decompress_ptr cinfo)
 }
 
 
+#ifdef D_MULTISCAN_FILES_SUPPORTED
+
+/*
+ * Switch to a new external colormap between output passes.
+ */
+
+GLOBAL(void)
+jpeg_new_colormap(j_decompress_ptr cinfo)
+{
+  ERREXIT(cinfo, JERR_NOT_COMPILED);
+}
+
+#endif /* D_MULTISCAN_FILES_SUPPORTED */
+
+
 /*
  * Initialize master decompression control and select active modules.
  * This is performed at the start of jpeg_start_decompress.
