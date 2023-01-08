@@ -55,9 +55,10 @@ different build systems). Use that instead.
 
 For Operating Systems that want to provide a dynamic library, or utility
 programs like `cjpeg` and `djpeg`, use the upstream libjpeg-turbo instead. For
-example, this repository's `cjpeg` program speaks fewer image file formats than
-what many Linux distributions ship as `/usr/bin/cjpeg`. This repository's
-`cjpeg` only exists to support the previously mentioned basic regression test.
+example, this repository's `cjpeg` program speaks fewer image file formats (and
+supports none of the command-line switches) than what many Linux distributions
+ship as `/usr/bin/cjpeg`. This repository's `cjpeg` only exists to support the
+previously mentioned basic regression test.
 
 
 ## Compared to Upstream libjpeg-turbo

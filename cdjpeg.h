@@ -36,9 +36,6 @@ struct cjpeg_source_struct {
 
   JSAMPARRAY buffer;
   JDIMENSION buffer_height;
-#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
-  JDIMENSION max_pixels;
-#endif
 };
 
 
@@ -79,51 +76,12 @@ struct djpeg_dest_struct {
 };
 
 
-/*
- * cjpeg/djpeg may need to perform extra passes to convert to or from
- * the source/destination file format.  The JPEG library does not know
- * about these passes, but we'd like them to be counted by the progress
- * monitor.  We use an expanded progress monitor object to hold the
- * additional pass count.
- */
-
-struct cdjpeg_progress_mgr {
-  struct jpeg_progress_mgr pub; /* fields known to JPEG library */
-  int completed_extra_passes;   /* extra passes completed */
-  int total_extra_passes;       /* total extra */
-  JDIMENSION max_scans;         /* abort if the number of scans exceeds this
-                                   value and the value is non-zero */
-  boolean report;               /* whether or not to report progress */
-  /* last printed percentage stored here to avoid multiple printouts */
-  int percent_done;
-};
-
-typedef struct cdjpeg_progress_mgr *cd_progress_ptr;
-
-
 /* Module selection routines for I/O modules. */
 
 EXTERN(cjpeg_source_ptr) jinit_read_ppm(j_compress_ptr cinfo);
 EXTERN(djpeg_dest_ptr) jinit_write_ppm(j_decompress_ptr cinfo);
 
-/* common support routines (in cdjpeg.c) */
-
-EXTERN(void) start_progress_monitor(j_common_ptr cinfo,
-                                    cd_progress_ptr progress);
-EXTERN(void) end_progress_monitor(j_common_ptr cinfo);
-EXTERN(boolean) keymatch(char *arg, const char *keyword, int minchars);
-EXTERN(FILE *) read_stdin(void);
-EXTERN(FILE *) write_stdout(void);
-
 /* miscellaneous useful macros */
-
-#ifdef DONT_USE_B_MODE          /* define mode parameters for fopen() */
-#define READ_BINARY     "r"
-#define WRITE_BINARY    "w"
-#else
-#define READ_BINARY     "rb"
-#define WRITE_BINARY    "wb"
-#endif
 
 #ifndef EXIT_FAILURE            /* define exit() codes if not provided */
 #define EXIT_FAILURE  1

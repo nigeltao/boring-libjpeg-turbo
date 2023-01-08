@@ -87,11 +87,11 @@ done
 echo Building boring-cjpeg
 $CC -I . -D PPM_SUPPORTED -fdata-sections -ffunction-sections $CFLAGS \
     ${OBJ_FILES[@]} \
-    cjpeg.c cdjpeg.c rdppm.c -o boring-cjpeg \
+    cjpeg.c rdppm.c -o boring-cjpeg \
     -Wl,--gc-sections -Wl,-s
 
 echo Building boring-djpeg
 $CC -I . -D PPM_SUPPORTED -fdata-sections -ffunction-sections $CFLAGS \
     ${OBJ_FILES[@]} \
-    djpeg.c cdjpeg.c wrppm.c -o boring-djpeg \
+    djpeg.c wrppm.c -o boring-djpeg \
     -Wl,--gc-sections -Wl,-s

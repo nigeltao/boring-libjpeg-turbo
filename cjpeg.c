@@ -98,41 +98,14 @@ select_file_type(j_compress_ptr cinfo, FILE *infile)
 
 
 static const char *progname;    /* program name for error messages */
-static char *icc_filename;      /* for -icc switch */
-static char *outfilename;       /* for -outfile switch */
-boolean memdst;                 /* for -memdst switch */
-boolean report;                 /* for -report switch */
-boolean strict;                 /* for -strict switch */
 
 
 LOCAL(void)
 usage(void)
 /* complain about bad command line */
 {
-  fprintf(stderr, "usage: %s [switches] ", progname);
+  fprintf(stderr, "usage: %s ", progname);
   fprintf(stderr, "[inputfile]\n");
-
-  fprintf(stderr, "Switches (names may be abbreviated):\n");
-  fprintf(stderr, "  -grayscale     Create monochrome JPEG file\n");
-  fprintf(stderr, "  -rgb           Create RGB JPEG file\n");
-#ifdef ENTROPY_OPT_SUPPORTED
-  fprintf(stderr, "  -optimize      Optimize Huffman table (smaller file, but slow compression)\n");
-#endif
-#ifdef C_PROGRESSIVE_SUPPORTED
-  fprintf(stderr, "  -progressive   Create progressive JPEG file\n");
-#endif
-  fprintf(stderr, "Switches for advanced users:\n");
-  fprintf(stderr, "  -icc FILE      Embed ICC profile contained in FILE\n");
-  fprintf(stderr, "  -restart N     Set restart interval in rows, or in blocks with B\n");
-  fprintf(stderr, "  -maxmemory N   Maximum memory to use (in kbytes)\n");
-  fprintf(stderr, "  -outfile name  Specify name for output file\n");
-#if JPEG_LIB_VERSION >= 80 || defined(MEM_SRCDST_SUPPORTED)
-  fprintf(stderr, "  -memdst        Compress to memory instead of file (useful for benchmarking)\n");
-#endif
-  fprintf(stderr, "  -report        Report compression progress\n");
-  fprintf(stderr, "  -strict        Treat all warnings as fatal\n");
-  fprintf(stderr, "  -verbose  or  -debug   Emit debug output\n");
-  fprintf(stderr, "  -version       Print version information and exit\n");
   exit(EXIT_FAILURE);
 }
 
@@ -151,17 +124,6 @@ parse_switches(j_compress_ptr cinfo, int argc, char **argv,
 {
   int argn;
   char *arg;
-  boolean simple_progressive;
-
-  /* Set up default JPEG parameters. */
-
-  simple_progressive = FALSE;
-  icc_filename = NULL;
-  outfilename = NULL;
-  memdst = FALSE;
-  report = FALSE;
-  strict = FALSE;
-  cinfo->err->trace_level = 0;
 
   /* Scan command line options, adjust parameters */
 
@@ -170,211 +132,16 @@ parse_switches(j_compress_ptr cinfo, int argc, char **argv,
     if (*arg != '-') {
       /* Not a switch, must be a file name argument */
       if (argn <= last_file_arg_seen) {
-        outfilename = NULL;     /* -outfile applies to just one input file */
         continue;               /* ignore this name if previously processed */
       }
       break;                    /* else done parsing switches */
     }
     arg++;                      /* advance past switch marker character */
-
-    if (keymatch(arg, "arithmetic", 1)) {
-      /* Use arithmetic coding. */
-      fprintf(stderr, "%s: sorry, arithmetic coding not supported\n",
-              progname);
-      exit(EXIT_FAILURE);
-
-    } else if (keymatch(arg, "baseline", 1)) {
-      /* Force baseline-compatible output (8-bit quantizer values). */
-      fprintf(stderr, "%s: notboring: baseline is not supported\n",
-              progname);
-      exit(EXIT_FAILURE);
-
-    } else if (keymatch(arg, "dct", 2)) {
-      /* Select DCT algorithm. */
-      fprintf(stderr, "%s: notboring: dct is not supported\n",
-              progname);
-      exit(EXIT_FAILURE);
-
-    } else if (keymatch(arg, "debug", 1) || keymatch(arg, "verbose", 1)) {
-      /* Enable debug printouts. */
-      /* On first -d, print version identification */
-      static boolean printed_version = FALSE;
-
-      if (!printed_version) {
-        fprintf(stderr, "%s version %s (build %s)\n",
-                PACKAGE_NAME, VERSION, BUILD);
-        fprintf(stderr, "%s\n\n", JCOPYRIGHT);
-        fprintf(stderr, "Emulating The Independent JPEG Group's software, version %s\n\n",
-                JVERSION);
-        printed_version = TRUE;
-      }
-      cinfo->err->trace_level++;
-
-    } else if (keymatch(arg, "version", 4)) {
-      fprintf(stderr, "%s version %s (build %s)\n",
-              PACKAGE_NAME, VERSION, BUILD);
-      exit(EXIT_SUCCESS);
-
-    } else if (keymatch(arg, "grayscale", 2) ||
-               keymatch(arg, "greyscale", 2)) {
-      /* Force a monochrome JPEG file to be generated. */
-      jpeg_set_colorspace(cinfo, JCS_GRAYSCALE);
-
-    } else if (keymatch(arg, "rgb", 3)) {
-      /* Force an RGB JPEG file to be generated. */
-      jpeg_set_colorspace(cinfo, JCS_RGB);
-
-    } else if (keymatch(arg, "icc", 1)) {
-      /* Set ICC filename. */
-      if (++argn >= argc)       /* advance to next argument */
-        usage();
-      icc_filename = argv[argn];
-
-    } else if (keymatch(arg, "maxmemory", 3)) {
-      /* Maximum memory in Kb (or Mb with 'm'). */
-      long lval;
-      char ch = 'x';
-
-      if (++argn >= argc)       /* advance to next argument */
-        usage();
-      if (sscanf(argv[argn], "%ld%c", &lval, &ch) < 1)
-        usage();
-      if (ch == 'm' || ch == 'M')
-        lval *= 1000L;
-      cinfo->mem->max_memory_to_use = lval * 1000L;
-
-    } else if (keymatch(arg, "optimize", 1) || keymatch(arg, "optimise", 1)) {
-      /* Enable entropy parm optimization. */
-#ifdef ENTROPY_OPT_SUPPORTED
-      cinfo->optimize_coding = TRUE;
-#else
-      fprintf(stderr, "%s: sorry, entropy optimization was not compiled in\n",
-              progname);
-      exit(EXIT_FAILURE);
-#endif
-
-    } else if (keymatch(arg, "outfile", 4)) {
-      /* Set output file name. */
-      if (++argn >= argc)       /* advance to next argument */
-        usage();
-      outfilename = argv[argn]; /* save it away for later use */
-
-    } else if (keymatch(arg, "progressive", 1)) {
-      /* Select simple progressive mode. */
-#ifdef C_PROGRESSIVE_SUPPORTED
-      simple_progressive = TRUE;
-      /* We must postpone execution until num_components is known. */
-#else
-      fprintf(stderr, "%s: sorry, progressive output was not compiled in\n",
-              progname);
-      exit(EXIT_FAILURE);
-#endif
-
-    } else if (keymatch(arg, "memdst", 2)) {
-      /* Use in-memory destination manager */
-#if JPEG_LIB_VERSION >= 80 || defined(MEM_SRCDST_SUPPORTED)
-      memdst = TRUE;
-#else
-      fprintf(stderr, "%s: sorry, in-memory destination manager was not compiled in\n",
-              progname);
-      exit(EXIT_FAILURE);
-#endif
-
-    } else if (keymatch(arg, "quality", 1)) {
-      /* Quality ratings (quantization table scaling factors). */
-      fprintf(stderr, "%s: notboring: quality is not supported\n",
-              progname);
-      exit(EXIT_FAILURE);
-
-    } else if (keymatch(arg, "qslots", 2)) {
-      /* Quantization table slot numbers. */
-      fprintf(stderr, "%s: notboring: qslots is not supported\n",
-              progname);
-      exit(EXIT_FAILURE);
-
-    } else if (keymatch(arg, "qtables", 2)) {
-      /* Quantization tables fetched from file. */
-      fprintf(stderr, "%s: notboring: qtables is not supported\n",
-              progname);
-      exit(EXIT_FAILURE);
-
-    } else if (keymatch(arg, "report", 3)) {
-      report = TRUE;
-
-    } else if (keymatch(arg, "restart", 1)) {
-      /* Restart interval in MCU rows (or in MCUs with 'b'). */
-      long lval;
-      char ch = 'x';
-
-      if (++argn >= argc)       /* advance to next argument */
-        usage();
-      if (sscanf(argv[argn], "%ld%c", &lval, &ch) < 1)
-        usage();
-      if (lval < 0 || lval > 65535L)
-        usage();
-      if (ch == 'b' || ch == 'B') {
-        cinfo->restart_interval = (unsigned int)lval;
-        cinfo->restart_in_rows = 0; /* else prior '-restart n' overrides me */
-      } else {
-        cinfo->restart_in_rows = (int)lval;
-        /* restart_interval will be computed during startup */
-      }
-
-    } else if (keymatch(arg, "sample", 2)) {
-      /* Set sampling factors. */
-      fprintf(stderr, "%s: notboring: sample is not supported\n",
-              progname);
-      exit(EXIT_FAILURE);
-
-    } else if (keymatch(arg, "scans", 4)) {
-      /* Set scan script. */
-      fprintf(stderr, "%s: notboring: scans is not supported\n",
-              progname);
-      exit(EXIT_FAILURE);
-
-    } else if (keymatch(arg, "smooth", 2)) {
-      /* Set input smoothing factor. */
-      fprintf(stderr, "%s: notboring: smooth is not supported\n",
-              progname);
-      exit(EXIT_FAILURE);
-
-    } else if (keymatch(arg, "strict", 2)) {
-      strict = TRUE;
-
-    } else if (keymatch(arg, "targa", 1)) {
-      /* Input file is Targa format. */
-      fprintf(stderr, "%s: notboring: targa is not supported\n",
-              progname);
-      exit(EXIT_FAILURE);
-
-    } else {
-      usage();                  /* bogus switch */
-    }
-  }
-
-  /* Post-switch-scanning cleanup */
-
-  if (for_real) {
-#ifdef C_PROGRESSIVE_SUPPORTED
-    if (simple_progressive)     /* process -progressive; -scans can override */
-      jpeg_simple_progression(cinfo);
-#endif
+    fprintf(stderr, "%s: notboring: switches are not supported\n", progname);
+    exit(EXIT_FAILURE);
   }
 
   return argn;                  /* return index of next arg (file name) */
-}
-
-
-METHODDEF(void)
-my_emit_message(j_common_ptr cinfo, int msg_level)
-{
-  if (msg_level < 0) {
-    /* Treat warning as fatal */
-    cinfo->err->error_exit(cinfo);
-  } else {
-    if (cinfo->err->trace_level >= msg_level)
-      cinfo->err->output_message(cinfo);
-  }
 }
 
 
@@ -387,16 +154,10 @@ main(int argc, char **argv)
 {
   struct jpeg_compress_struct cinfo;
   struct jpeg_error_mgr jerr;
-  struct cdjpeg_progress_mgr progress;
   int file_index;
   cjpeg_source_ptr src_mgr;
   FILE *input_file = NULL;
-  FILE *icc_file;
-  JOCTET *icc_profile = NULL;
-  long icc_len = 0;
   FILE *output_file = NULL;
-  unsigned char *outbuffer = NULL;
-  unsigned long outsize = 0;
   JDIMENSION num_scanlines;
 
   progname = argv[0];
@@ -428,9 +189,6 @@ main(int argc, char **argv)
 
   file_index = parse_switches(&cinfo, argc, argv, 0, FALSE);
 
-  if (strict)
-    jerr.emit_message = my_emit_message;
-
   /* Unix style: expect zero or one file name */
   if (file_index < argc - 1) {
     fprintf(stderr, "%s: only one input file\n", progname);
@@ -439,56 +197,19 @@ main(int argc, char **argv)
 
   /* Open the input file. */
   if (file_index < argc) {
-    if ((input_file = fopen(argv[file_index], READ_BINARY)) == NULL) {
+    if ((input_file = fopen(argv[file_index], "rb")) == NULL) {
       fprintf(stderr, "%s: can't open %s\n", progname, argv[file_index]);
       exit(EXIT_FAILURE);
     }
   } else {
     /* default input file is stdin */
-    input_file = read_stdin();
+    input_file = stdin;
   }
 
   /* Open the output file. */
-  if (outfilename != NULL) {
-    if ((output_file = fopen(outfilename, WRITE_BINARY)) == NULL) {
-      fprintf(stderr, "%s: can't open %s\n", progname, outfilename);
-      exit(EXIT_FAILURE);
-    }
-  } else if (!memdst) {
+  if (BORING_ALWAYS_TRUE) {
     /* default output file is stdout */
-    output_file = write_stdout();
-  }
-
-  if (icc_filename != NULL) {
-    if ((icc_file = fopen(icc_filename, READ_BINARY)) == NULL) {
-      fprintf(stderr, "%s: can't open %s\n", progname, icc_filename);
-      exit(EXIT_FAILURE);
-    }
-    if (fseek(icc_file, 0, SEEK_END) < 0 ||
-        (icc_len = ftell(icc_file)) < 1 ||
-        fseek(icc_file, 0, SEEK_SET) < 0) {
-      fprintf(stderr, "%s: can't determine size of %s\n", progname,
-              icc_filename);
-      exit(EXIT_FAILURE);
-    }
-    if ((icc_profile = (JOCTET *)malloc(icc_len)) == NULL) {
-      fprintf(stderr, "%s: can't allocate memory for ICC profile\n", progname);
-      fclose(icc_file);
-      exit(EXIT_FAILURE);
-    }
-    if (fread(icc_profile, icc_len, 1, icc_file) < 1) {
-      fprintf(stderr, "%s: can't read ICC profile from %s\n", progname,
-              icc_filename);
-      free(icc_profile);
-      fclose(icc_file);
-      exit(EXIT_FAILURE);
-    }
-    fclose(icc_file);
-  }
-
-  if (report) {
-    start_progress_monitor((j_common_ptr)&cinfo, &progress);
-    progress.report = report;
+    output_file = stdout;
   }
 
   /* Figure out the input file format, and set up to read it. */
@@ -505,18 +226,10 @@ main(int argc, char **argv)
   file_index = parse_switches(&cinfo, argc, argv, 0, TRUE);
 
   /* Specify data destination for compression */
-#if JPEG_LIB_VERSION >= 80 || defined(MEM_SRCDST_SUPPORTED)
-  if (memdst)
-    jpeg_mem_dest(&cinfo, &outbuffer, &outsize);
-  else
-#endif
     jpeg_stdio_dest(&cinfo, output_file);
 
   /* Start compressor */
   jpeg_start_compress(&cinfo, TRUE);
-
-  if (icc_profile != NULL)
-    jpeg_write_icc_profile(&cinfo, icc_profile, (unsigned int)icc_len);
 
   /* Process data */
   while (cinfo.next_scanline < cinfo.image_height) {
@@ -534,15 +247,6 @@ main(int argc, char **argv)
     fclose(input_file);
   if (output_file != stdout && output_file != NULL)
     fclose(output_file);
-
-  if (report)
-    end_progress_monitor((j_common_ptr)&cinfo);
-
-  if (memdst) {
-    free(outbuffer);
-  }
-
-  free(icc_profile);
 
   /* All done. */
   return (jerr.num_warnings ? EXIT_WARNING : EXIT_SUCCESS);
