@@ -230,11 +230,7 @@ validate_script(j_compress_ptr cinfo)
        * out-of-range reconstructed DC values during the first DC scan,
        * which might cause problems for some decoders.
        */
-#if BITS_IN_JSAMPLE == 8
 #define MAX_AH_AL  10
-#else
-#define MAX_AH_AL  13
-#endif
       if (Ss < 0 || Ss >= DCTSIZE2 || Se < Ss || Se >= DCTSIZE2 ||
           Ah < 0 || Ah > MAX_AH_AL || Al < 0 || Al > MAX_AH_AL)
         ERREXIT1(cinfo, JERR_BAD_PROG_SCRIPT, scanno);

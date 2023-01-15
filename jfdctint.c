@@ -77,13 +77,8 @@
  * shows that the values given below are the most effective.
  */
 
-#if BITS_IN_JSAMPLE == 8
 #define CONST_BITS  13
 #define PASS1_BITS  2
-#else
-#define CONST_BITS  13
-#define PASS1_BITS  1           /* lose a little precision to avoid overflow */
-#endif
 
 /* Some C compilers fail to reduce "FIX(constant)" at compile time, thus
  * causing a lot of useless floating-point operations at run time.
@@ -128,11 +123,7 @@
  * For 12-bit samples, a full 32-bit multiplication will be needed.
  */
 
-#if BITS_IN_JSAMPLE == 8
 #define MULTIPLY(var, const)  MULTIPLY16C16(var, const)
-#else
-#define MULTIPLY(var, const)  ((var) * (const))
-#endif
 
 
 /*

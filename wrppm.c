@@ -35,26 +35,9 @@
  * implementation will be to ask for that instead.)
  */
 
-#if BITS_IN_JSAMPLE == 8
 #define PUTPPMSAMPLE(ptr, v)  *ptr++ = (char)(v)
 #define BYTESPERSAMPLE  1
 #define PPM_MAXVAL  255
-#else
-#ifdef PPM_NORAWWORD
-#define PUTPPMSAMPLE(ptr, v)  *ptr++ = (char)((v) >> (BITS_IN_JSAMPLE - 8))
-#define BYTESPERSAMPLE  1
-#define PPM_MAXVAL  255
-#else
-/* The word-per-sample format always puts the MSB first. */
-#define PUTPPMSAMPLE(ptr, v) { \
-  register int val_ = v; \
-  *ptr++ = (char)((val_ >> 8) & 0xFF); \
-  *ptr++ = (char)(val_ & 0xFF); \
-}
-#define BYTESPERSAMPLE  2
-#define PPM_MAXVAL  ((1 << BITS_IN_JSAMPLE) - 1)
-#endif
-#endif
 
 
 /*
@@ -108,19 +91,10 @@ copy_pixel_rows(j_decompress_ptr cinfo, djpeg_dest_ptr dinfo,
   ppm_dest_ptr dest = (ppm_dest_ptr)dinfo;
   register char *bufferptr;
   register JSAMPROW ptr;
-#if BITS_IN_JSAMPLE != 8
-  register JDIMENSION col;
-#endif
 
   ptr = dest->pub.buffer[0];
   bufferptr = dest->iobuffer;
-#if BITS_IN_JSAMPLE == 8
   memcpy(bufferptr, ptr, dest->samples_per_row);
-#else
-  for (col = dest->samples_per_row; col > 0; col--) {
-    PUTPPMSAMPLE(bufferptr, *ptr++);
-  }
-#endif
   fwrite(dest->iobuffer, 1, dest->buffer_width, dest->pub.output_file);
 }
 
@@ -273,7 +247,7 @@ jinit_write_ppm(j_decompress_ptr cinfo)
   dest->iobuffer = (char *)(*cinfo->mem->alloc_small)
     ((j_common_ptr)cinfo, JPOOL_IMAGE, dest->buffer_width);
 
-  if (BITS_IN_JSAMPLE != 8 || sizeof(JSAMPLE) != sizeof(char) ||
+  if (sizeof(JSAMPLE) != sizeof(char) ||
 #if RGB_RED == 0 && RGB_GREEN == 1 && RGB_BLUE == 2 && RGB_PIXELSIZE == 3
       (cinfo->out_color_space != JCS_EXT_RGB &&
        cinfo->out_color_space != JCS_RGB)) {

@@ -66,6 +66,7 @@ previously mentioned basic regression test.
 
 ### Removed File Format Support
 
+- 12 (not 8) bits per sample.
 - Arithmetic coding.
 
 
