@@ -429,9 +429,6 @@ jinit_upsampler(j_decompress_ptr cinfo)
   } else
     upsample = (my_upsample_ptr)cinfo->upsample;
 
-  if (cinfo->CCIR601_sampling)  /* this isn't supported */
-    ERREXIT(cinfo, JERR_CCIR601_NOTIMPL);
-
   do_fancy = cinfo->do_fancy_upsampling;
   if (!do_fancy)
     ERREXIT(cinfo, JERR_NOTBORING_DO_FANCY_UPSAMPLING);

@@ -214,7 +214,6 @@ get_soi(j_decompress_ptr cinfo)
   /* Set initial assumptions for colorspace etc */
 
   cinfo->jpeg_color_space = JCS_UNKNOWN;
-  cinfo->CCIR601_sampling = FALSE; /* Assume non-CCIR sampling??? */
 
   cinfo->saw_JFIF_marker = FALSE;
   cinfo->JFIF_major_version = 1; /* set default JFIF APP0 values */

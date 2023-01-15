@@ -221,14 +221,6 @@ jpeg_set_defaults(j_compress_ptr cinfo)
   if (cinfo->data_precision > 8)
     cinfo->optimize_coding = TRUE;
 
-  /* By default, use the simpler non-cosited sampling alignment */
-  cinfo->CCIR601_sampling = FALSE;
-
-#if JPEG_LIB_VERSION >= 70
-  /* By default, apply fancy downsampling */
-  cinfo->do_fancy_downsampling = TRUE;
-#endif
-
   /* No restart markers */
   cinfo->restart_interval = 0;
   cinfo->restart_in_rows = 0;

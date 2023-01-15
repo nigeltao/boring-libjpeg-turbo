@@ -272,23 +272,23 @@ typedef enum {
 
 typedef enum {
   JDCT_ISLOW,             /* accurate integer method */
-  JDCT_IFAST,             /* less accurate integer method [legacy feature] */
-  JDCT_FLOAT              /* floating-point method [legacy feature] */
+  BORING_NAME(JDCT_IFAST),
+  BORING_NAME(JDCT_FLOAT)
 } J_DCT_METHOD;
 
 #ifndef JDCT_DEFAULT            /* may be overridden in jconfig.h */
 #define JDCT_DEFAULT  JDCT_ISLOW
 #endif
 #ifndef JDCT_FASTEST            /* may be overridden in jconfig.h */
-#define JDCT_FASTEST  JDCT_IFAST
+#define JDCT_FASTEST  BORING_NAME(JDCT_IFAST)
 #endif
 
 /* Dithering options for decompression. */
 
 typedef enum {
   JDITHER_NONE,           /* no dithering */
-  JDITHER_ORDERED,        /* simple ordered dither */
-  JDITHER_FS              /* Floyd-Steinberg error diffusion dither */
+  BORING_NAME(JDITHER_ORDERED),
+  BORING_NAME(JDITHER_FS)
 } J_DITHER_MODE;
 
 
@@ -337,7 +337,7 @@ struct jpeg_compress_struct {
   int input_components;         /* # of color components in input image */
   J_COLOR_SPACE in_color_space; /* colorspace of input image */
 
-  double input_gamma;           /* image gamma of input image */
+  double BORING_NAME(input_gamma);
 
   /* Compression parameters --- these fields must be set before calling
    * jpeg_start_compress().  We recommend calling jpeg_set_defaults() to
@@ -350,14 +350,8 @@ struct jpeg_compress_struct {
 #if JPEG_LIB_VERSION >= 70
   unsigned int BORING_NAME(scale_num), BORING_NAME(scale_denom);
 
-  JDIMENSION jpeg_width;        /* scaled JPEG image width */
-  JDIMENSION jpeg_height;       /* scaled JPEG image height */
-  /* Dimensions of actual JPEG image that will be written to file,
-   * derived from input dimensions by scaling factors above.
-   * These fields are computed by jpeg_start_compress().
-   * You can also use jpeg_calc_jpeg_dimensions() to determine these values
-   * in advance of calling jpeg_start_compress().
-   */
+  JDIMENSION BORING_NAME(jpeg_width);
+  JDIMENSION BORING_NAME(jpeg_height);
 #endif
 
   int data_precision;           /* bits of precision in image data */
@@ -394,9 +388,9 @@ struct jpeg_compress_struct {
   boolean raw_data_in;          /* TRUE=caller supplies downsampled data */
   boolean BORING_NAME(arith_code);
   boolean optimize_coding;      /* TRUE=optimize entropy encoding parms */
-  boolean CCIR601_sampling;     /* TRUE=first samples are cosited */
+  boolean BORING_NAME(CCIR601_sampling);
 #if JPEG_LIB_VERSION >= 70
-  boolean do_fancy_downsampling; /* TRUE=apply fancy downsampling */
+  boolean BORING_NAME(do_fancy_downsampling);
 #endif
   int BORING_NAME(smoothing_factor);
   J_DCT_METHOD BORING_NAME(dct_method);
@@ -462,7 +456,7 @@ struct jpeg_compress_struct {
   /* *cur_comp_info[i] describes component that appears i'th in SOS */
 
   JDIMENSION MCUs_per_row;      /* # of MCUs across the image */
-  JDIMENSION MCU_rows_in_scan;  /* # of MCU rows in the image */
+  JDIMENSION BORING_NAME(MCU_rows_in_scan);
 
   int blocks_in_MCU;            /* # of DCT blocks per MCU */
   int MCU_membership[C_MAX_BLOCKS_IN_MCU];
@@ -472,9 +466,9 @@ struct jpeg_compress_struct {
   int Ss, Se, Ah, Al;           /* progressive JPEG parameters for scan */
 
 #if JPEG_LIB_VERSION >= 80
-  int block_size;               /* the basic DCT block size: 1..16 */
-  const int *natural_order;     /* natural-order position array */
-  int lim_Se;                   /* min( Se, DCTSIZE2-1 ) */
+  int BORING_NAME(block_size);
+  const int *BORING_NAME(natural_order);
+  int BORING_NAME(lim_Se);
 #endif
 
   /*
@@ -519,7 +513,7 @@ struct jpeg_decompress_struct {
 
   unsigned int BORING_NAME(scale_num), BORING_NAME(scale_denom);
 
-  double output_gamma;          /* image gamma wanted in output */
+  double BORING_NAME(output_gamma);
 
   boolean buffered_image;       /* TRUE=multiple output passes */
   boolean raw_data_out;         /* TRUE=downsampled data wanted */
@@ -557,14 +551,8 @@ struct jpeg_decompress_struct {
    * Usually rec_outbuf_height will be 1 or 2, at most 4.
    */
 
-  /* When quantizing colors, the output colormap is described by these fields.
-   * The application can supply a colormap by setting colormap non-NULL before
-   * calling jpeg_start_decompress; otherwise a colormap is created during
-   * jpeg_start_decompress or jpeg_start_output.
-   * The map has out_color_components rows and actual_number_of_colors columns.
-   */
-  int actual_number_of_colors;  /* number of entries in use */
-  JSAMPARRAY colormap;          /* The color map as a 2-D pixel array */
+  int BORING_NAME(actual_number_of_colors);
+  JSAMPARRAY BORING_NAME(colormap);
 
   /* State variables: these variables indicate the progress of decompression.
    * The application may examine these but must not modify them.
@@ -648,7 +636,7 @@ struct jpeg_decompress_struct {
   boolean saw_Adobe_marker;     /* TRUE iff an Adobe APP14 marker was found */
   UINT8 Adobe_transform;        /* Color transform code from Adobe marker */
 
-  boolean CCIR601_sampling;     /* TRUE=first samples are cosited */
+  boolean BORING_NAME(CCIR601_sampling);
 
   /* Aside from the specific data retained from APPn markers known to the
    * library, the uninterpreted contents of any or all APPn and COM markers
@@ -694,7 +682,7 @@ struct jpeg_decompress_struct {
   /* *cur_comp_info[i] describes component that appears i'th in SOS */
 
   JDIMENSION MCUs_per_row;      /* # of MCUs across the image */
-  JDIMENSION MCU_rows_in_scan;  /* # of MCU rows in the image */
+  JDIMENSION BORING_NAME(MCU_rows_in_scan);
 
   int blocks_in_MCU;            /* # of DCT blocks per MCU */
   int MCU_membership[D_MAX_BLOCKS_IN_MCU];
@@ -704,11 +692,9 @@ struct jpeg_decompress_struct {
   int Ss, Se, Ah, Al;           /* progressive JPEG parameters for scan */
 
 #if JPEG_LIB_VERSION >= 80
-  /* These fields are derived from Se of first SOS marker.
-   */
-  int block_size;               /* the basic DCT block size: 1..16 */
-  const int *natural_order; /* natural-order position array for entropy decode */
-  int lim_Se;                   /* min( Se, DCTSIZE2-1 ) for entropy decode */
+  int BORING_NAME(block_size);
+  const int *BORING_NAME(natural_order);
+  int BORING_NAME(lim_Se);
 #endif
 
   /* This field is shared between entropy decoder and marker parser.

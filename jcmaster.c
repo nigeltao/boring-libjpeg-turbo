@@ -69,9 +69,6 @@ GLOBAL(void)
 jpeg_calc_jpeg_dimensions(j_compress_ptr cinfo)
 /* Do computations that are needed before master selection phase */
 {
-  /* Hardwire it to "no scaling" */
-  cinfo->jpeg_width = cinfo->image_width;
-  cinfo->jpeg_height = cinfo->image_height;
 }
 #endif
 
@@ -359,7 +356,6 @@ per_scan_setup(j_compress_ptr cinfo)
 
     /* Overall image size in MCUs */
     cinfo->MCUs_per_row = compptr->width_in_blocks;
-    cinfo->MCU_rows_in_scan = compptr->height_in_blocks;
 
     /* For noninterleaved scan, always one block per MCU */
     compptr->MCU_width = 1;
@@ -389,9 +385,6 @@ per_scan_setup(j_compress_ptr cinfo)
     cinfo->MCUs_per_row = (JDIMENSION)
       jdiv_round_up((long)cinfo->_jpeg_width,
                     (long)(cinfo->max_h_samp_factor * DCTSIZE));
-    cinfo->MCU_rows_in_scan = (JDIMENSION)
-      jdiv_round_up((long)cinfo->_jpeg_height,
-                    (long)(cinfo->max_v_samp_factor * DCTSIZE));
 
     cinfo->blocks_in_MCU = 0;
 

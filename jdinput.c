@@ -77,12 +77,6 @@ initial_setup(j_decompress_ptr cinfo)
                                    compptr->v_samp_factor);
   }
 
-#if JPEG_LIB_VERSION >= 80
-  cinfo->block_size = DCTSIZE;
-  cinfo->natural_order = jpeg_natural_order;
-  cinfo->lim_Se = DCTSIZE2 - 1;
-#endif
-
   /* Compute dimensions of components */
   for (ci = 0, compptr = cinfo->comp_info; ci < cinfo->num_components;
        ci++, compptr++) {
@@ -143,7 +137,6 @@ per_scan_setup(j_decompress_ptr cinfo)
 
     /* Overall image size in MCUs */
     cinfo->MCUs_per_row = compptr->width_in_blocks;
-    cinfo->MCU_rows_in_scan = compptr->height_in_blocks;
 
     /* For noninterleaved scan, always one block per MCU */
     compptr->MCU_width = 1;
@@ -173,9 +166,6 @@ per_scan_setup(j_decompress_ptr cinfo)
     cinfo->MCUs_per_row = (JDIMENSION)
       jdiv_round_up((long)cinfo->image_width,
                     (long)(cinfo->max_h_samp_factor * DCTSIZE));
-    cinfo->MCU_rows_in_scan = (JDIMENSION)
-      jdiv_round_up((long)cinfo->image_height,
-                    (long)(cinfo->max_v_samp_factor * DCTSIZE));
 
     cinfo->blocks_in_MCU = 0;
 

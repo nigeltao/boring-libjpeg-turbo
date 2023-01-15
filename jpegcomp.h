@@ -11,8 +11,8 @@
  */
 
 #if JPEG_LIB_VERSION >= 70
-#define _jpeg_width  jpeg_width
-#define _jpeg_height  jpeg_height
+#define _jpeg_width  BORING_NAME(jpeg_width)
+#define _jpeg_height  BORING_NAME(jpeg_height)
 #define JERR_ARITH_NOTIMPL  JERR_NOT_COMPILED
 #else
 #define _jpeg_width  image_width

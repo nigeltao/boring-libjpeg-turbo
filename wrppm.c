@@ -180,55 +180,6 @@ put_cmyk(j_decompress_ptr cinfo, djpeg_dest_ptr dinfo,
 
 
 /*
- * Write some pixel data when color quantization is in effect.
- * We have to demap the color index values to straight data.
- */
-
-METHODDEF(void)
-put_demapped_rgb(j_decompress_ptr cinfo, djpeg_dest_ptr dinfo,
-                 JDIMENSION rows_supplied)
-{
-  ppm_dest_ptr dest = (ppm_dest_ptr)dinfo;
-  register char *bufferptr;
-  register int pixval;
-  register JSAMPROW ptr;
-  register JSAMPROW color_map0 = cinfo->colormap[0];
-  register JSAMPROW color_map1 = cinfo->colormap[1];
-  register JSAMPROW color_map2 = cinfo->colormap[2];
-  register JDIMENSION col;
-
-  ptr = dest->pub.buffer[0];
-  bufferptr = dest->iobuffer;
-  for (col = cinfo->output_width; col > 0; col--) {
-    pixval = *ptr++;
-    PUTPPMSAMPLE(bufferptr, color_map0[pixval]);
-    PUTPPMSAMPLE(bufferptr, color_map1[pixval]);
-    PUTPPMSAMPLE(bufferptr, color_map2[pixval]);
-  }
-  fwrite(dest->iobuffer, 1, dest->buffer_width, dest->pub.output_file);
-}
-
-
-METHODDEF(void)
-put_demapped_gray(j_decompress_ptr cinfo, djpeg_dest_ptr dinfo,
-                  JDIMENSION rows_supplied)
-{
-  ppm_dest_ptr dest = (ppm_dest_ptr)dinfo;
-  register char *bufferptr;
-  register JSAMPROW ptr;
-  register JSAMPROW color_map = cinfo->colormap[0];
-  register JDIMENSION col;
-
-  ptr = dest->pub.buffer[0];
-  bufferptr = dest->iobuffer;
-  for (col = cinfo->output_width; col > 0; col--) {
-    PUTPPMSAMPLE(bufferptr, color_map[*ptr++]);
-  }
-  fwrite(dest->iobuffer, 1, dest->buffer_width, dest->pub.output_file);
-}
-
-
-/*
  * Startup: write the file header.
  */
 
