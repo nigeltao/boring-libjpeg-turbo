@@ -41,18 +41,6 @@ EXTERN(void) jsimd_h2v1_downsample(j_compress_ptr cinfo,
                                    JSAMPARRAY input_data,
                                    JSAMPARRAY output_data);
 
-EXTERN(int) jsimd_can_h2v2_upsample(void);
-EXTERN(int) jsimd_can_h2v1_upsample(void);
-
-EXTERN(void) jsimd_h2v2_upsample(j_decompress_ptr cinfo,
-                                 jpeg_component_info *compptr,
-                                 JSAMPARRAY input_data,
-                                 JSAMPARRAY *output_data_ptr);
-EXTERN(void) jsimd_h2v1_upsample(j_decompress_ptr cinfo,
-                                 jpeg_component_info *compptr,
-                                 JSAMPARRAY input_data,
-                                 JSAMPARRAY *output_data_ptr);
-
 EXTERN(int) jsimd_can_h2v2_fancy_upsample(void);
 EXTERN(int) jsimd_can_h2v1_fancy_upsample(void);
 EXTERN(int) jsimd_can_h1v2_fancy_upsample(void);

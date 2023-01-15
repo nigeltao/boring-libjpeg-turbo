@@ -286,28 +286,6 @@ EXTERN(void) jsimd_h2v2_downsample_neon
   (JDIMENSION image_width, int max_v_samp_factor, JDIMENSION v_samp_factor,
    JDIMENSION width_in_blocks, JSAMPARRAY input_data, JSAMPARRAY output_data);
 
-/* Upsampling */
-EXTERN(void) jsimd_h2v1_upsample_sse2
-  (int max_v_samp_factor, JDIMENSION output_width, JSAMPARRAY input_data,
-   JSAMPARRAY *output_data_ptr);
-EXTERN(void) jsimd_h2v2_upsample_sse2
-  (int max_v_samp_factor, JDIMENSION output_width, JSAMPARRAY input_data,
-   JSAMPARRAY *output_data_ptr);
-
-EXTERN(void) jsimd_h2v1_upsample_avx2
-  (int max_v_samp_factor, JDIMENSION output_width, JSAMPARRAY input_data,
-   JSAMPARRAY *output_data_ptr);
-EXTERN(void) jsimd_h2v2_upsample_avx2
-  (int max_v_samp_factor, JDIMENSION output_width, JSAMPARRAY input_data,
-   JSAMPARRAY *output_data_ptr);
-
-EXTERN(void) jsimd_h2v1_upsample_neon
-  (int max_v_samp_factor, JDIMENSION output_width, JSAMPARRAY input_data,
-   JSAMPARRAY *output_data_ptr);
-EXTERN(void) jsimd_h2v2_upsample_neon
-  (int max_v_samp_factor, JDIMENSION output_width, JSAMPARRAY input_data,
-   JSAMPARRAY *output_data_ptr);
-
 /* Fancy Upsampling */
 extern const int jconst_fancy_upsample_sse2[];
 EXTERN(void) jsimd_h2v1_fancy_upsample_sse2

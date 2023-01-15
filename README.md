@@ -76,11 +76,13 @@ previously mentioned basic regression test.
 - IDCT scaling.
 - Input smoothing, designed for 8-bit color input files (e.g. GIFs).
 - Merged upsampling (merging upsampling with color conversion, which is fast
-  but 'sloppy', as opposed to higher quality, 'fancy' upsampling).
+  but uses 'sloppy' chroma upsampling).
 - Quantization from 24-bit (or 32-bit) to 8-bit color.
 - RGB565 color space.
 - Runtime configuration via environment variables (e.g. JPEGMEM,
   JSIMD\_FORCENONE, etc).
+- 'Sloppy' (low quality, box filter) chroma upsampling, as opposed to the
+  default 'fancy' (high quality, triangle filter) algorithm.
 
 
 ### Removed SIMD Code

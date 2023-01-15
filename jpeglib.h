@@ -519,7 +519,7 @@ struct jpeg_decompress_struct {
   boolean raw_data_out;         /* TRUE=downsampled data wanted */
 
   J_DCT_METHOD BORING_NAME(dct_method);
-  boolean do_fancy_upsampling;  /* TRUE=apply fancy upsampling */
+  boolean BORING_NAME(do_fancy_upsampling);
   boolean do_block_smoothing;   /* TRUE=apply interblock smoothing */
 
   boolean BORING_NAME(quantize_colors);

@@ -200,7 +200,6 @@ default_decompress_parms(j_decompress_ptr cinfo)
   /* Set defaults for other decompression parameters. */
   cinfo->buffered_image = FALSE;
   cinfo->raw_data_out = FALSE;
-  cinfo->do_fancy_upsampling = TRUE;
   cinfo->do_block_smoothing = TRUE;
 }
 

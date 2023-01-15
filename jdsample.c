@@ -194,67 +194,6 @@ int_upsample(j_decompress_ptr cinfo, jpeg_component_info *compptr,
 
 
 /*
- * Fast processing for the common case of 2:1 horizontal and 1:1 vertical.
- * It's still a box filter.
- */
-
-METHODDEF(void)
-h2v1_upsample(j_decompress_ptr cinfo, jpeg_component_info *compptr,
-              JSAMPARRAY input_data, JSAMPARRAY *output_data_ptr)
-{
-  JSAMPARRAY output_data = *output_data_ptr;
-  register JSAMPROW inptr, outptr;
-  register JSAMPLE invalue;
-  JSAMPROW outend;
-  int inrow;
-
-  for (inrow = 0; inrow < cinfo->max_v_samp_factor; inrow++) {
-    inptr = input_data[inrow];
-    outptr = output_data[inrow];
-    outend = outptr + cinfo->output_width;
-    while (outptr < outend) {
-      invalue = *inptr++;
-      *outptr++ = invalue;
-      *outptr++ = invalue;
-    }
-  }
-}
-
-
-/*
- * Fast processing for the common case of 2:1 horizontal and 2:1 vertical.
- * It's still a box filter.
- */
-
-METHODDEF(void)
-h2v2_upsample(j_decompress_ptr cinfo, jpeg_component_info *compptr,
-              JSAMPARRAY input_data, JSAMPARRAY *output_data_ptr)
-{
-  JSAMPARRAY output_data = *output_data_ptr;
-  register JSAMPROW inptr, outptr;
-  register JSAMPLE invalue;
-  JSAMPROW outend;
-  int inrow, outrow;
-
-  inrow = outrow = 0;
-  while (outrow < cinfo->max_v_samp_factor) {
-    inptr = input_data[inrow];
-    outptr = output_data[outrow];
-    outend = outptr + cinfo->output_width;
-    while (outptr < outend) {
-      invalue = *inptr++;
-      *outptr++ = invalue;
-      *outptr++ = invalue;
-    }
-    jcopy_sample_rows(output_data, outrow, output_data, outrow + 1, 1,
-                      cinfo->output_width);
-    inrow++;
-    outrow += 2;
-  }
-}
-
-
-/*
  * Fancy processing for the common case of 2:1 horizontal and 1:1 vertical.
  *
  * The upsampling algorithm is linear interpolation between pixel centers,
@@ -429,9 +368,7 @@ jinit_upsampler(j_decompress_ptr cinfo)
   } else
     upsample = (my_upsample_ptr)cinfo->upsample;
 
-  do_fancy = cinfo->do_fancy_upsampling;
-  if (!do_fancy)
-    ERREXIT(cinfo, JERR_NOTBORING_DO_FANCY_UPSAMPLING);
+  do_fancy = BORING_ALWAYS_TRUE;
 
   /* Verify we can handle the sampling factors, select per-component methods,
    * and create storage as needed.
@@ -463,10 +400,10 @@ jinit_upsampler(j_decompress_ptr cinfo)
         else
           upsample->methods[ci] = h2v1_fancy_upsample;
       } else {
-        if (jsimd_can_h2v1_upsample())
-          upsample->methods[ci] = jsimd_h2v1_upsample;
-        else
-          upsample->methods[ci] = h2v1_upsample;
+        /* Generic integral-factors upsampling method */
+        upsample->methods[ci] = int_upsample;
+        upsample->h_expand[ci] = 2;
+        upsample->v_expand[ci] = 1;
       }
     } else if (h_in_group == h_out_group &&
                v_in_group * 2 == v_out_group && do_fancy) {
@@ -489,10 +426,10 @@ jinit_upsampler(j_decompress_ptr cinfo)
           upsample->methods[ci] = h2v2_fancy_upsample;
         upsample->pub.need_context_rows = TRUE;
       } else {
-        if (jsimd_can_h2v2_upsample())
-          upsample->methods[ci] = jsimd_h2v2_upsample;
-        else
-          upsample->methods[ci] = h2v2_upsample;
+        /* Generic integral-factors upsampling method */
+        upsample->methods[ci] = int_upsample;
+        upsample->h_expand[ci] = 2;
+        upsample->v_expand[ci] = 2;
       }
     } else if ((h_out_group % h_in_group) == 0 &&
                (v_out_group % v_in_group) == 0) {
