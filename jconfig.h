@@ -31,6 +31,9 @@
  */
 
 #define BITS_IN_JSAMPLE  8      /* use 8 or 12 */
+#if BITS_IN_JSAMPLE != 8
+#error "boring-libjpeg-turbo only supports BITS_IN_JSAMPLE == 8"
+#endif
 
 /* Define if your (broken) compiler shifts signed values as if they were
    unsigned. */
