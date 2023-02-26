@@ -92,6 +92,3 @@ EXTERN(djpeg_dest_ptr) jinit_write_ppm(j_decompress_ptr cinfo);
 #ifndef EXIT_WARNING
 #define EXIT_WARNING  2
 #endif
-
-#define IsExtRGB(cs) \
-  (cs == JCS_RGB || (cs >= JCS_EXT_RGB && cs <= JCS_EXT_ARGB))
