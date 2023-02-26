@@ -5,7 +5,7 @@
  * Copyright (C) 1991-1998, Thomas G. Lane.
  * Modification developed 2002-2018 by Guido Vollbeding.
  * libjpeg-turbo Modifications:
- * Copyright (C) 2015, 2020, D. R. Commander.
+ * Copyright (C) 2015, 2020, 2022, D. R. Commander.
  * For conditions of distribution and use, see the accompanying README.ijg
  * file.
  *
@@ -161,9 +161,9 @@
  */
 
 GLOBAL(void)
-jpeg_idct_islow(j_decompress_ptr cinfo, jpeg_component_info *compptr,
-                JCOEFPTR coef_block, JSAMPARRAY output_buf,
-                JDIMENSION output_col)
+_jpeg_idct_islow(j_decompress_ptr cinfo, jpeg_component_info *compptr,
+                 JCOEFPTR coef_block, _JSAMPARRAY output_buf,
+                 JDIMENSION output_col)
 {
   JLONG tmp0, tmp1, tmp2, tmp3;
   JLONG tmp10, tmp11, tmp12, tmp13;
@@ -171,8 +171,8 @@ jpeg_idct_islow(j_decompress_ptr cinfo, jpeg_component_info *compptr,
   JCOEFPTR inptr;
   ISLOW_MULT_TYPE *quantptr;
   int *wsptr;
-  JSAMPROW outptr;
-  JSAMPLE *range_limit = IDCT_range_limit(cinfo);
+  _JSAMPROW outptr;
+  _JSAMPLE *range_limit = IDCT_range_limit(cinfo);
   int ctr;
   int workspace[DCTSIZE2];      /* buffers data between passes */
 
@@ -304,8 +304,8 @@ jpeg_idct_islow(j_decompress_ptr cinfo, jpeg_component_info *compptr,
     if (wsptr[1] == 0 && wsptr[2] == 0 && wsptr[3] == 0 && wsptr[4] == 0 &&
         wsptr[5] == 0 && wsptr[6] == 0 && wsptr[7] == 0) {
       /* AC terms all zero */
-      JSAMPLE dcval = range_limit[(int)DESCALE((JLONG)wsptr[0],
-                                               PASS1_BITS + 3) & RANGE_MASK];
+      _JSAMPLE dcval = range_limit[(int)DESCALE((JLONG)wsptr[0],
+                                                PASS1_BITS + 3) & RANGE_MASK];
 
       outptr[0] = dcval;
       outptr[1] = dcval;

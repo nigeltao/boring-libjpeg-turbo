@@ -17,6 +17,7 @@
 #define JPEG_INTERNALS
 #include "jinclude.h"
 #include "jpeglib.h"
+#include "jsamplecomp.h"
 
 
 /*
@@ -71,17 +72,17 @@ jround_up(long a, long b)
 
 
 GLOBAL(void)
-jcopy_sample_rows(JSAMPARRAY input_array, int source_row,
-                  JSAMPARRAY output_array, int dest_row, int num_rows,
-                  JDIMENSION num_cols)
+_jcopy_sample_rows(_JSAMPARRAY input_array, int source_row,
+                   _JSAMPARRAY output_array, int dest_row, int num_rows,
+                   JDIMENSION num_cols)
 /* Copy some rows of samples from one place to another.
  * num_rows rows are copied from input_array[source_row++]
  * to output_array[dest_row++]; these areas may overlap for duplication.
  * The source and destination arrays must be at least as wide as num_cols.
  */
 {
-  register JSAMPROW inptr, outptr;
-  register size_t count = (size_t)(num_cols * sizeof(JSAMPLE));
+  register _JSAMPROW inptr, outptr;
+  register size_t count = (size_t)(num_cols * sizeof(_JSAMPLE));
   register int row;
 
   input_array += source_row;
