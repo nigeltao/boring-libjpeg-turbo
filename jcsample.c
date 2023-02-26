@@ -310,16 +310,20 @@ _jinit_downsampler(j_compress_ptr cinfo)
         downsample->methods[ci] = fullsize_downsample;
     } else if (compptr->h_samp_factor * 2 == cinfo->max_h_samp_factor &&
                compptr->v_samp_factor == cinfo->max_v_samp_factor) {
+#ifdef WITH_SIMD
       if (jsimd_can_h2v1_downsample())
         downsample->methods[ci] = jsimd_h2v1_downsample;
       else
+#endif
         downsample->methods[ci] = h2v1_downsample;
     } else if (compptr->h_samp_factor * 2 == cinfo->max_h_samp_factor &&
                compptr->v_samp_factor * 2 == cinfo->max_v_samp_factor) {
       {
+#ifdef WITH_SIMD
         if (jsimd_can_h2v2_downsample())
           downsample->methods[ci] = jsimd_h2v2_downsample;
         else
+#endif
           downsample->methods[ci] = h2v2_downsample;
       }
     } else if ((cinfo->max_h_samp_factor % compptr->h_samp_factor) == 0 &&

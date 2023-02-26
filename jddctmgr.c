@@ -88,9 +88,11 @@ start_pass(j_decompress_ptr cinfo)
        ci++, compptr++) {
     /* Select the proper IDCT routine for this component's scaling */
     if (BORING_ALWAYS_TRUE) {
+#ifdef WITH_SIMD
         if (jsimd_can_idct_islow())
           method_ptr = jsimd_idct_islow;
         else
+#endif
           method_ptr = jpeg_idct_islow;
     }
     idct->pub.inverse_DCT[ci] = method_ptr;

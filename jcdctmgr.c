@@ -242,9 +242,13 @@ start_pass_fdctmgr(j_compress_ptr cinfo)
       }
       dtbl = fdct->divisors[qtblno];
       for (i = 0; i < DCTSIZE2; i++) {
+#ifdef WITH_SIMD
         if (!compute_reciprocal(qtbl->quantval[i] << 3, &dtbl[i]) &&
             fdct->quantize == jsimd_quantize)
           fdct->quantize = quantize;
+#else
+        compute_reciprocal(qtbl->quantval[i] << 3, &dtbl[i]);
+#endif
       }
     }
   }
@@ -386,21 +390,27 @@ _jinit_forward_dct(j_compress_ptr cinfo)
   /* First determine the DCT... */
   if (BORING_ALWAYS_TRUE) {
     fdct->pub._forward_DCT = forward_DCT;
+#ifdef WITH_SIMD
     if (jsimd_can_fdct_islow())
       fdct->dct = jsimd_fdct_islow;
     else
+#endif
       fdct->dct = _jpeg_fdct_islow;
   }
 
   /* ...then the supporting stages. */
   if (BORING_ALWAYS_TRUE) {
+#ifdef WITH_SIMD
     if (jsimd_can_convsamp())
       fdct->convsamp = jsimd_convsamp;
     else
+#endif
       fdct->convsamp = convsamp;
+#ifdef WITH_SIMD
     if (jsimd_can_quantize())
       fdct->quantize = jsimd_quantize;
     else
+#endif
       fdct->quantize = quantize;
   }
 

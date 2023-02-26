@@ -390,9 +390,11 @@ _jinit_upsampler(j_decompress_ptr cinfo)
     } else if (h_in_group * 2 == h_out_group && v_in_group == v_out_group) {
       /* Special cases for 2h1v upsampling */
       if (do_fancy && compptr->downsampled_width > 2) {
+#ifdef WITH_SIMD
         if (jsimd_can_h2v1_fancy_upsample())
           upsample->methods[ci] = jsimd_h2v1_fancy_upsample;
         else
+#endif
           upsample->methods[ci] = h2v1_fancy_upsample;
       } else {
         /* Generic integral-factors upsampling method */
@@ -403,8 +405,8 @@ _jinit_upsampler(j_decompress_ptr cinfo)
     } else if (h_in_group == h_out_group &&
                v_in_group * 2 == v_out_group && do_fancy) {
       /* Non-fancy upsampling is handled by the generic method */
-#if defined(__arm__) || defined(__aarch64__) || \
-    defined(_M_ARM) || defined(_M_ARM64)
+#if defined(WITH_SIMD) && (defined(__arm__) || defined(__aarch64__) || \
+                           defined(_M_ARM) || defined(_M_ARM64))
       if (jsimd_can_h1v2_fancy_upsample())
         upsample->methods[ci] = jsimd_h1v2_fancy_upsample;
       else
@@ -415,9 +417,11 @@ _jinit_upsampler(j_decompress_ptr cinfo)
                v_in_group * 2 == v_out_group) {
       /* Special cases for 2h2v upsampling */
       if (do_fancy && compptr->downsampled_width > 2) {
+#ifdef WITH_SIMD
         if (jsimd_can_h2v2_fancy_upsample())
           upsample->methods[ci] = jsimd_h2v2_fancy_upsample;
         else
+#endif
           upsample->methods[ci] = h2v2_fancy_upsample;
         upsample->pub.need_context_rows = TRUE;
       } else {
