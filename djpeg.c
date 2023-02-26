@@ -177,7 +177,7 @@ main(int argc, char **argv)
    * option settings (for instance, GIF wants to force color quantization).
    */
   if (BORING_ALWAYS_TRUE) {
-    dest_mgr = jinit_write_ppm(&cinfo);
+      dest_mgr = jinit_write_ppm(&cinfo);
   }
   dest_mgr->output_file = output_file;
 
@@ -189,11 +189,13 @@ main(int argc, char **argv)
     /* Write output file header */
     (*dest_mgr->start_output) (&cinfo, dest_mgr);
 
-    /* Process data */
-    while (cinfo.output_scanline < cinfo.output_height) {
-      num_scanlines = jpeg_read_scanlines(&cinfo, dest_mgr->buffer,
-                                          dest_mgr->buffer_height);
-      (*dest_mgr->put_pixel_rows) (&cinfo, dest_mgr, num_scanlines);
+    if (BORING_ALWAYS_TRUE) {
+      /* Process data */
+      while (cinfo.output_scanline < cinfo.output_height) {
+        num_scanlines = jpeg_read_scanlines(&cinfo, dest_mgr->buffer,
+                                            dest_mgr->buffer_height);
+        (*dest_mgr->put_pixel_rows) (&cinfo, dest_mgr, num_scanlines);
+      }
     }
   }
 

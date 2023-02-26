@@ -4,6 +4,8 @@
  * This file was part of the Independent JPEG Group's software:
  * Copyright (C) 1991-1998, Thomas G. Lane.
  * Modified 2003-2011 by Guido Vollbeding.
+ * Lossless JPEG Modifications:
+ * Copyright (C) 1999, Ken Murchison.
  * libjpeg-turbo Modifications:
  * Copyright (C) 2010, 2013-2014, 2017, 2019-2022, D. R. Commander.
  * For conditions of distribution and use, see the accompanying README.ijg
@@ -77,7 +79,7 @@ select_file_type(j_compress_ptr cinfo, FILE *infile)
   switch (c) {
 #ifdef PPM_SUPPORTED
   case 'P':
-    return jinit_read_ppm(cinfo);
+      return jinit_read_ppm(cinfo);
 #endif
   default:
     ERREXIT(cinfo, JERR_UNKNOWN_FORMAT);
@@ -232,9 +234,11 @@ main(int argc, char **argv)
   jpeg_start_compress(&cinfo, TRUE);
 
   /* Process data */
-  while (cinfo.next_scanline < cinfo.image_height) {
-    num_scanlines = (*src_mgr->get_pixel_rows) (&cinfo, src_mgr);
-    (void)jpeg_write_scanlines(&cinfo, src_mgr->buffer, num_scanlines);
+  if (BORING_ALWAYS_TRUE) {
+    while (cinfo.next_scanline < cinfo.image_height) {
+      num_scanlines = (*src_mgr->get_pixel_rows) (&cinfo, src_mgr);
+      (void)jpeg_write_scanlines(&cinfo, src_mgr->buffer, num_scanlines);
+    }
   }
 
   /* Finish compression and release memory */
