@@ -254,7 +254,7 @@ jpeg_make_d_derived_tbl(j_decompress_ptr cinfo, boolean isDC, int tblno,
   if (isDC) {
     for (i = 0; i < numsymbols; i++) {
       int sym = htbl->huffval[i];
-      if (sym < 0 || sym > (cinfo->master->lossless ? 16 : 15))
+      if (sym < 0 || sym > 15)
         ERREXIT(cinfo, JERR_BAD_HUFF_TABLE);
     }
   }

@@ -166,9 +166,6 @@ default_decompress_parms(j_decompress_ptr cinfo)
         cinfo->jpeg_color_space = JCS_RGB; /* ASCII 'R', 'G', 'B' */
       else {
         TRACEMS3(cinfo, 1, JTRC_UNKNOWN_IDS, cid0, cid1, cid2);
-        if (cinfo->master->lossless)
-          cinfo->jpeg_color_space = JCS_RGB; /* assume it's RGB */
-        else
           cinfo->jpeg_color_space = JCS_YCbCr; /* assume it's YCbCr */
       }
     }

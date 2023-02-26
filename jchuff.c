@@ -325,7 +325,7 @@ jpeg_make_c_derived_tbl(j_compress_ptr cinfo, boolean isDC, int tblno,
    * lossy mode and 0..16 for DC in lossless mode.  (We could constrain them
    * further based on data depth and mode, but this seems enough.)
    */
-  maxsymbol = isDC ? (cinfo->master->lossless ? 16 : 15) : 255;
+  maxsymbol = isDC ? 15 : 255;
 
   for (p = 0; p < lastp; p++) {
     i = htbl->huffval[p];

@@ -454,7 +454,7 @@ write_frame_header(j_compress_ptr cinfo)
   boolean is_baseline;
   jpeg_component_info *compptr;
 
-  if (!cinfo->master->lossless) {
+  if (BORING_ALWAYS_TRUE) {
     /* Emit DQT for each quantization table.
      * Note that emit_dqt() suppresses any duplicate tables.
      */
@@ -469,7 +469,7 @@ write_frame_header(j_compress_ptr cinfo)
    * Note we assume that Huffman table numbers won't be changed later.
    */
   if (cinfo->progressive_mode ||
-      cinfo->master->lossless || cinfo->data_precision != 8) {
+      cinfo->data_precision != 8) {
     is_baseline = FALSE;
   } else {
     is_baseline = TRUE;
@@ -489,8 +489,6 @@ write_frame_header(j_compress_ptr cinfo)
   if (BORING_ALWAYS_TRUE) {
     if (cinfo->progressive_mode)
       emit_sof(cinfo, M_SOF2);  /* SOF code for progressive Huffman */
-    else if (cinfo->master->lossless)
-      emit_sof(cinfo, M_SOF3);  /* SOF code for lossless Huffman */
     else if (is_baseline)
       emit_sof(cinfo, M_SOF0);  /* SOF code for baseline implementation */
     else
@@ -518,11 +516,11 @@ write_scan_header(j_compress_ptr cinfo)
      */
     for (i = 0; i < cinfo->comps_in_scan; i++) {
       compptr = cinfo->cur_comp_info[i];
-      if ((cinfo->Ss == 0 && cinfo->Ah == 0) || cinfo->master->lossless)
+      if (cinfo->Ss == 0 && cinfo->Ah == 0)
         emit_dht(cinfo, compptr->dc_tbl_no, FALSE);
       /* AC needs no table when not present, and lossless mode uses only DC
          tables. */
-      if (cinfo->Se && !cinfo->master->lossless)
+      if (cinfo->Se)
         emit_dht(cinfo, compptr->ac_tbl_no, TRUE);
     }
   }

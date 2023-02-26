@@ -168,7 +168,6 @@ validate_script(j_compress_ptr cinfo)
   else if (scanptr->Ss != 0 || scanptr->Se != DCTSIZE2 - 1) {
 #ifdef C_PROGRESSIVE_SUPPORTED
     cinfo->progressive_mode = TRUE;
-    cinfo->master->lossless = FALSE;
     last_bitpos_ptr = &last_bitpos[0][0];
     for (ci = 0; ci < cinfo->num_components; ci++)
       for (coefi = 0; coefi < DCTSIZE2; coefi++)
@@ -177,7 +176,6 @@ validate_script(j_compress_ptr cinfo)
     ERREXIT(cinfo, JERR_NOT_COMPILED);
 #endif
   } else {
-    cinfo->progressive_mode = cinfo->master->lossless = FALSE;
     for (ci = 0; ci < cinfo->num_components; ci++)
       component_sent[ci] = FALSE;
   }
@@ -310,7 +308,7 @@ select_scan_parameters(j_compress_ptr cinfo)
     for (ci = 0; ci < cinfo->num_components; ci++) {
       cinfo->cur_comp_info[ci] = &cinfo->comp_info[ci];
     }
-    if (!cinfo->master->lossless) {
+    if (BORING_ALWAYS_TRUE) {
       cinfo->Ss = 0;
       cinfo->Se = DCTSIZE2 - 1;
       cinfo->Ah = 0;
@@ -445,8 +443,7 @@ prepare_for_pass(j_compress_ptr cinfo)
     /* Do Huffman optimization for a scan after the first one. */
     select_scan_parameters(cinfo);
     per_scan_setup(cinfo);
-    if (cinfo->Ss != 0 || cinfo->Ah == 0 ||
-        cinfo->master->lossless) {
+    if (cinfo->Ss != 0 || cinfo->Ah == 0) {
       (*cinfo->entropy->start_pass) (cinfo, TRUE);
       (*cinfo->coef->start_pass) (cinfo, JBUF_CRANK_DEST);
       master->pub.call_pass_startup = FALSE;
@@ -573,27 +570,10 @@ jinit_c_master_control(j_compress_ptr cinfo, boolean transcode_only)
     cinfo->num_scans = 1;
   }
 
-  /* Disable smoothing and subsampling in lossless mode, since those are lossy
-   * algorithms.  Set the JPEG colorspace to the input colorspace.  Disable raw
-   * (downsampled) data input, because it isn't particularly useful without
-   * subsampling and has not been tested in lossless mode.
-   */
-  if (cinfo->master->lossless) {
-    int ci;
-    jpeg_component_info *compptr;
-
-    cinfo->raw_data_in = FALSE;
-    jpeg_default_colorspace(cinfo);
-    for (ci = 0, compptr = cinfo->comp_info; ci < cinfo->num_components;
-         ci++, compptr++)
-      compptr->h_samp_factor = compptr->v_samp_factor = 1;
-  }
-
   /* Validate parameters, determine derived values */
   initial_setup(cinfo, transcode_only);
 
-  if (cinfo->master->lossless ||        /*  TEMPORARY HACK ??? */
-      cinfo->progressive_mode)
+  if (cinfo->progressive_mode)          /*  TEMPORARY HACK ??? */
     cinfo->optimize_coding = TRUE; /* assume default tables no good for
                                       progressive mode or lossless mode */
   if (cinfo->data_precision == 12)

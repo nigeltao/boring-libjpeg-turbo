@@ -629,9 +629,6 @@ _jinit_color_deconverter(j_decompress_ptr cinfo)
 
   switch (cinfo->out_color_space) {
   case JCS_GRAYSCALE:
-    if (cinfo->master->lossless &&
-        cinfo->jpeg_color_space != cinfo->out_color_space)
-      ERREXIT(cinfo, JERR_CONVERSION_NOTIMPL);
     cinfo->out_color_components = 1;
     if (cinfo->jpeg_color_space == JCS_GRAYSCALE ||
         cinfo->jpeg_color_space == JCS_YCbCr) {
@@ -657,8 +654,6 @@ _jinit_color_deconverter(j_decompress_ptr cinfo)
   case JCS_EXT_BGRA:
   case JCS_EXT_ABGR:
   case JCS_EXT_ARGB:
-    if (cinfo->master->lossless && cinfo->jpeg_color_space != JCS_RGB)
-      ERREXIT(cinfo, JERR_CONVERSION_NOTIMPL);
     cinfo->out_color_components = rgb_pixelsize[cinfo->out_color_space];
     if (cinfo->jpeg_color_space == JCS_YCbCr) {
       if (jsimd_can_ycc_rgb())

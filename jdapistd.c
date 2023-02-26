@@ -135,9 +135,6 @@ _jpeg_crop_scanline(j_decompress_ptr cinfo, JDIMENSION *xoffset,
   if (cinfo->data_precision != BITS_IN_JSAMPLE)
     ERREXIT1(cinfo, JERR_BAD_PRECISION, cinfo->data_precision);
 
-  if (cinfo->master->lossless)
-    ERREXIT(cinfo, JERR_NOTIMPL);
-
   if ((cinfo->global_state != DSTATE_SCANNING &&
        cinfo->global_state != DSTATE_BUFIMAGE) || cinfo->output_scanline != 0)
     ERREXIT1(cinfo, JERR_BAD_STATE, cinfo->global_state);
@@ -366,9 +363,6 @@ _jpeg_skip_scanlines(j_decompress_ptr cinfo, JDIMENSION num_lines)
   if (cinfo->data_precision != BITS_IN_JSAMPLE)
     ERREXIT1(cinfo, JERR_BAD_PRECISION, cinfo->data_precision);
 
-  if (cinfo->master->lossless)
-    ERREXIT(cinfo, JERR_NOTIMPL);
-
   if (cinfo->global_state != DSTATE_SCANNING)
     ERREXIT1(cinfo, JERR_BAD_STATE, cinfo->global_state);
 
@@ -544,9 +538,6 @@ _jpeg_read_raw_data(j_decompress_ptr cinfo, _JSAMPIMAGE data,
 
   if (cinfo->data_precision != BITS_IN_JSAMPLE)
     ERREXIT1(cinfo, JERR_BAD_PRECISION, cinfo->data_precision);
-
-  if (cinfo->master->lossless)
-    ERREXIT(cinfo, JERR_NOTIMPL);
 
   if (cinfo->global_state != DSTATE_RAW_OK)
     ERREXIT1(cinfo, JERR_BAD_STATE, cinfo->global_state);

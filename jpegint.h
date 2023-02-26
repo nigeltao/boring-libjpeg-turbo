@@ -96,7 +96,7 @@ struct jpeg_comp_master {
   /* State variables made visible to other modules */
   boolean call_pass_startup;    /* True if pass_startup must be called */
   boolean is_last_pass;         /* True during last pass */
-  boolean lossless;             /* True if lossless mode is enabled */
+  boolean notboring_lossless;
 };
 
 /* Main buffer control (downsampled-data buffer) */
@@ -212,7 +212,7 @@ struct jpeg_decomp_master {
 
   /* State variables made visible to other modules */
   boolean notboring_is_dummy_pass;
-  boolean lossless;             /* True if decompressing a lossless image */
+  boolean notboring_lossless;
 
   /* Partial decompression variables */
   JDIMENSION first_iMCU_col;

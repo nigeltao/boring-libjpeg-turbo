@@ -85,6 +85,7 @@ full feature set, use libjpeg-turbo.
 
 - 12 (not 8) bits per sample.
 - Arithmetic coding.
+- Lossless.
 
 
 ### Removed C Library Features

@@ -243,7 +243,8 @@ get_sof(j_decompress_ptr cinfo, boolean is_prog, boolean is_lossless,
   INPUT_VARS(cinfo);
 
   cinfo->progressive_mode = is_prog;
-  cinfo->master->lossless = is_lossless;
+  if (is_lossless)
+    ERREXIT(cinfo, JERR_NOT_COMPILED);
 
   INPUT_2BYTES(cinfo, length, return FALSE);
 

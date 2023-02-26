@@ -51,9 +51,7 @@ jinit_compress_master(j_compress_ptr cinfo)
     }
   }
 
-  if (cinfo->master->lossless) {
-    ERREXIT(cinfo, JERR_NOT_COMPILED);
-  } else {
+  if (BORING_ALWAYS_TRUE) {
     if (cinfo->data_precision == 16)
       ERREXIT1(cinfo, JERR_BAD_PRECISION, cinfo->data_precision);
     /* Forward DCT */

@@ -204,16 +204,6 @@ master_selection(j_decompress_ptr cinfo)
   long samplesperrow;
   JDIMENSION jd_samplesperrow;
 
-  /* Disable IDCT scaling and raw (downsampled) data output in lossless mode.
-   * IDCT scaling is not useful in lossless mode, and it must be disabled in
-   * order to properly calculate the output dimensions.  Raw data output isn't
-   * particularly useful without subsampling and has not been tested in
-   * lossless mode.
-   */
-  if (cinfo->master->lossless) {
-    cinfo->raw_data_out = FALSE;
-  }
-
   /* Initialize dimensions and other stuff */
   jpeg_calc_output_dimensions(cinfo);
   prepare_range_limit_table(cinfo);
@@ -248,9 +238,7 @@ master_selection(j_decompress_ptr cinfo)
       jinit_d_post_controller(cinfo, FALSE);
   }
 
-  if (cinfo->master->lossless) {
-    ERREXIT(cinfo, JERR_NOT_COMPILED);
-  } else {
+  if (BORING_ALWAYS_TRUE) {
     if (cinfo->data_precision == 16)
       ERREXIT1(cinfo, JERR_BAD_PRECISION, cinfo->data_precision);
     /* Inverse DCT */

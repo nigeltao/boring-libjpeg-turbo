@@ -258,7 +258,6 @@ METHODDEF(void)
 start_input_pass(j_decompress_ptr cinfo)
 {
   per_scan_setup(cinfo);
-  if (!cinfo->master->lossless)
     latch_quant_tables(cinfo);
   (*cinfo->entropy->start_pass) (cinfo);
   (*cinfo->coef->start_input_pass) (cinfo);
