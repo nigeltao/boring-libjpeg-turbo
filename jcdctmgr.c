@@ -6,7 +6,7 @@
  * libjpeg-turbo Modifications:
  * Copyright (C) 1999-2006, MIYASAKA Masaru.
  * Copyright 2009 Pierre Ossman <ossman@cendio.se> for Cendio AB
- * Copyright (C) 2011, 2014-2015, D. R. Commander.
+ * Copyright (C) 2011, 2014-2015, 2022, D. R. Commander.
  * For conditions of distribution and use, see the accompanying README.ijg
  * file.
  *
@@ -27,7 +27,7 @@
 
 typedef void (*forward_DCT_method_ptr) (DCTELEM *data);
 
-typedef void (*convsamp_method_ptr) (JSAMPARRAY sample_data,
+typedef void (*convsamp_method_ptr) (_JSAMPARRAY sample_data,
                                      JDIMENSION start_col,
                                      DCTELEM *workspace);
 
@@ -256,10 +256,10 @@ start_pass_fdctmgr(j_compress_ptr cinfo)
  */
 
 METHODDEF(void)
-convsamp(JSAMPARRAY sample_data, JDIMENSION start_col, DCTELEM *workspace)
+convsamp(_JSAMPARRAY sample_data, JDIMENSION start_col, DCTELEM *workspace)
 {
   register DCTELEM *workspaceptr;
-  register JSAMPROW elemptr;
+  register _JSAMPROW elemptr;
   register int elemr;
 
   workspaceptr = workspace;
@@ -267,19 +267,19 @@ convsamp(JSAMPARRAY sample_data, JDIMENSION start_col, DCTELEM *workspace)
     elemptr = sample_data[elemr] + start_col;
 
 #if DCTSIZE == 8                /* unroll the inner loop */
-    *workspaceptr++ = (*elemptr++) - CENTERJSAMPLE;
-    *workspaceptr++ = (*elemptr++) - CENTERJSAMPLE;
-    *workspaceptr++ = (*elemptr++) - CENTERJSAMPLE;
-    *workspaceptr++ = (*elemptr++) - CENTERJSAMPLE;
-    *workspaceptr++ = (*elemptr++) - CENTERJSAMPLE;
-    *workspaceptr++ = (*elemptr++) - CENTERJSAMPLE;
-    *workspaceptr++ = (*elemptr++) - CENTERJSAMPLE;
-    *workspaceptr++ = (*elemptr++) - CENTERJSAMPLE;
+    *workspaceptr++ = (*elemptr++) - _CENTERJSAMPLE;
+    *workspaceptr++ = (*elemptr++) - _CENTERJSAMPLE;
+    *workspaceptr++ = (*elemptr++) - _CENTERJSAMPLE;
+    *workspaceptr++ = (*elemptr++) - _CENTERJSAMPLE;
+    *workspaceptr++ = (*elemptr++) - _CENTERJSAMPLE;
+    *workspaceptr++ = (*elemptr++) - _CENTERJSAMPLE;
+    *workspaceptr++ = (*elemptr++) - _CENTERJSAMPLE;
+    *workspaceptr++ = (*elemptr++) - _CENTERJSAMPLE;
 #else
     {
       register int elemc;
       for (elemc = DCTSIZE; elemc > 0; elemc--)
-        *workspaceptr++ = (*elemptr++) - CENTERJSAMPLE;
+        *workspaceptr++ = (*elemptr++) - _CENTERJSAMPLE;
     }
 #endif
   }
@@ -333,7 +333,7 @@ quantize(JCOEFPTR coef_block, DCTELEM *divisors, DCTELEM *workspace)
 
 METHODDEF(void)
 forward_DCT(j_compress_ptr cinfo, jpeg_component_info *compptr,
-            JSAMPARRAY sample_data, JBLOCKROW coef_blocks,
+            _JSAMPARRAY sample_data, JBLOCKROW coef_blocks,
             JDIMENSION start_row, JDIMENSION start_col, JDIMENSION num_blocks)
 /* This version is used for integer DCT implementations. */
 {
@@ -369,10 +369,13 @@ forward_DCT(j_compress_ptr cinfo, jpeg_component_info *compptr,
  */
 
 GLOBAL(void)
-jinit_forward_dct(j_compress_ptr cinfo)
+_jinit_forward_dct(j_compress_ptr cinfo)
 {
   my_fdct_ptr fdct;
   int i;
+
+  if (cinfo->data_precision != BITS_IN_JSAMPLE)
+    ERREXIT1(cinfo, JERR_BAD_PRECISION, cinfo->data_precision);
 
   fdct = (my_fdct_ptr)
     (*cinfo->mem->alloc_small) ((j_common_ptr)cinfo, JPOOL_IMAGE,
@@ -382,11 +385,11 @@ jinit_forward_dct(j_compress_ptr cinfo)
 
   /* First determine the DCT... */
   if (BORING_ALWAYS_TRUE) {
-    fdct->pub.forward_DCT = forward_DCT;
+    fdct->pub._forward_DCT = forward_DCT;
     if (jsimd_can_fdct_islow())
       fdct->dct = jsimd_fdct_islow;
     else
-      fdct->dct = jpeg_fdct_islow;
+      fdct->dct = _jpeg_fdct_islow;
   }
 
   /* ...then the supporting stages. */

@@ -1,10 +1,10 @@
 /*
  * jcprepct.c
  *
- * This file is part of the Independent JPEG Group's software:
+ * This file was part of the Independent JPEG Group's software:
  * Copyright (C) 1994-1996, Thomas G. Lane.
- * libjpeg-turbo Modifications:
- * Copyright (C) 2022, D. R. Commander.
+ * Lossless JPEG Modifications:
+ * Copyright (C) 1999, Ken Murchison.
  * For conditions of distribution and use, see the accompanying README.ijg
  * file.
  *
@@ -20,6 +20,7 @@
 #define JPEG_INTERNALS
 #include "jinclude.h"
 #include "jpeglib.h"
+#include "jsamplecomp.h"
 
 
 /*
@@ -49,7 +50,7 @@ typedef struct {
   /* Downsampling input buffer.  This buffer holds color-converted data
    * until we have enough to do a downsample step.
    */
-  JSAMPARRAY color_buf[MAX_COMPONENTS];
+  _JSAMPARRAY color_buf[MAX_COMPONENTS];
 
   JDIMENSION rows_to_go;        /* counts rows remaining in source image */
   int next_buf_row;             /* index of next row to store in color_buf */
@@ -84,14 +85,14 @@ start_pass_prep(j_compress_ptr cinfo, J_BUF_MODE pass_mode)
  */
 
 LOCAL(void)
-expand_bottom_edge(JSAMPARRAY image_data, JDIMENSION num_cols, int input_rows,
+expand_bottom_edge(_JSAMPARRAY image_data, JDIMENSION num_cols, int input_rows,
                    int output_rows)
 {
   register int row;
 
   for (row = input_rows; row < output_rows; row++) {
-    jcopy_sample_rows(image_data, input_rows - 1, image_data, row, 1,
-                      num_cols);
+    _jcopy_sample_rows(image_data, input_rows - 1, image_data, row, 1,
+                       num_cols);
   }
 }
 
@@ -106,9 +107,9 @@ expand_bottom_edge(JSAMPARRAY image_data, JDIMENSION num_cols, int input_rows,
  */
 
 METHODDEF(void)
-pre_process_data(j_compress_ptr cinfo, JSAMPARRAY input_buf,
+pre_process_data(j_compress_ptr cinfo, _JSAMPARRAY input_buf,
                  JDIMENSION *in_row_ctr, JDIMENSION in_rows_avail,
-                 JSAMPIMAGE output_buf, JDIMENSION *out_row_group_ctr,
+                 _JSAMPIMAGE output_buf, JDIMENSION *out_row_group_ctr,
                  JDIMENSION out_row_groups_avail)
 {
   my_prep_ptr prep = (my_prep_ptr)cinfo->prep;
@@ -122,10 +123,10 @@ pre_process_data(j_compress_ptr cinfo, JSAMPARRAY input_buf,
     inrows = in_rows_avail - *in_row_ctr;
     numrows = cinfo->max_v_samp_factor - prep->next_buf_row;
     numrows = (int)MIN((JDIMENSION)numrows, inrows);
-    (*cinfo->cconvert->color_convert) (cinfo, input_buf + *in_row_ctr,
-                                       prep->color_buf,
-                                       (JDIMENSION)prep->next_buf_row,
-                                       numrows);
+    (*cinfo->cconvert->_color_convert) (cinfo, input_buf + *in_row_ctr,
+                                        prep->color_buf,
+                                        (JDIMENSION)prep->next_buf_row,
+                                        numrows);
     *in_row_ctr += numrows;
     prep->next_buf_row += numrows;
     prep->rows_to_go -= numrows;
@@ -140,9 +141,9 @@ pre_process_data(j_compress_ptr cinfo, JSAMPARRAY input_buf,
     }
     /* If we've filled the conversion buffer, empty it. */
     if (prep->next_buf_row == cinfo->max_v_samp_factor) {
-      (*cinfo->downsample->downsample) (cinfo,
-                                        prep->color_buf, (JDIMENSION)0,
-                                        output_buf, *out_row_group_ctr);
+      (*cinfo->downsample->_downsample) (cinfo,
+                                         prep->color_buf, (JDIMENSION)0,
+                                         output_buf, *out_row_group_ctr);
       prep->next_buf_row = 0;
       (*out_row_group_ctr)++;
     }
@@ -152,7 +153,8 @@ pre_process_data(j_compress_ptr cinfo, JSAMPARRAY input_buf,
     if (prep->rows_to_go == 0 && *out_row_group_ctr < out_row_groups_avail) {
       for (ci = 0, compptr = cinfo->comp_info; ci < cinfo->num_components;
            ci++, compptr++) {
-        expand_bottom_edge(output_buf[ci], compptr->width_in_blocks * DCTSIZE,
+        expand_bottom_edge(output_buf[ci],
+                           compptr->width_in_blocks * DCTSIZE,
                            (int)(*out_row_group_ctr * compptr->v_samp_factor),
                            (int)(out_row_groups_avail * compptr->v_samp_factor));
       }
@@ -168,11 +170,14 @@ pre_process_data(j_compress_ptr cinfo, JSAMPARRAY input_buf,
  */
 
 GLOBAL(void)
-jinit_c_prep_controller(j_compress_ptr cinfo, boolean need_full_buffer)
+_jinit_c_prep_controller(j_compress_ptr cinfo, boolean need_full_buffer)
 {
   my_prep_ptr prep;
   int ci;
   jpeg_component_info *compptr;
+
+  if (cinfo->data_precision != BITS_IN_JSAMPLE)
+    ERREXIT1(cinfo, JERR_BAD_PRECISION, cinfo->data_precision);
 
   if (need_full_buffer)         /* safety check */
     ERREXIT(cinfo, JERR_BAD_BUFFER_MODE);
@@ -191,10 +196,10 @@ jinit_c_prep_controller(j_compress_ptr cinfo, boolean need_full_buffer)
     ERREXIT(cinfo, JERR_NOT_COMPILED);
   } else {
     /* No context, just make it tall enough for one row group */
-    prep->pub.pre_process_data = pre_process_data;
+    prep->pub._pre_process_data = pre_process_data;
     for (ci = 0, compptr = cinfo->comp_info; ci < cinfo->num_components;
          ci++, compptr++) {
-      prep->color_buf[ci] = (*cinfo->mem->alloc_sarray)
+      prep->color_buf[ci] = (_JSAMPARRAY)(*cinfo->mem->alloc_sarray)
         ((j_common_ptr)cinfo, JPOOL_IMAGE,
          (JDIMENSION)(((long)compptr->width_in_blocks * DCTSIZE *
                        cinfo->max_h_samp_factor) / compptr->h_samp_factor),

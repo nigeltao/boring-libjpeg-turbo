@@ -4,7 +4,7 @@
  * This file was part of the Independent JPEG Group's software:
  * Copyright (C) 1994-1996, Thomas G. Lane.
  * libjpeg-turbo Modifications:
- * Copyright (C) 2015, D. R. Commander.
+ * Copyright (C) 2015, 2022, D. R. Commander.
  * For conditions of distribution and use, see the accompanying README.ijg
  * file.
  *
@@ -15,13 +15,15 @@
  * machine-dependent tuning (e.g., assembly coding).
  */
 
+#include "jsamplecomp.h"
+
 
 /*
  * A forward DCT routine is given a pointer to a work area of type DCTELEM[];
  * the DCT is to be performed in-place in that buffer.  Type DCTELEM is int
  * for 8-bit samples, JLONG for 12-bit samples.  (NOTE: Floating-point DCT
  * implementations use an array of type FAST_FLOAT, instead.)
- * The DCT inputs are expected to be signed (range +-CENTERJSAMPLE).
+ * The DCT inputs are expected to be signed (range +-_CENTERJSAMPLE).
  * The DCT outputs are returned scaled up by a factor of 8; they therefore
  * have a range of +-8K for 8-bit data, +-128K for 12-bit data.  This
  * convention improves accuracy in integer implementations and saves some
@@ -68,25 +70,27 @@ typedef MULTIPLIER ISLOW_MULT_TYPE;  /* short or int, whichever is faster */
 
 /*
  * Each IDCT routine is responsible for range-limiting its results and
- * converting them to unsigned form (0..MAXJSAMPLE).  The raw outputs could
+ * converting them to unsigned form (0.._MAXJSAMPLE).  The raw outputs could
  * be quite far out of range if the input data is corrupt, so a bulletproof
  * range-limiting step is required.  We use a mask-and-table-lookup method
  * to do the combined operations quickly.  See the comments with
  * prepare_range_limit_table (in jdmaster.c) for more info.
  */
 
-#define IDCT_range_limit(cinfo)  ((cinfo)->sample_range_limit + CENTERJSAMPLE)
+#define IDCT_range_limit(cinfo) \
+  ((_JSAMPLE *)((cinfo)->sample_range_limit) + _CENTERJSAMPLE)
 
-#define RANGE_MASK  (MAXJSAMPLE * 4 + 3) /* 2 bits wider than legal samples */
+#define RANGE_MASK  (_MAXJSAMPLE * 4 + 3) /* 2 bits wider than legal samples */
 
 
 /* Extern declarations for the forward and inverse DCT routines. */
 
-EXTERN(void) jpeg_fdct_islow(DCTELEM *data);
+EXTERN(void) _jpeg_fdct_islow(DCTELEM *data);
 
-EXTERN(void) jpeg_idct_islow(j_decompress_ptr cinfo,
-                             jpeg_component_info *compptr, JCOEFPTR coef_block,
-                             JSAMPARRAY output_buf, JDIMENSION output_col);
+EXTERN(void) _jpeg_idct_islow(j_decompress_ptr cinfo,
+                              jpeg_component_info *compptr,
+                              JCOEFPTR coef_block, _JSAMPARRAY output_buf,
+                              JDIMENSION output_col);
 
 
 /*

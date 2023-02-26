@@ -23,6 +23,7 @@
 #define JPEG_INTERNALS
 #include "jinclude.h"
 #include "jpeglib.h"
+#include "jcmaster.h"
 
 
 /*
@@ -81,8 +82,18 @@ jpeg_CreateCompress(j_compress_ptr cinfo, int version, size_t structsize)
 
   cinfo->script_space = NULL;
 
+  cinfo->data_precision = BITS_IN_JSAMPLE;
+
   /* OK, I'm ready */
   cinfo->global_state = CSTATE_START;
+
+  /* The master struct is used to store extension parameters, so we allocate it
+   * here.
+   */
+  cinfo->master = (struct jpeg_comp_master *)
+      (*cinfo->mem->alloc_small) ((j_common_ptr)cinfo, JPOOL_PERMANENT,
+                                  sizeof(my_comp_master));
+  memset(cinfo->master, 0, sizeof(my_comp_master));
 }
 
 
@@ -174,8 +185,9 @@ jpeg_finish_compress(j_compress_ptr cinfo)
       /* We bypass the main controller and invoke coef controller directly;
        * all work is being done from the coefficient buffer.
        */
-      if (!(*cinfo->coef->compress_data) (cinfo, (JSAMPIMAGE)NULL))
-        ERREXIT(cinfo, JERR_CANT_SUSPEND);
+      if (BORING_ALWAYS_TRUE)
+        if (!(*cinfo->coef->compress_data) (cinfo, (JSAMPIMAGE)NULL))
+          ERREXIT(cinfo, JERR_CANT_SUSPEND);
     }
     (*cinfo->master->finish_pass) (cinfo);
   }

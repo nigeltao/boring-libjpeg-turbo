@@ -3,8 +3,10 @@
  *
  * This file was part of the Independent JPEG Group's software:
  * Copyright (C) 1991-1997, Thomas G. Lane.
+ * Lossless JPEG Modifications:
+ * Copyright (C) 1999, Ken Murchison.
  * libjpeg-turbo Modifications:
- * Copyright (C) 2020, D. R. Commander.
+ * Copyright (C) 2020, 2022, D. R. Commander.
  * For conditions of distribution and use, see the accompanying README.ijg
  * file.
  *
@@ -21,7 +23,7 @@
 #define JPEG_INTERNALS
 #include "jinclude.h"
 #include "jpeglib.h"
-#include "jpegcomp.h"
+#include "jpegapicomp.h"
 
 
 /*
@@ -38,28 +40,53 @@ jinit_compress_master(j_compress_ptr cinfo)
 
   /* Preprocessing */
   if (!cinfo->raw_data_in) {
-    jinit_color_converter(cinfo);
-    jinit_downsampler(cinfo);
-    jinit_c_prep_controller(cinfo, FALSE /* never need full buffer here */);
-  }
-  /* Forward DCT */
-  jinit_forward_dct(cinfo);
-  /* Entropy encoding: either Huffman or arithmetic coding. */
-  if (BORING_ALWAYS_TRUE) {
-    if (cinfo->progressive_mode) {
-#ifdef C_PROGRESSIVE_SUPPORTED
-      jinit_phuff_encoder(cinfo);
-#else
+    if (cinfo->data_precision == 16) {
+      ERREXIT1(cinfo, JERR_BAD_PRECISION, cinfo->data_precision);
+    } else if (cinfo->data_precision == 12) {
       ERREXIT(cinfo, JERR_NOT_COMPILED);
-#endif
-    } else
-      jinit_huff_encoder(cinfo);
+    } else {
+      jinit_color_converter(cinfo);
+      jinit_downsampler(cinfo);
+      jinit_c_prep_controller(cinfo, FALSE /* never need full buffer here */);
+    }
   }
 
-  /* Need a full-image coefficient buffer in any multi-pass mode. */
-  jinit_c_coef_controller(cinfo, (boolean)(cinfo->num_scans > 1 ||
-                                           cinfo->optimize_coding));
-  jinit_c_main_controller(cinfo, FALSE /* never need full buffer here */);
+  if (cinfo->master->lossless) {
+    ERREXIT(cinfo, JERR_NOT_COMPILED);
+  } else {
+    if (cinfo->data_precision == 16)
+      ERREXIT1(cinfo, JERR_BAD_PRECISION, cinfo->data_precision);
+    /* Forward DCT */
+    if (cinfo->data_precision == 12)
+      ERREXIT(cinfo, JERR_NOT_COMPILED);
+    else
+      jinit_forward_dct(cinfo);
+    /* Entropy encoding: either Huffman or arithmetic coding. */
+    if (BORING_ALWAYS_TRUE) {
+      if (cinfo->progressive_mode) {
+#ifdef C_PROGRESSIVE_SUPPORTED
+        jinit_phuff_encoder(cinfo);
+#else
+        ERREXIT(cinfo, JERR_NOT_COMPILED);
+#endif
+      } else
+        jinit_huff_encoder(cinfo);
+    }
+
+    /* Need a full-image coefficient buffer in any multi-pass mode. */
+    if (cinfo->data_precision == 12)
+      ERREXIT(cinfo, JERR_NOT_COMPILED);
+    else
+      jinit_c_coef_controller(cinfo, (boolean)(cinfo->num_scans > 1 ||
+                                               cinfo->optimize_coding));
+  }
+
+  if (cinfo->data_precision == 16)
+    ERREXIT1(cinfo, JERR_BAD_PRECISION, cinfo->data_precision);
+  else if (cinfo->data_precision == 12)
+    ERREXIT(cinfo, JERR_NOT_COMPILED);
+  else
+    jinit_c_main_controller(cinfo, FALSE /* never need full buffer here */);
 
   jinit_marker_writer(cinfo);
 
