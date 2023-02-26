@@ -69,10 +69,10 @@ EXTERN(int) jsimd_can_encode_mcu_AC_first_prepare(void);
 
 EXTERN(void) jsimd_encode_mcu_AC_first_prepare
   (const JCOEF *block, const int *jpeg_natural_order_start, int Sl, int Al,
-   JCOEF *values, size_t *zerobits);
+   UJCOEF *values, size_t *zerobits);
 
 EXTERN(int) jsimd_can_encode_mcu_AC_refine_prepare(void);
 
 EXTERN(int) jsimd_encode_mcu_AC_refine_prepare
   (const JCOEF *block, const int *jpeg_natural_order_start, int Sl, int Al,
-   JCOEF *absvalues, size_t *bits);
+   UJCOEF *absvalues, size_t *bits);

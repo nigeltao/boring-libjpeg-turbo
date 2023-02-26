@@ -25,6 +25,14 @@
 #define MAX_COEF_BITS  14
 #endif
 
+/* The progressive Huffman encoder uses an unsigned 16-bit data type to store
+ * absolute values of coefficients, because it is possible to inject a
+ * coefficient value of -32768 into the encoder by attempting to transform a
+ * malformed 12-bit JPEG image, and the absolute value of -32768 would overflow
+ * a signed 16-bit integer.
+ */
+typedef unsigned short UJCOEF;
+
 /* Derived data constructed for each Huffman table */
 
 typedef struct {
