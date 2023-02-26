@@ -4,6 +4,8 @@
  * This file was part of the Independent JPEG Group's software:
  * Copyright (C) 1991-1997, Thomas G. Lane.
  * Modified 2002-2009 by Guido Vollbeding.
+ * Lossless JPEG Modifications:
+ * Copyright (C) 1999, Ken Murchison.
  * libjpeg-turbo Modifications:
  * Copyright (C) 2009-2011, 2016, 2019, 2022, D. R. Commander.
  * Copyright (C) 2013, Linaro Limited.
@@ -20,7 +22,7 @@
 #define JPEG_INTERNALS
 #include "jinclude.h"
 #include "jpeglib.h"
-#include "jpegcomp.h"
+#include "jpegapicomp.h"
 #include "jdmaster.h"
 
 
@@ -40,9 +42,11 @@ jpeg_core_output_dimensions(j_decompress_ptr cinfo)
  * This function is used for transcoding and full decompression.
  */
 {
-  /* Hardwire it to "no scaling" */
-  cinfo->output_width = cinfo->image_width;
-  cinfo->output_height = cinfo->image_height;
+  {
+    /* Hardwire it to "no scaling" */
+    cinfo->output_width = cinfo->image_width;
+    cinfo->output_height = cinfo->image_height;
+  }
 }
 
 
@@ -64,9 +68,11 @@ jpeg_calc_output_dimensions(j_decompress_ptr cinfo)
   /* Compute core output image dimensions and DCT scaling choices. */
   jpeg_core_output_dimensions(cinfo);
 
-  /* Hardwire it to "no scaling" */
-  cinfo->output_width = cinfo->image_width;
-  cinfo->output_height = cinfo->image_height;
+  {
+    /* Hardwire it to "no scaling" */
+    cinfo->output_width = cinfo->image_width;
+    cinfo->output_height = cinfo->image_height;
+  }
 
   /* Report number of components in selected colorspace. */
   /* Probably this should be in the color conversion module... */
@@ -151,25 +157,31 @@ prepare_range_limit_table(j_decompress_ptr cinfo)
   JSAMPLE *table;
   int i;
 
-  table = (JSAMPLE *)
-    (*cinfo->mem->alloc_small) ((j_common_ptr)cinfo, JPOOL_IMAGE,
-                (5 * (MAXJSAMPLE + 1) + CENTERJSAMPLE) * sizeof(JSAMPLE));
-  table += (MAXJSAMPLE + 1);    /* allow negative subscripts of simple table */
-  cinfo->sample_range_limit = table;
-  /* First segment of "simple" table: limit[x] = 0 for x < 0 */
-  memset(table - (MAXJSAMPLE + 1), 0, (MAXJSAMPLE + 1) * sizeof(JSAMPLE));
-  /* Main part of "simple" table: limit[x] = x */
-  for (i = 0; i <= MAXJSAMPLE; i++)
-    table[i] = (JSAMPLE)i;
-  table += CENTERJSAMPLE;       /* Point to where post-IDCT table starts */
-  /* End of simple table, rest of first half of post-IDCT table */
-  for (i = CENTERJSAMPLE; i < 2 * (MAXJSAMPLE + 1); i++)
-    table[i] = MAXJSAMPLE;
-  /* Second half of post-IDCT table */
-  memset(table + (2 * (MAXJSAMPLE + 1)), 0,
-         (2 * (MAXJSAMPLE + 1) - CENTERJSAMPLE) * sizeof(JSAMPLE));
-  memcpy(table + (4 * (MAXJSAMPLE + 1) - CENTERJSAMPLE),
-         cinfo->sample_range_limit, CENTERJSAMPLE * sizeof(JSAMPLE));
+  if (cinfo->data_precision == 16) {
+    ERREXIT1(cinfo, JERR_BAD_PRECISION, cinfo->data_precision);
+  } else if (cinfo->data_precision == 12) {
+    ERREXIT(cinfo, JERR_NOT_COMPILED);
+  } else {
+    table = (JSAMPLE *)
+      (*cinfo->mem->alloc_small) ((j_common_ptr)cinfo, JPOOL_IMAGE,
+                  (5 * (MAXJSAMPLE + 1) + CENTERJSAMPLE) * sizeof(JSAMPLE));
+    table += (MAXJSAMPLE + 1);  /* allow negative subscripts of simple table */
+    cinfo->sample_range_limit = table;
+    /* First segment of "simple" table: limit[x] = 0 for x < 0 */
+    memset(table - (MAXJSAMPLE + 1), 0, (MAXJSAMPLE + 1) * sizeof(JSAMPLE));
+    /* Main part of "simple" table: limit[x] = x */
+    for (i = 0; i <= MAXJSAMPLE; i++)
+      table[i] = (JSAMPLE)i;
+    table += CENTERJSAMPLE;     /* Point to where post-IDCT table starts */
+    /* End of simple table, rest of first half of post-IDCT table */
+    for (i = CENTERJSAMPLE; i < 2 * (MAXJSAMPLE + 1); i++)
+      table[i] = MAXJSAMPLE;
+    /* Second half of post-IDCT table */
+    memset(table + (2 * (MAXJSAMPLE + 1)), 0,
+           (2 * (MAXJSAMPLE + 1) - CENTERJSAMPLE) * sizeof(JSAMPLE));
+    memcpy(table + (4 * (MAXJSAMPLE + 1) - CENTERJSAMPLE),
+           cinfo->sample_range_limit, CENTERJSAMPLE * sizeof(JSAMPLE));
+  }
 }
 
 
@@ -192,6 +204,16 @@ master_selection(j_decompress_ptr cinfo)
   long samplesperrow;
   JDIMENSION jd_samplesperrow;
 
+  /* Disable IDCT scaling and raw (downsampled) data output in lossless mode.
+   * IDCT scaling is not useful in lossless mode, and it must be disabled in
+   * order to properly calculate the output dimensions.  Raw data output isn't
+   * particularly useful without subsampling and has not been tested in
+   * lossless mode.
+   */
+  if (cinfo->master->lossless) {
+    cinfo->raw_data_out = FALSE;
+  }
+
   /* Initialize dimensions and other stuff */
   jpeg_calc_output_dimensions(cinfo);
   prepare_range_limit_table(cinfo);
@@ -209,31 +231,62 @@ master_selection(j_decompress_ptr cinfo)
   /* Post-processing: in particular, color conversion first */
   if (!cinfo->raw_data_out) {
     if (BORING_ALWAYS_TRUE) {
-      jinit_color_deconverter(cinfo);
-      jinit_upsampler(cinfo);
+      if (cinfo->data_precision == 16) {
+        ERREXIT1(cinfo, JERR_BAD_PRECISION, cinfo->data_precision);
+      } else if (cinfo->data_precision == 12) {
+        ERREXIT(cinfo, JERR_NOT_COMPILED);
+      } else {
+        jinit_color_deconverter(cinfo);
+        jinit_upsampler(cinfo);
+      }
     }
-    jinit_d_post_controller(cinfo, FALSE);
-  }
-  /* Inverse DCT */
-  jinit_inverse_dct(cinfo);
-  /* Entropy decoding: either Huffman or arithmetic coding. */
-  if (BORING_ALWAYS_TRUE) {
-    if (cinfo->progressive_mode) {
-#ifdef D_PROGRESSIVE_SUPPORTED
-      jinit_phuff_decoder(cinfo);
-#else
+    if (cinfo->data_precision == 16)
+      ERREXIT1(cinfo, JERR_BAD_PRECISION, cinfo->data_precision);
+    else if (cinfo->data_precision == 12)
       ERREXIT(cinfo, JERR_NOT_COMPILED);
-#endif
-    } else
-      jinit_huff_decoder(cinfo);
+    else
+      jinit_d_post_controller(cinfo, FALSE);
   }
 
-  /* Initialize principal buffer controllers. */
-  use_c_buffer = cinfo->inputctl->has_multiple_scans || cinfo->buffered_image;
-  jinit_d_coef_controller(cinfo, use_c_buffer);
+  if (cinfo->master->lossless) {
+    ERREXIT(cinfo, JERR_NOT_COMPILED);
+  } else {
+    if (cinfo->data_precision == 16)
+      ERREXIT1(cinfo, JERR_BAD_PRECISION, cinfo->data_precision);
+    /* Inverse DCT */
+    if (cinfo->data_precision == 12)
+      ERREXIT(cinfo, JERR_NOT_COMPILED);
+    else
+      jinit_inverse_dct(cinfo);
+    /* Entropy decoding: either Huffman or arithmetic coding. */
+    if (BORING_ALWAYS_TRUE) {
+      if (cinfo->progressive_mode) {
+#ifdef D_PROGRESSIVE_SUPPORTED
+        jinit_phuff_decoder(cinfo);
+#else
+        ERREXIT(cinfo, JERR_NOT_COMPILED);
+#endif
+      } else
+        jinit_huff_decoder(cinfo);
+    }
 
-  if (!cinfo->raw_data_out)
-    jinit_d_main_controller(cinfo, FALSE /* never need full buffer here */);
+    /* Initialize principal buffer controllers. */
+    use_c_buffer = cinfo->inputctl->has_multiple_scans ||
+                   cinfo->buffered_image;
+    if (cinfo->data_precision == 12)
+      ERREXIT(cinfo, JERR_NOT_COMPILED);
+    else
+      jinit_d_coef_controller(cinfo, use_c_buffer);
+  }
+
+  if (!cinfo->raw_data_out) {
+    if (cinfo->data_precision == 16)
+      ERREXIT1(cinfo, JERR_BAD_PRECISION, cinfo->data_precision);
+    else if (cinfo->data_precision == 12)
+      ERREXIT(cinfo, JERR_NOT_COMPILED);
+    else
+      jinit_d_main_controller(cinfo, FALSE /* never need full buffer here */);
+  }
 
   /* We can now tell the memory manager to allocate virtual arrays. */
   (*cinfo->mem->realize_virt_arrays) ((j_common_ptr)cinfo);

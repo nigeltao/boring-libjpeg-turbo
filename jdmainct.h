@@ -9,7 +9,8 @@
 
 #define JPEG_INTERNALS
 #include "jpeglib.h"
-#include "jpegcomp.h"
+#include "jpegapicomp.h"
+#include "jsamplecomp.h"
 
 
 /* Private buffer controller object */
@@ -18,7 +19,7 @@ typedef struct {
   struct jpeg_d_main_controller pub; /* public fields */
 
   /* Pointer to allocated workspace (M or M+2 row groups). */
-  JSAMPARRAY buffer[MAX_COMPONENTS];
+  _JSAMPARRAY buffer[MAX_COMPONENTS];
 
   boolean buffer_full;          /* Have we gotten an iMCU row from decoder? */
   JDIMENSION rowgroup_ctr;      /* counts row groups output to postprocessor */
@@ -26,7 +27,7 @@ typedef struct {
   /* Remaining fields are only used in the context case. */
 
   /* These are the master pointers to the funny-order pointer lists. */
-  JSAMPIMAGE xbuffer[2];        /* pointers to weird pointer lists */
+  _JSAMPIMAGE xbuffer[2];       /* pointers to weird pointer lists */
 
   int whichptr;                 /* indicates which pointer set is now in use */
   int context_state;            /* process_data state machine status */
@@ -53,7 +54,7 @@ set_wraparound_pointers(j_decompress_ptr cinfo)
   int ci, i, rgroup;
   int M = DCTSIZE;
   jpeg_component_info *compptr;
-  JSAMPARRAY xbuf0, xbuf1;
+  _JSAMPARRAY xbuf0, xbuf1;
 
   for (ci = 0, compptr = cinfo->comp_info; ci < cinfo->num_components;
        ci++, compptr++) {

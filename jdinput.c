@@ -3,6 +3,8 @@
  *
  * This file was part of the Independent JPEG Group's software:
  * Copyright (C) 1991-1997, Thomas G. Lane.
+ * Lossless JPEG Modifications:
+ * Copyright (C) 1999, Ken Murchison.
  * libjpeg-turbo Modifications:
  * Copyright (C) 2010, 2016, 2018, 2022, D. R. Commander.
  * Copyright (C) 2015, Google, Inc.
@@ -11,14 +13,15 @@
  *
  * This file contains input control logic for the JPEG decompressor.
  * These routines are concerned with controlling the decompressor's input
- * processing (marker reading and coefficient decoding).  The actual input
- * reading is done in jdmarker.c, jdhuff.c, and jdphuff.c.
+ * processing (marker reading and coefficient/difference decoding).
+ * The actual input reading is done in jdmarker.c, jdhuff.c, jdphuff.c,
+ * and jdlhuff.c.
  */
 
 #define JPEG_INTERNALS
 #include "jinclude.h"
 #include "jpeglib.h"
-#include "jpegcomp.h"
+#include "jpegapicomp.h"
 
 
 /* Private state */
@@ -53,7 +56,7 @@ initial_setup(j_decompress_ptr cinfo)
     ERREXIT1(cinfo, JERR_IMAGE_TOO_BIG, (unsigned int)JPEG_MAX_DIMENSION);
 
   /* For now, precision must match compiled-in value... */
-  if (cinfo->data_precision != BITS_IN_JSAMPLE)
+  if (cinfo->data_precision != 8 && cinfo->data_precision != 12)
     ERREXIT1(cinfo, JERR_BAD_PRECISION, cinfo->data_precision);
 
   /* Check that number of components won't exceed internal array sizes */
@@ -80,7 +83,7 @@ initial_setup(j_decompress_ptr cinfo)
   /* Compute dimensions of components */
   for (ci = 0, compptr = cinfo->comp_info; ci < cinfo->num_components;
        ci++, compptr++) {
-    /* Size in DCT blocks */
+    /* Size in data units */
     compptr->width_in_blocks = (JDIMENSION)
       jdiv_round_up((long)cinfo->image_width * (long)compptr->h_samp_factor,
                     (long)(cinfo->max_h_samp_factor * DCTSIZE));
@@ -138,14 +141,14 @@ per_scan_setup(j_decompress_ptr cinfo)
     /* Overall image size in MCUs */
     cinfo->MCUs_per_row = compptr->width_in_blocks;
 
-    /* For noninterleaved scan, always one block per MCU */
+    /* For noninterleaved scan, always one data unit per MCU */
     compptr->MCU_width = 1;
     compptr->MCU_height = 1;
     compptr->MCU_blocks = 1;
     compptr->MCU_sample_width = DCTSIZE;
     compptr->last_col_width = 1;
     /* For noninterleaved scans, it is convenient to define last_row_height
-     * as the number of block rows present in the last iMCU row.
+     * as the number of data unit rows present in the last iMCU row.
      */
     tmp = (int)(compptr->height_in_blocks % compptr->v_samp_factor);
     if (tmp == 0) tmp = compptr->v_samp_factor;
@@ -171,12 +174,12 @@ per_scan_setup(j_decompress_ptr cinfo)
 
     for (ci = 0; ci < cinfo->comps_in_scan; ci++) {
       compptr = cinfo->cur_comp_info[ci];
-      /* Sampling factors give # of blocks of component in each MCU */
+      /* Sampling factors give # of data units of component in each MCU */
       compptr->MCU_width = compptr->h_samp_factor;
       compptr->MCU_height = compptr->v_samp_factor;
       compptr->MCU_blocks = compptr->MCU_width * compptr->MCU_height;
       compptr->MCU_sample_width = compptr->MCU_width * DCTSIZE;
-      /* Figure number of non-dummy blocks in last MCU column & row */
+      /* Figure number of non-dummy data units in last MCU column & row */
       tmp = (int)(compptr->width_in_blocks % compptr->MCU_width);
       if (tmp == 0) tmp = compptr->MCU_width;
       compptr->last_col_width = tmp;
@@ -255,7 +258,8 @@ METHODDEF(void)
 start_input_pass(j_decompress_ptr cinfo)
 {
   per_scan_setup(cinfo);
-  latch_quant_tables(cinfo);
+  if (!cinfo->master->lossless)
+    latch_quant_tables(cinfo);
   (*cinfo->entropy->start_pass) (cinfo);
   (*cinfo->coef->start_input_pass) (cinfo);
   cinfo->inputctl->consume_input = cinfo->coef->consume_data;
@@ -264,8 +268,8 @@ start_input_pass(j_decompress_ptr cinfo)
 
 /*
  * Finish up after inputting a compressed-data scan.
- * This is called by the coefficient controller after it's read all
- * the expected data of the scan.
+ * This is called by the coefficient or difference controller after it's read
+ * all the expected data of the scan.
  */
 
 METHODDEF(void)
@@ -281,8 +285,8 @@ finish_input_pass(j_decompress_ptr cinfo)
  * Return value is JPEG_SUSPENDED, JPEG_REACHED_SOS, or JPEG_REACHED_EOI.
  *
  * The consume_input method pointer points either here or to the
- * coefficient controller's consume_data routine, depending on whether
- * we are reading a compressed data segment or inter-segment markers.
+ * coefficient or difference controller's consume_data routine, depending on
+ * whether we are reading a compressed data segment or inter-segment markers.
  */
 
 METHODDEF(int)

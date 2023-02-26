@@ -26,7 +26,7 @@
 #include "jpeglib.h"
 #include "jdct.h"               /* Private declarations for DCT subsystem */
 #include "jsimddct.h"
-#include "jpegcomp.h"
+#include "jpegapicomp.h"
 
 
 /*

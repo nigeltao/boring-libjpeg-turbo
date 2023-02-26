@@ -107,7 +107,7 @@ output_pass_setup(j_decompress_ptr cinfo)
     cinfo->global_state = DSTATE_PRESCAN;
   }
   /* Ready for application to drive output pass through
-   * jpeg_read_scanlines or jpeg_read_raw_data.
+   * _jpeg_read_scanlines or _jpeg_read_raw_data.
    */
   cinfo->global_state = cinfo->raw_data_out ? DSTATE_RAW_OK : DSTATE_SCANNING;
   return TRUE;
@@ -118,19 +118,25 @@ output_pass_setup(j_decompress_ptr cinfo)
  * Enable partial scanline decompression
  *
  * Must be called after jpeg_start_decompress() and before any calls to
- * jpeg_read_scanlines() or jpeg_skip_scanlines().
+ * _jpeg_read_scanlines() or _jpeg_skip_scanlines().
  *
  * Refer to libjpeg.txt for more information.
  */
 
 GLOBAL(void)
-jpeg_crop_scanline(j_decompress_ptr cinfo, JDIMENSION *xoffset,
-                   JDIMENSION *width)
+_jpeg_crop_scanline(j_decompress_ptr cinfo, JDIMENSION *xoffset,
+                    JDIMENSION *width)
 {
   int ci, align, orig_downsampled_width;
   JDIMENSION input_xoffset;
   boolean reinit_upsampler = FALSE;
   jpeg_component_info *compptr;
+
+  if (cinfo->data_precision != BITS_IN_JSAMPLE)
+    ERREXIT1(cinfo, JERR_BAD_PRECISION, cinfo->data_precision);
+
+  if (cinfo->master->lossless)
+    ERREXIT(cinfo, JERR_NOTIMPL);
 
   if ((cinfo->global_state != DSTATE_SCANNING &&
        cinfo->global_state != DSTATE_BUFIMAGE) || cinfo->output_scanline != 0)
@@ -216,7 +222,7 @@ jpeg_crop_scanline(j_decompress_ptr cinfo, JDIMENSION *xoffset,
 
   if (reinit_upsampler) {
     cinfo->master->jinit_upsampler_no_alloc = TRUE;
-    jinit_upsampler(cinfo);
+    _jinit_upsampler(cinfo);
     cinfo->master->jinit_upsampler_no_alloc = FALSE;
   }
 }
@@ -230,16 +236,19 @@ jpeg_crop_scanline(j_decompress_ptr cinfo, JDIMENSION *xoffset,
  * including bottom of image, data source suspension, and operating
  * modes that emit multiple scanlines at a time.
  *
- * Note: we warn about excess calls to jpeg_read_scanlines() since
+ * Note: we warn about excess calls to _jpeg_read_scanlines() since
  * this likely signals an application programmer error.  However,
  * an oversize buffer (max_lines > scanlines remaining) is not an error.
  */
 
 GLOBAL(JDIMENSION)
-jpeg_read_scanlines(j_decompress_ptr cinfo, JSAMPARRAY scanlines,
-                    JDIMENSION max_lines)
+_jpeg_read_scanlines(j_decompress_ptr cinfo, _JSAMPARRAY scanlines,
+                     JDIMENSION max_lines)
 {
   JDIMENSION row_ctr;
+
+  if (cinfo->data_precision != BITS_IN_JSAMPLE)
+    ERREXIT1(cinfo, JERR_BAD_PRECISION, cinfo->data_precision);
 
   if (cinfo->global_state != DSTATE_SCANNING)
     ERREXIT1(cinfo, JERR_BAD_STATE, cinfo->global_state);
@@ -257,22 +266,22 @@ jpeg_read_scanlines(j_decompress_ptr cinfo, JSAMPARRAY scanlines,
 
   /* Process some data */
   row_ctr = 0;
-  (*cinfo->main->process_data) (cinfo, scanlines, &row_ctr, max_lines);
+  (*cinfo->main->_process_data) (cinfo, scanlines, &row_ctr, max_lines);
   cinfo->output_scanline += row_ctr;
   return row_ctr;
 }
 
 
-/* Dummy color convert function used by jpeg_skip_scanlines() */
+/* Dummy color convert function used by _jpeg_skip_scanlines() */
 LOCAL(void)
-noop_convert(j_decompress_ptr cinfo, JSAMPIMAGE input_buf,
-             JDIMENSION input_row, JSAMPARRAY output_buf, int num_rows)
+noop_convert(j_decompress_ptr cinfo, _JSAMPIMAGE input_buf,
+             JDIMENSION input_row, _JSAMPARRAY output_buf, int num_rows)
 {
 }
 
 
 /*
- * In some cases, it is best to call jpeg_read_scanlines() and discard the
+ * In some cases, it is best to call _jpeg_read_scanlines() and discard the
  * output, rather than skipping the scanlines, because this allows us to
  * maintain the internal state of the context-based upsampler.  In these cases,
  * we set up and tear down a dummy color converter in order to avoid valgrind
@@ -283,16 +292,16 @@ LOCAL(void)
 read_and_discard_scanlines(j_decompress_ptr cinfo, JDIMENSION num_lines)
 {
   JDIMENSION n;
-  JSAMPLE dummy_sample[1] = { 0 };
-  JSAMPROW dummy_row = dummy_sample;
-  JSAMPARRAY scanlines = NULL;
-  void (*color_convert) (j_decompress_ptr cinfo, JSAMPIMAGE input_buf,
-                         JDIMENSION input_row, JSAMPARRAY output_buf,
+  _JSAMPLE dummy_sample[1] = { 0 };
+  _JSAMPROW dummy_row = dummy_sample;
+  _JSAMPARRAY scanlines = NULL;
+  void (*color_convert) (j_decompress_ptr cinfo, _JSAMPIMAGE input_buf,
+                         JDIMENSION input_row, _JSAMPARRAY output_buf,
                          int num_rows) = NULL;
 
-  if (cinfo->cconvert && cinfo->cconvert->color_convert) {
-    color_convert = cinfo->cconvert->color_convert;
-    cinfo->cconvert->color_convert = noop_convert;
+  if (cinfo->cconvert && cinfo->cconvert->_color_convert) {
+    color_convert = cinfo->cconvert->_color_convert;
+    cinfo->cconvert->_color_convert = noop_convert;
     /* This just prevents UBSan from complaining about adding 0 to a NULL
      * pointer.  The pointer isn't actually used.
      */
@@ -300,16 +309,16 @@ read_and_discard_scanlines(j_decompress_ptr cinfo, JDIMENSION num_lines)
   }
 
   for (n = 0; n < num_lines; n++)
-    jpeg_read_scanlines(cinfo, scanlines, 1);
+    _jpeg_read_scanlines(cinfo, scanlines, 1);
 
   if (color_convert)
-    cinfo->cconvert->color_convert = color_convert;
+    cinfo->cconvert->_color_convert = color_convert;
 }
 
 
 /*
- * Called by jpeg_skip_scanlines().  This partially skips a decompress block by
- * incrementing the rowgroup counter.
+ * Called by _jpeg_skip_scanlines().  This partially skips a decompress block
+ * by incrementing the rowgroup counter.
  */
 
 LOCAL(void)
@@ -343,7 +352,7 @@ increment_simple_rowgroup_ctr(j_decompress_ptr cinfo, JDIMENSION rows)
  */
 
 GLOBAL(JDIMENSION)
-jpeg_skip_scanlines(j_decompress_ptr cinfo, JDIMENSION num_lines)
+_jpeg_skip_scanlines(j_decompress_ptr cinfo, JDIMENSION num_lines)
 {
   my_main_ptr main_ptr = (my_main_ptr)cinfo->main;
   my_coef_ptr coef = (my_coef_ptr)cinfo->coef;
@@ -353,6 +362,12 @@ jpeg_skip_scanlines(j_decompress_ptr cinfo, JDIMENSION num_lines)
   int y;
   JDIMENSION lines_per_iMCU_row, lines_left_in_iMCU_row, lines_after_iMCU_row;
   JDIMENSION lines_to_skip, lines_to_read;
+
+  if (cinfo->data_precision != BITS_IN_JSAMPLE)
+    ERREXIT1(cinfo, JERR_BAD_PRECISION, cinfo->data_precision);
+
+  if (cinfo->master->lossless)
+    ERREXIT(cinfo, JERR_NOTIMPL);
 
   if (cinfo->global_state != DSTATE_SCANNING)
     ERREXIT1(cinfo, JERR_BAD_STATE, cinfo->global_state);
@@ -522,10 +537,16 @@ jpeg_skip_scanlines(j_decompress_ptr cinfo, JDIMENSION num_lines)
  */
 
 GLOBAL(JDIMENSION)
-jpeg_read_raw_data(j_decompress_ptr cinfo, JSAMPIMAGE data,
-                   JDIMENSION max_lines)
+_jpeg_read_raw_data(j_decompress_ptr cinfo, _JSAMPIMAGE data,
+                    JDIMENSION max_lines)
 {
   JDIMENSION lines_per_iMCU_row;
+
+  if (cinfo->data_precision != BITS_IN_JSAMPLE)
+    ERREXIT1(cinfo, JERR_BAD_PRECISION, cinfo->data_precision);
+
+  if (cinfo->master->lossless)
+    ERREXIT(cinfo, JERR_NOTIMPL);
 
   if (cinfo->global_state != DSTATE_RAW_OK)
     ERREXIT1(cinfo, JERR_BAD_STATE, cinfo->global_state);
@@ -547,7 +568,7 @@ jpeg_read_raw_data(j_decompress_ptr cinfo, JSAMPIMAGE data,
     ERREXIT(cinfo, JERR_BUFFER_SIZE);
 
   /* Decompress directly into user's buffer. */
-  if (!(*cinfo->coef->decompress_data) (cinfo, data))
+  if (!(*cinfo->coef->_decompress_data) (cinfo, data))
     return 0;                   /* suspension forced, can do nothing more */
 
   /* OK, we processed one iMCU row. */

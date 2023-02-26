@@ -3,6 +3,8 @@
  *
  * This file was part of the Independent JPEG Group's software:
  * Copyright (C) 1994-1996, Thomas G. Lane.
+ * libjpeg-turbo Modifications:
+ * Copyright (C) 2022, D. R. Commander.
  * It was modified by The libjpeg-turbo Project to include only code relevant
  * to libjpeg-turbo.
  * For conditions of distribution and use, see the accompanying README.ijg
@@ -22,6 +24,7 @@
 #define JPEG_INTERNALS
 #include "jinclude.h"
 #include "jpeglib.h"
+#include "jsamplecomp.h"
 
 
 /* Private buffer controller object */
@@ -48,7 +51,7 @@ start_pass_dpost(j_decompress_ptr cinfo, J_BUF_MODE pass_mode)
       /* For single-pass processing without color quantization,
        * I have no work to do; just call the upsampler directly.
        */
-      post->pub.post_process_data = cinfo->upsample->upsample;
+      post->pub._post_process_data = cinfo->upsample->_upsample;
     }
     break;
   default:
@@ -63,9 +66,12 @@ start_pass_dpost(j_decompress_ptr cinfo, J_BUF_MODE pass_mode)
  */
 
 GLOBAL(void)
-jinit_d_post_controller(j_decompress_ptr cinfo, boolean need_full_buffer)
+_jinit_d_post_controller(j_decompress_ptr cinfo, boolean need_full_buffer)
 {
   my_post_ptr post;
+
+  if (cinfo->data_precision != BITS_IN_JSAMPLE)
+    ERREXIT1(cinfo, JERR_BAD_PRECISION, cinfo->data_precision);
 
   post = (my_post_ptr)
     (*cinfo->mem->alloc_small) ((j_common_ptr)cinfo, JPOOL_IMAGE,
