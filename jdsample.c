@@ -99,7 +99,8 @@ sep_upsample(j_decompress_ptr cinfo, _JSAMPIMAGE input_buf,
 
   (*cinfo->cconvert->_color_convert) (cinfo, upsample->color_buf,
                                       (JDIMENSION)upsample->next_row_out,
-                                      output_buf + *out_row_ctr, (int)num_rows);
+                                      output_buf + *out_row_ctr,
+                                      (int)num_rows);
 
   /* Adjust counts */
   *out_row_ctr += num_rows;
@@ -435,7 +436,7 @@ _jinit_upsampler(j_decompress_ptr cinfo)
     } else if ((h_out_group % h_in_group) == 0 &&
                (v_out_group % v_in_group) == 0) {
       /* Generic integral-factors upsampling method */
-      upsample->methods[ci] = int_upsample;
+        upsample->methods[ci] = int_upsample;
       upsample->h_expand[ci] = (UINT8)(h_out_group / h_in_group);
       upsample->v_expand[ci] = (UINT8)(v_out_group / v_in_group);
     } else

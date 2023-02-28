@@ -81,7 +81,7 @@ jpeg_start_compress(j_compress_ptr cinfo, boolean write_all_tables)
 
 GLOBAL(JDIMENSION)
 _jpeg_write_scanlines(j_compress_ptr cinfo, _JSAMPARRAY scanlines,
-                     JDIMENSION num_lines)
+                      JDIMENSION num_lines)
 {
   JDIMENSION row_ctr, rows_left;
 
@@ -103,7 +103,7 @@ _jpeg_write_scanlines(j_compress_ptr cinfo, _JSAMPARRAY scanlines,
   /* Give master control module another chance if this is first call to
    * _jpeg_write_scanlines.  This lets output of the frame/scan headers be
    * delayed so that application can write COM, etc, markers between
-   * _jpeg_start_compress and _jpeg_write_scanlines.
+   * jpeg_start_compress and _jpeg_write_scanlines.
    */
   if (cinfo->master->call_pass_startup)
     (*cinfo->master->pass_startup) (cinfo);
@@ -127,7 +127,7 @@ _jpeg_write_scanlines(j_compress_ptr cinfo, _JSAMPARRAY scanlines,
 
 GLOBAL(JDIMENSION)
 _jpeg_write_raw_data(j_compress_ptr cinfo, _JSAMPIMAGE data,
-                    JDIMENSION num_lines)
+                     JDIMENSION num_lines)
 {
   JDIMENSION lines_per_iMCU_row;
 
@@ -151,7 +151,7 @@ _jpeg_write_raw_data(j_compress_ptr cinfo, _JSAMPIMAGE data,
   /* Give master control module another chance if this is first call to
    * _jpeg_write_raw_data.  This lets output of the frame/scan headers be
    * delayed so that application can write COM, etc, markers between
-   * _jpeg_start_compress and _jpeg_write_raw_data.
+   * jpeg_start_compress and _jpeg_write_raw_data.
    */
   if (cinfo->master->call_pass_startup)
     (*cinfo->master->pass_startup) (cinfo);

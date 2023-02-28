@@ -44,6 +44,14 @@
  * and 2:1 ratios) the box is equivalent to a "triangle filter" which is not
  * nearly so bad.  If you intend to use other sampling ratios, you'd be well
  * advised to improve this code.
+ *
+ * A simple input-smoothing capability is provided.  This is mainly intended
+ * for cleaning up color-dithered GIF input files (if you find it inadequate,
+ * we suggest using an external filtering program such as pnmconvol).  When
+ * enabled, each input pixel P is replaced by a weighted sum of itself and its
+ * eight neighbors.  P's weight is 1-8*SF and each neighbor's weight is SF,
+ * where SF = (smoothing_factor / 1024).
+ * Currently, smoothing is only supported for 2h2v sampling factors.
  */
 
 #define JPEG_INTERNALS

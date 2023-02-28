@@ -187,6 +187,7 @@ struct jpeg_entropy_encoder {
   JDIMENSION (*encode_mcus) (j_compress_ptr cinfo, JDIFFIMAGE diff_buf,
                              JDIMENSION MCU_row_num, JDIMENSION MCU_col_num,
                              JDIMENSION nMCU);
+
   void (*finish_pass) (j_compress_ptr cinfo);
 };
 

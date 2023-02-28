@@ -702,5 +702,5 @@ _jinit_color_deconverter(j_decompress_ptr cinfo)
     break;
   }
 
-  cinfo->output_components = cinfo->out_color_components;
+    cinfo->output_components = cinfo->out_color_components;
 }

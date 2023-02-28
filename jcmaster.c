@@ -77,7 +77,6 @@ initial_setup(j_compress_ptr cinfo, boolean transcode_only)
   if ((long)jd_samplesperrow != samplesperrow)
     ERREXIT(cinfo, JERR_WIDTH_OVERFLOW);
 
-  /* For now, precision must match compiled-in value... */
   if (cinfo->data_precision != 8 && cinfo->data_precision != 12)
     ERREXIT1(cinfo, JERR_BAD_PRECISION, cinfo->data_precision);
 
@@ -163,7 +162,6 @@ validate_script(j_compress_ptr cinfo)
   if (scanptr->Ss != 0 && scanptr->Se == 0) {
     ERREXIT(cinfo, JERR_NOT_COMPILED);
   }
-
   /* For sequential JPEG, all scans must have Ss=0, Se=DCTSIZE2-1;
    * for progressive JPEG, no scan can have this.
    */
@@ -210,6 +208,7 @@ validate_script(j_compress_ptr cinfo)
        * which might cause problems for some decoders.
        */
       int max_Ah_Al = cinfo->data_precision == 12 ? 13 : 10;
+
       if (Ss < 0 || Ss >= DCTSIZE2 || Se < Ss || Se >= DCTSIZE2 ||
           Ah < 0 || Ah > max_Ah_Al || Al < 0 || Al > max_Ah_Al)
         ERREXIT1(cinfo, JERR_BAD_PROG_SCRIPT, scanno);

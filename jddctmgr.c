@@ -83,7 +83,7 @@ start_pass(j_decompress_ptr cinfo)
   my_idct_ptr idct = (my_idct_ptr)cinfo->idct;
   int ci, i;
   jpeg_component_info *compptr;
-  inverse_DCT_method_ptr method_ptr = NULL;
+  _inverse_DCT_method_ptr method_ptr = NULL;
   JQUANT_TBL *qtbl;
 
   for (ci = 0, compptr = cinfo->comp_info; ci < cinfo->num_components;
@@ -95,9 +95,9 @@ start_pass(j_decompress_ptr cinfo)
           method_ptr = jsimd_idct_islow;
         else
 #endif
-          method_ptr = jpeg_idct_islow;
+          method_ptr = _jpeg_idct_islow;
     }
-    idct->pub.inverse_DCT[ci] = method_ptr;
+    idct->pub._inverse_DCT[ci] = method_ptr;
     /* Create multiplier table from quant table.
      * However, we can skip this if the component is uninteresting
      * or if we already built the table.  Also, if no quant table
@@ -129,11 +129,14 @@ start_pass(j_decompress_ptr cinfo)
  */
 
 GLOBAL(void)
-jinit_inverse_dct(j_decompress_ptr cinfo)
+_jinit_inverse_dct(j_decompress_ptr cinfo)
 {
   my_idct_ptr idct;
   int ci;
   jpeg_component_info *compptr;
+
+  if (cinfo->data_precision != BITS_IN_JSAMPLE)
+    ERREXIT1(cinfo, JERR_BAD_PRECISION, cinfo->data_precision);
 
   idct = (my_idct_ptr)
     (*cinfo->mem->alloc_small) ((j_common_ptr)cinfo, JPOOL_IMAGE,

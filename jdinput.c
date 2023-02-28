@@ -180,7 +180,8 @@ per_scan_setup(j_decompress_ptr cinfo)
       compptr->MCU_width = compptr->h_samp_factor;
       compptr->MCU_height = compptr->v_samp_factor;
       compptr->MCU_blocks = compptr->MCU_width * compptr->MCU_height;
-      compptr->MCU_sample_width = compptr->MCU_width * DCTSIZE;
+      compptr->MCU_sample_width = compptr->MCU_width *
+                                  DCTSIZE;
       /* Figure number of non-dummy data units in last MCU column & row */
       tmp = (int)(compptr->width_in_blocks % compptr->MCU_width);
       if (tmp == 0) tmp = compptr->MCU_width;

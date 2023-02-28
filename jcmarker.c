@@ -518,6 +518,7 @@ write_scan_header(j_compress_ptr cinfo)
      */
     for (i = 0; i < cinfo->comps_in_scan; i++) {
       compptr = cinfo->cur_comp_info[i];
+      /* DC needs no table for refinement scan */
       if (cinfo->Ss == 0 && cinfo->Ah == 0)
         emit_dht(cinfo, compptr->dc_tbl_no, FALSE);
       /* AC needs no table when not present, and lossless mode uses only DC

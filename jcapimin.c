@@ -187,9 +187,10 @@ jpeg_finish_compress(j_compress_ptr cinfo)
       /* We bypass the main controller and invoke coef controller directly;
        * all work is being done from the coefficient buffer.
        */
-      if (BORING_ALWAYS_TRUE)
+      if (BORING_ALWAYS_TRUE) {
         if (!(*cinfo->coef->compress_data) (cinfo, (JSAMPIMAGE)NULL))
           ERREXIT(cinfo, JERR_CANT_SUSPEND);
+      }
     }
     (*cinfo->master->finish_pass) (cinfo);
   }

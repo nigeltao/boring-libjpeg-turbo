@@ -108,7 +108,7 @@ jpeg_calc_output_dimensions(j_decompress_ptr cinfo)
   }
   cinfo->output_components = cinfo->out_color_components;
 
-  cinfo->rec_outbuf_height = 1;
+    cinfo->rec_outbuf_height = 1;
 }
 
 
