@@ -10,6 +10,8 @@
  * Copyright (C) 2016, 2018, 2022, Matthieu Darbois.
  * Copyright (C) 2020, Arm Limited.
  * Copyright (C) 2021, Alex Richardson.
+ * boring-libjpeg-turbo Modifications:
+ * Copyright (C) 2023, Nigel Tao.
  * For conditions of distribution and use, see the accompanying README.ijg
  * file.
  *

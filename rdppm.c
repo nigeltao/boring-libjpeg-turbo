@@ -6,6 +6,8 @@
  * Modified 2009 by Bill Allombert, Guido Vollbeding.
  * libjpeg-turbo Modifications:
  * Copyright (C) 2015-2017, 2020-2023, D. R. Commander.
+ * boring-libjpeg-turbo Modifications:
+ * Copyright (C) 2023, Nigel Tao.
  * For conditions of distribution and use, see the accompanying README.ijg
  * file.
  *

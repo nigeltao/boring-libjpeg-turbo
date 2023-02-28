@@ -8,6 +8,8 @@
  * Copyright 2009 Pierre Ossman <ossman@cendio.se> for Cendio AB
  * Copyright (C) 2010, 2015, 2022, D. R. Commander.
  * Copyright (C) 2013, MIPS Technologies, Inc., California.
+ * boring-libjpeg-turbo Modifications:
+ * Copyright (C) 2023, Nigel Tao.
  * For conditions of distribution and use, see the accompanying README.ijg
  * file.
  *

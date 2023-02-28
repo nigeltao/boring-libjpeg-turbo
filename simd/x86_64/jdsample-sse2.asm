@@ -4,6 +4,8 @@
 ; Copyright 2009 Pierre Ossman <ossman@cendio.se> for Cendio AB
 ; Copyright (C) 2009, 2016, D. R. Commander.
 ; Copyright (C) 2018, Matthias Räncker.
+; boring-libjpeg-turbo Modifications:
+; Copyright (C) 2023, Nigel Tao.
 ;
 ; Based on the x86 SIMD extension for IJG JPEG library
 ; Copyright (C) 1999-2006, MIYASAKA Masaru.

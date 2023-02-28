@@ -5,8 +5,8 @@
  * Copyright (C) 1994-1996, Thomas G. Lane.
  * libjpeg-turbo Modifications:
  * Copyright (C) 2022, D. R. Commander.
- * It was modified by The libjpeg-turbo Project to include only code relevant
- * to libjpeg-turbo.
+ * boring-libjpeg-turbo Modifications:
+ * Copyright (C) 2023, Nigel Tao.
  * For conditions of distribution and use, see the accompanying README.ijg
  * file.
  *

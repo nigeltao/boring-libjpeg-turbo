@@ -5,6 +5,8 @@
  * Copyright (C) 1994-1996, Thomas G. Lane.
  * Lossless JPEG Modifications:
  * Copyright (C) 1999, Ken Murchison.
+ * boring-libjpeg-turbo Modifications:
+ * Copyright (C) 2023, Nigel Tao.
  * For conditions of distribution and use, see the accompanying README.ijg
  * file.
  *

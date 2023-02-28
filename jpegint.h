@@ -10,6 +10,8 @@
  * Copyright (C) 2015-2017, 2019, 2021-2022, D. R. Commander.
  * Copyright (C) 2015, Google, Inc.
  * Copyright (C) 2021, Alex Richardson.
+ * boring-libjpeg-turbo Modifications:
+ * Copyright (C) 2023, Nigel Tao.
  * For conditions of distribution and use, see the accompanying README.ijg
  * file.
  *

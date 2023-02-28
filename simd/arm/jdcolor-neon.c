@@ -2,6 +2,8 @@
  * jdcolor-neon.c - colorspace conversion (Arm Neon)
  *
  * Copyright (C) 2020, Arm Limited.  All Rights Reserved.
+ * boring-libjpeg-turbo Modifications:
+ * Copyright (C) 2023, Nigel Tao.
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors be held liable for any damages

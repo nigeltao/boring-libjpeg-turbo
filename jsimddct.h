@@ -2,6 +2,8 @@
  * jsimddct.h
  *
  * Copyright 2009 Pierre Ossman <ossman@cendio.se> for Cendio AB
+ * boring-libjpeg-turbo Modifications:
+ * Copyright (C) 2023, Nigel Tao.
  *
  * Based on the x86 SIMD extension for IJG JPEG library,
  * Copyright (C) 1999-2006, MIYASAKA Masaru.

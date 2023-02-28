@@ -8,6 +8,8 @@
  * libjpeg-turbo Modifications:
  * Copyright (C) 2010, 2016, 2018, 2022, D. R. Commander.
  * Copyright (C) 2015, Google, Inc.
+ * boring-libjpeg-turbo Modifications:
+ * Copyright (C) 2023, Nigel Tao.
  * For conditions of distribution and use, see the accompanying README.ijg
  * file.
  *

@@ -9,6 +9,8 @@
  * Copyright (C) 2014-2016, 2020, D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2015-2016, 2018, Matthieu Darbois.  All Rights Reserved.
  * Copyright (C) 2016, Siarhei Siamashka.  All Rights Reserved.
+ * boring-libjpeg-turbo Modifications:
+ * Copyright (C) 2023, Nigel Tao.
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors be held liable for any damages
