@@ -3,22 +3,20 @@
 This is a slimmed-down fork of the
 [libjpeg-turbo](https://github.com/libjpeg-turbo/libjpeg-turbo) code.
 
-**boring-libjpeg-turbo removes over 62k lines of code (66.71%) from the
-upstream libjpeg-turbo version 2.1.4.**
+**boring-libjpeg-turbo removes over 61k lines of code (65.87%) from the
+upstream libjpeg-turbo version 2.1.91.**
 
 ```
              boring  upstream
-ansic:        22067     57068
+ansic:        22419     61390
 asm:           8754     30823
-java:             0      3273
-javascript:       0      1172
-sh:             112      1114
 pascal:         453       453
-cpp:              0       390
 
-total:        31386     94293
-ratio:         3.00x
-inverse:      33.29%  =  100% - 66.71%
+[Elided: cpp, java, javascript, sh.]
+
+total:        31626     92666
+ratio:        34.13%  =   100% - 65.87%
+inverse:       2.93x
 ```
 
 The `sloccount` tool harmlessly miscategorizes the `simd/nasm/*` files as
@@ -30,10 +28,9 @@ The `sloccount` tool harmlessly miscategorizes the `simd/nasm/*` files as
 The 'boring' name is inspired by how
 [BoringSSL](https://boringssl.googlesource.com/boringssl/) relates to OpenSSL.
 
-As of the time of writing, the latest tagged libjpeg-turbo version is 2.1.4
-(commit 8162eddf, August 2022). There have been 25 commits in the 5 months
-since then (up to commit 94a2b953, January 2023). This includes 4 commits
-addressing [buffer
+There were 25 commits in the 5 months between libjpeg-turbo commit 8162eddf
+(version 2.1.4, August 2022) and commit 94a2b953 (January 2023). This includes
+4 commits addressing [buffer
 overrun](https://github.com/libjpeg-turbo/libjpeg-turbo/commit/94a2b953421124a425027ee97d8c858f414fbf7e),
 [integer division by
 zero](https://github.com/libjpeg-turbo/libjpeg-turbo/commit/dc4a93fab38b42d29b89a533409e012570180e28),
@@ -51,9 +48,9 @@ The safest code is deleted code.
 
 ## Changes from Upstream
 
-boring-libjpeg-turbo is based on libjpeg-turbo version 2.1.4 ([commit
-8162eddf](https://github.com/libjpeg-turbo/libjpeg-turbo/commit/8162eddf041e0be26f5c671bb6528723c55fed9d),
-August 2022).
+boring-libjpeg-turbo is based on libjpeg-turbo version 2.1.91 ([commit
+6c610333](https://github.com/libjpeg-turbo/libjpeg-turbo/commit/6c610333497302c52ff36046f9ff72f0c3a6dc2e),
+February 2023), also known as 3.0 beta2.
 
 From there, it removes (or ignores, marked with "BORING\_NAME" or "notboring")
 a lot of code. The original libjpeg-turbo library is relatively featureful and
